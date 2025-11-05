@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 📋 Issue 관리
 
-## Getting Started
+### 작업 전
 
-First, run the development server:
+- 깃허브 Issue 탭에서 `[태그] 작업 내용` 형식으로 이슈 생성
+- 예시: `[Feat] 로그인 페이지 구현`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 작업 후
+
+- 커밋 메시지에 `#이슈번호` 포함
+- 예시: `[Feat] 로그인 기능 추가 #1`
+
+---
+
+### 커밋 컨벤션 가이드
+
+- 브랜치를 새로 만들 때에는 현재 브랜치가 `dev 브랜치`인지 확인하고 새로운 브랜치를 생성하기!
+
+### 주요 브랜치
+
+- **main**: 프로덕션 브랜치 (실제 서비스 중인 안정 버전)
+- **dev**: 개발 배포 확인용 브랜치 (다음 배포 준비중인 통합 개발 코드)
+
+### 작업 브랜치
+
+- **feature**: 새로운 페이지 개발
+  - 네이밍: `feature/기능명/담당자`
+  - 예시: `feature/login-page/홍길동`
+
+### 브랜치 워크플로우
+
+```
+브랜치 생성
+    ↓
+개발 중 add - commit - push
+    ↓
+작업 완료 후 dev 브랜치에 PR
+    ↓
+컨트리뷰터 코드 리뷰
+    ↓
+dev 브랜치에 merge
+    ↓
+프로덕션 배포 시점에 dev → main merge
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💬 커밋 메시지 규칙
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 커밋 타입
 
-## Learn More
+| 타입       | 설명                                     |
+| ---------- | ---------------------------------------- |
+| `feat`     | 새로운 기능 추가                         |
+| `fix`      | 버그 수정                                |
+| `docs`     | 문서 수정 (README, .gitignore 등)        |
+| `design`   | CSS 수정, UI 변경                        |
+| `refactor` | 코드 리팩토링 (기능 변경 없이 코드 개선) |
+| `perf`     | 성능 개선                                |
+| `test`     | 테스트 코드 추가/수정                    |
+| `chore`    | 빌드/패키지 관리 변경                    |
+| `build`    | 빌드 관련 변경 (설정 파일 등)            |
 
-To learn more about Next.js, take a look at the following resources:
+### 커밋 메시지 형식
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[타입] 제목 #이슈번호
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 예시
 
-## Deploy on Vercel
+git commit -m "[feat] 회원가입 기능 구현 #1"
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 이메일 중복 체크 기능 추가
+- 비밀번호 유효성 검사 로직 구현"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+git commit -m "[design] 로그인 페이지 UI 개선 #15
+
+* 로그인 버튼 색상 변경
+* 반응형 레이아웃 적용"
+```
+
+---
+
+## 🔄 Git 작업 프로세스
+
+### 1. 작업 시작 전 브랜치 확인
+
+git branch 현재 브랜치 확인 (⭐ 필수!)
+
+### 2. dev 브랜치 최신화
+
+git checkout dev
+git pull origin dev
+
+### 3. 새 작업 브랜치 생성
+
+git checkout -b feature/login-page
+
+### 4. 코드 수정 및 커밋
+
+git add .
+git commit -m "[feat] 로그인 페이지 UI 구현 #10"
+
+### 5. 원격 저장소에 푸시
+
+git push origin feature/login-page
+
+### 6. GitHub에서 Pull Request 생성
+
+1. GitHub 저장소 접속
+2. **Pull Request** 탭 클릭
+3. `feature/login-page` → `dev` 브랜치로 PR 생성
+4. 컨트리뷰터 코드 리뷰 대기
+5. 승인 후 merge
+
+---
+
+## ⚠️ 주의사항
+
+1. **작업 전 반드시 브랜치 확인**: `git branch` 명령어로 현재 브랜치 확인
+2. **main 브랜치에 직접 커밋 금지**: 항상 작업 브랜치에서 작업
+3. **커밋 전 코드 리뷰**: 가능하면 동료에게 코드 확인 요청
+4. **명확한 커밋 메시지 작성**: 변경 내용을 구체적으로 기술
+5. **정기적인 동기화**: 작업 중 주기적으로 main 브랜치와 동기화
+
+```
+
+```
+
+```
+
+```
