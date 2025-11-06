@@ -1,9 +1,23 @@
+@font-face {
+  font-family: 'CroissantOne';
+  src: url('/fonts/CroissantOne-Regular.woff2') format('woff2'),
+       url('/fonts/CroissantOne-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-croissant {
+  font-family: 'CroissantOne', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 @import "tailwindcss";
 @import 'pretendard/dist/web/variable/pretendardvariable.css';
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-croissant-one: var(--font-croissant-one)
 }
 
 @theme inline {
@@ -17,6 +31,19 @@
     --foreground: #ededed;
   }
 }
+
+    /* globals.css or a CSS module */
+.flex-col {
+  flex-direction: column;
+}
+
+    .min-h-screen {
+      min-height: 100vh; /* or 100dvh for newer browsers */
+    }
+
+    .flex-grow {
+      flex-grow: 1;
+    }
 
 body {
   background: var(--background);
