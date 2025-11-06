@@ -15,6 +15,7 @@ export default function HomeCarousel() {
   // 다음 슬라이드
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    console.log("Total Slides:", totalSlides);
   }, [totalSlides]);
 
   // 이전 슬라이드
@@ -28,77 +29,78 @@ export default function HomeCarousel() {
     return () => clearInterval(timer);
   }, [nextSlide]);
   return (
-    <section className="flex-1 relative overflow-hidden">
-      <div className="w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="relative w-full h-full rounded-lg overflow-hidden">
-          {/* 배경 이미지들 */}
-          {slides.map((slide, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                index === currentSlide ? "opacity-100" : "opacity-0"
-              }`}
-              style={{
-                backgroundImage: `url(${slide})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-              }}
+    <section className="relative w-full h-[calc(100vh-395px)] my-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      {/* ^^^^^ 메인 캐러셀 섹션 ^^^^^
+        height: 화면 높이에서 헤더와 푸터 높이(336px) + padding 값(16+16px) + unknown(27px)를 뺀 값 368
+     */}
+      <div className="relative w-full h-full rounded-lg overflow-hidden">
+        {/* 배경 이미지들 */}
+        {slides.map((slide, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              index === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              backgroundImage: `url(${slide})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+          />
+        ))}
+
+        {/* 이전 버튼 */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 md:p-4 shadow-xl transition-all duration-200 z-20"
+          aria-label="이전 슬라이드"
+        >
+          <svg
+            className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M15 19l-7-7 7-7"
             />
-          ))}
+          </svg>
+        </button>
 
-          {/* 이전 버튼 */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 md:p-4 shadow-xl transition-all duration-200 z-20"
-            aria-label="이전 슬라이드"
+        {/* 다음 버튼 */}
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 md:p-4 shadow-xl transition-all duration-200 z-20"
+          aria-label="다음 슬라이드"
+        >
+          <svg
+            className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
 
-          {/* 다음 버튼 */}
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 md:p-4 shadow-xl transition-all duration-200 z-20"
-            aria-label="다음 슬라이드"
-          >
-            <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-
-          {/* 슬라이드 인디케이터 */}
-          <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 bg-white/90 px-3 sm:px-4 py-1 sm:py-2 rounded-full shadow-lg z-20">
-            <span className="text-xs sm:text-sm font-semibold text-black">
-              {String(currentSlide + 1).padStart(2, "0")}
-            </span>
-            <span className="text-xs sm:text-sm text-gray-600">
-              {" "}
-              / {String(totalSlides).padStart(2, "0")}
-            </span>
-          </div>
+        {/* 슬라이드 인디케이터 */}
+        <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 bg-white/90 px-3 sm:px-4 py-1 sm:py-2 rounded-full shadow-lg z-20">
+          <span className="text-xs sm:text-sm font-semibold text-black">
+            {String(currentSlide + 1).padStart(2, "0")}
+          </span>
+          <span className="text-xs sm:text-sm text-gray-600">
+            {" "}
+            / {String(totalSlides).padStart(2, "0")}
+          </span>
         </div>
       </div>
     </section>
