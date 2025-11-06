@@ -39,7 +39,8 @@ export default function Header() {
         {/* Main header */}
         <div className="flex items-center justify-between py-3 md:py-4">
           <Link href="/">
-            <h1 className="text-xl md:text-2xl font-bold text-black cursor-pointer font-croissant">
+            <h1 className="text-xl md:text-2xl font-bold text-black cursor-pointer font-croissant"
+                style={{ fontFamily: "CroissantOne, cursive" }}>
               Minié
             </h1>
           </Link>

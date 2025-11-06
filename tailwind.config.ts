@@ -9,7 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        'croissant': ['Croissant One', 'cursive'],
+        pretendard: ["Pretendard", "sans-serif"],
+        croissant: ["CroissantOne", "cursive"],
       },
     },
   },

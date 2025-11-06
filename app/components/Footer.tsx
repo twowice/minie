@@ -7,7 +7,7 @@ export default function Footer() {
           <div>
             <h1
               className="text-lg md:text-xl font-bold mb-2 md:mb-4 text-black"
-              style={{ fontFamily: "var(--font-croissant-one), cursive" }}
+              style={{ fontFamily: "CroissantOne, cursive" }}
             >
               Minié
             </h1>
