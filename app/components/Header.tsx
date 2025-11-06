@@ -1,23 +1,28 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <header className="flex-shrink-0 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top bar - 모바일에서 숨김 */}
-        <div className="hidden md:flex justify-end items-center py-2 text-xs lg:text-sm text-gray-600 border-b">
+        <div className="hidden md:flex justify-end items-center py-2 text-xs lg:text-sm text-gray-600 ">
           <Link href="/login" className="px-2 lg:px-3 hover:text-black">
             로그인
           </Link>
           <span className="text-gray-300">|</span>
           <Link href="/orders" className="px-2 lg:px-3 hover:text-black">
             주문조회
+          </Link>
+          <span className="text-gray-300">|</span>
+          <Link href="/mypage" className="px-2 lg:px-3 hover:text-black">
+            마이페이지
           </Link>
           <span className="text-gray-300">|</span>
           <Link href="/support" className="px-2 lg:px-3 hover:text-black">
@@ -40,31 +45,31 @@ export default function Header() {
         <div className="flex items-center justify-between py-3 md:py-4">
           <Link href="/">
             <h1 className="text-xl md:text-2xl font-bold text-black cursor-pointer font-croissant"
-                style={{ fontFamily: "CroissantOne, cursive" }}>
+                style={{ fontFamily: "CroissantOne, cursive", fontWeight: "lighter"}}>
               Minié
             </h1>
           </Link>
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex gap-4 xl:gap-8 text-sm xl:text-base text-black">
-            <Link href="/shopping" className="hover:text-gray-600">
-              쇼핑케어
+          <nav className="hidden lg:flex gap-14 xl:gap-14 text-sm xl:text-base text-black">
+            <Link href="/shopping" className={`${pathname === "/shopping" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
+              스킨케어
             </Link>
-            <Link href="/cleansing" className="hover:text-gray-600">
+            <Link href="/cleansing" className={`${pathname === "/cleansing" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
               클렌징
             </Link>
-            <Link href="/suncare" className="hover:text-gray-600">
+            <Link href="/suncare" className={`${pathname === "/suncare" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
               선케어
             </Link>
-            <Link href="/makeup" className="hover:text-gray-600">
+            <Link href="/makeup" className={`${pathname === "/makeup" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
               메이크업
             </Link>
-            <Link href="/beauty" className="hover:text-gray-600">
+            <Link href="/beauty" className={`${pathname === "/beauty" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
               뷰티소품
             </Link>
-            <Link href="/bodycare" className="hover:text-gray-600">
+            <Link href="/bodycare" className={`${pathname === "/bodycare" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
               바디케어
             </Link>
-            <Link href="/haircare" className="hover:text-gray-600">
+            <Link href="/haircare" className={`${pathname === "/haircare" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
               헤어케어
             </Link>
           </nav>
@@ -73,7 +78,7 @@ export default function Header() {
             {/* 모바일 메뉴 버튼 */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden hover:opacity-70"
+              className="lg:hidden hover:opacity-70 cursor-pointer"
               aria-label="메뉴"
             >
               <svg
@@ -92,7 +97,7 @@ export default function Header() {
             </button>
             {/* 마이페이지 아이콘 */}
             {}
-            <button
+            {/* <button
               onClick={() => router.push("/mypage")}
               className="hover:opacity-70 cursor-pointer"
               aria-label="마이페이지"
@@ -110,7 +115,7 @@ export default function Header() {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
-            </button>
+            </button> */}
             {/* 장바구니 아이콘 */}
             <button
               className="hover:opacity-70 cursor-pointer"
