@@ -50,32 +50,43 @@ export default function Header() {
           display={{ base: "none", md: "flex" }}
           justify="flex-end"
           align="center"
+          gap="10px"
           py={2}
           fontSize="xs"
           color="gray.600"
         >
           {topBarLinks.map((link, index) => (
-            <HStack key={link.href} gap={{ base: 2, lg: 3 }}>
+            <HStack key={link.href}>
               {" "}
-              {/* spacing -> gap */}
-              <Link as={NextLink} href={link.href} _hover={{ color: "black" }}>
+              <Link
+                as={NextLink}
+                href={link.href}
+                color="black"
+                _focus={{ boxShadow: "none", outline: "none" }}
+                _hover={{ textDecoration: "none" }}
+              >
                 {link.label}
               </Link>
-              {index < topBarLinks.length - 1 && (
-                <Text color="gray.300">|</Text>
-              )}
+              {index < topBarLinks.length - 1 && <Text color="black">|</Text>}
             </HStack>
           ))}
         </Flex>
 
         {/* Main header */}
         <Flex align="center" justify="space-between" py={{ base: 3, md: 4 }}>
-          <Link as={NextLink} href="/" _focus={{ boxShadow: "none", outline: "none" }}>
+          <Link
+            as={NextLink}
+            href="/"
+            _focus={{ boxShadow: "none", outline: "none" }}
+            _hover={{ textDecoration: "none" }}
+          >
             <Heading
               as="h1"
-              fontSize="3xl"
+              fontSize="24px"
               color="black"
+              fontWeight="normal"
               cursor="pointer"
+              fontStyle={"normal"}
               fontFamily="CroissantOne, cursive"
             >
               Minié
@@ -95,6 +106,7 @@ export default function Header() {
                 as={NextLink}
                 key={link.href}
                 href={link.href}
+                _focus={{ boxShadow: "none", outline: "none" }}
                 color={pathname === link.href ? "#FA6D6D" : "inherit"}
                 fontWeight={pathname === link.href ? "semibold" : "normal"}
                 _hover={{ color: "gray.600" }}

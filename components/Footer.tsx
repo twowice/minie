@@ -1,5 +1,13 @@
-'use client';
-import { Box, Container, Flex, Heading, Text, Link, HStack } from "@chakra-ui/react";
+"use client";
+import {
+  Box,
+  Container,
+  Flex,
+  Heading,
+  Text,
+  Link,
+  HStack,
+} from "@chakra-ui/react";
 import NextLink from "next/link";
 
 export default function Footer() {
@@ -11,13 +19,13 @@ export default function Footer() {
           <Heading
             as="h1"
             fontSize="3xl"
-            fontWeight="bold"
+            fontWeight="normal"
             color="black"
             cursor="pointer"
+            fontStyle={"normal"}
             fontFamily="CroissantOne, cursive"
-            w={{ base: "full", md: "50" }} // w-50은 Tailwind의 임의 값으로, Chakra에서는 명시적 값 필요. 여기서는 예시로 full, md:50
             display="flex"
-            justifyContent="center"
+            justifyContent="start"
             alignItems="center"
             mr={{ base: 0, md: "90px" }}
             mb={{ base: 4, md: 0 }}
@@ -25,12 +33,17 @@ export default function Footer() {
             Minié
           </Heading>
           {/* Right side */}
-          <Flex justify="space-between" flexGrow={1} direction={{ base: "column", md: "row" }}>
+          <Flex
+            justify="space-between"
+            flexGrow={1}
+            direction={{ base: "column", md: "row" }}
+          >
             <Box mb={{ base: 4, md: 0 }}>
               <Heading
                 as="h1"
                 fontSize="xs"
-                fontWeight="lighter" // Tailwind의 lighter는 Chakra의 fontWeight에서 'lighter'로 매핑
+                fontWeight="lighter"
+                fontStyle={"normal"}
                 mb={2}
                 color="rgba(0, 0, 0, 0.64)"
                 fontFamily="CroissantOne, cursive"
@@ -40,20 +53,33 @@ export default function Footer() {
               <Box fontSize="xs" color="rgba(0, 0, 0, 0.64)">
                 <Box>대표이사 : 이선영 | 사업자등록번호 : 000-00-00000</Box>
                 <Box wordBreak="break-all">
-                  주소: (04320) 서울특별시 용산구 원효대로 372, 24층 (용산동, KDB타워)
+                  주소: (04320) 서울특별시 용산구 원효대로 372, 24층 (용산동,
+                  KDB타워)
                 </Box>
                 <Box>호스팅사업자 : Minié</Box>
                 <Box>통신판매업신고번호 : 2019-서울용산-1428</Box>
                 <Box wordBreak="break-all">
                   이메일 :{" "}
-                  <Link as={NextLink} href="mailto:Miniéweb@Minie@.net" _hover={{ color: "black" }}>
+                  <Link
+                    as={NextLink}
+                    href="mailto:Miniéweb@Minie@.net"
+                    _hover={{ color: "black" }}
+                  >
                     Miniéweb@Minie@.net
                   </Link>
                 </Box>
               </Box>
             </Box>
-            <Box textAlign={{ base: "left", md: "right" }} color="rgba(0, 0, 0, 0.64)">
-              <Flex justify={{ base: "flex-start", md: "flex-end" }} align="center" gap={2} mb={2}>
+            <Box
+              textAlign={{ base: "left", md: "right" }}
+              color="rgba(0, 0, 0, 0.64)"
+            >
+              <Flex
+                justify={{ base: "flex-start", md: "flex-end" }}
+                align="center"
+                gap={2}
+                mb={2}
+              >
                 <Text fontSize="base" fontWeight="bold">
                   고객센터
                 </Text>

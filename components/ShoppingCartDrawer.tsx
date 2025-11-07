@@ -34,8 +34,6 @@ export default function ShoppingCartDrawer() {
       onClick={() => {
         setIsCartActivity((prev) => !prev);
       }}
-      variant="ghost"
-      _hover={{ opacity: 0.7 }}
       cursor="pointer"
     >
       <CartIcon
