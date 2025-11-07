@@ -18,7 +18,7 @@ export default function Footer() {
           {/* Left side */}
           <Heading
             as="h1"
-            fontSize="3xl"
+            fontSize="24px"
             fontWeight="normal"
             color="black"
             cursor="pointer"
@@ -41,7 +41,7 @@ export default function Footer() {
             <Box mb={{ base: 4, md: 0 }}>
               <Heading
                 as="h1"
-                fontSize="xs"
+                fontSize="12px"
                 fontWeight="lighter"
                 fontStyle={"normal"}
                 mb={2}
@@ -50,7 +50,7 @@ export default function Footer() {
               >
                 Minié
               </Heading>
-              <Box fontSize="xs" color="rgba(0, 0, 0, 0.64)">
+              <Box fontSize="12px" color="rgba(0, 0, 0, 0.64)">
                 <Box>대표이사 : 이선영 | 사업자등록번호 : 000-00-00000</Box>
                 <Box wordBreak="break-all">
                   주소: (04320) 서울특별시 용산구 원효대로 372, 24층 (용산동,
@@ -63,6 +63,7 @@ export default function Footer() {
                   <Link
                     as={NextLink}
                     href="mailto:Miniéweb@Minie@.net"
+                    color={"rgba(0, 0, 0, 0.64)"}
                     _hover={{ color: "black" }}
                   >
                     Miniéweb@Minie@.net
