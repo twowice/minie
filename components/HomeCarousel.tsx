@@ -30,7 +30,13 @@ export default function HomeCarousel() {
   }, [nextSlide]);
 
   return (
-    <Box as="section" position="relative" w="full" h="calc(100vh - 251px)">
+    <Box
+      as="section"
+      position="relative"
+      w="full"
+      flexGrow={1}
+      h={{ base: "200px", sm: "300px", md: "400px", lg: "500px" }}
+    >
       <Box position="relative" w="full" h="full" overflow="hidden">
         {slides.map((slide, index) => (
           <Box

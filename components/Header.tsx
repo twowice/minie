@@ -1,6 +1,6 @@
 "use client";
 import NextLink from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import ShoppingCartDrawer from "./ShoppingCartDrawer";
 import {
