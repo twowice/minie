@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ShoppingCartDrawer from "./ShoppingCartDrawer";
 
 export default function Header() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function Header() {
     <header className="flex-shrink-0 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top bar - 모바일에서 숨김 */}
-        <div className="hidden md:flex justify-end items-center py-2 text-xs lg:text-sm text-gray-600 ">
+        <div className="hidden md:flex justify-end items-center py-2 text-xs text-gray-600 ">
           <Link href="/login" className="px-2 lg:px-3 hover:text-black">
             로그인
           </Link>
@@ -44,32 +45,83 @@ export default function Header() {
         {/* Main header */}
         <div className="flex items-center justify-between py-3 md:py-4">
           <Link href="/">
-            <h1 className="text-xl md:text-2xl font-bold text-black cursor-pointer font-croissant"
-                style={{ fontFamily: "CroissantOne, cursive", fontWeight: "lighter"}}>
+            <h1
+              className="text-3xl text-black cursor-pointer font-croissant w-50 flex justify-center items-center"
+              style={{ fontFamily: "CroissantOne, cursive" }}
+            >
               Minié
             </h1>
           </Link>
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex gap-14 xl:gap-14 text-sm xl:text-base text-black">
-            <Link href="/shopping" className={`${pathname === "/shopping" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
+          <nav className="hidden lg:flex gap-8 xl:gap-14 text-base xl:text-base text-black">
+            <Link
+              href="/shopping"
+              className={`${
+                pathname === "/shopping"
+                  ? "text-[#FA6D6D] font-semibold"
+                  : "hover:text-gray-600"
+              }`}
+            >
               스킨케어
             </Link>
-            <Link href="/cleansing" className={`${pathname === "/cleansing" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
+            <Link
+              href="/cleansing"
+              className={`${
+                pathname === "/cleansing"
+                  ? "text-[#FA6D6D] font-semibold"
+                  : "hover:text-gray-600"
+              }`}
+            >
               클렌징
             </Link>
-            <Link href="/suncare" className={`${pathname === "/suncare" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
+            <Link
+              href="/suncare"
+              className={`${
+                pathname === "/suncare"
+                  ? "text-[#FA6D6D] font-semibold"
+                  : "hover:text-gray-600"
+              }`}
+            >
               선케어
             </Link>
-            <Link href="/makeup" className={`${pathname === "/makeup" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
+            <Link
+              href="/makeup"
+              className={`${
+                pathname === "/makeup"
+                  ? "text-[#FA6D6D] font-semibold"
+                  : "hover:text-gray-600"
+              }`}
+            >
               메이크업
             </Link>
-            <Link href="/beauty" className={`${pathname === "/beauty" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
+            <Link
+              href="/beauty"
+              className={`${
+                pathname === "/beauty"
+                  ? "text-[#FA6D6D] font-semibold"
+                  : "hover:text-gray-600"
+              }`}
+            >
               뷰티소품
             </Link>
-            <Link href="/bodycare" className={`${pathname === "/bodycare" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
+            <Link
+              href="/bodycare"
+              className={`${
+                pathname === "/bodycare"
+                  ? "text-[#FA6D6D] font-semibold"
+                  : "hover:text-gray-600"
+              }`}
+            >
               바디케어
             </Link>
-            <Link href="/haircare" className={`${pathname === "/haircare" ? "text-[#FA6D6D] font-semibold" : "hover:text-gray-600"}`}>
+            <Link
+              href="/haircare"
+              className={`${
+                pathname === "/haircare"
+                  ? "text-[#FA6D6D] font-semibold"
+                  : "hover:text-gray-600"
+              }`}
+            >
               헤어케어
             </Link>
           </nav>
@@ -117,24 +169,7 @@ export default function Header() {
               </svg>
             </button> */}
             {/* 장바구니 아이콘 */}
-            <button
-              className="hover:opacity-70 cursor-pointer"
-              aria-label="장바구니"
-            >
-              <svg
-                className="w-5 h-5 md:w-6 md:h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </button>
+            <ShoppingCartDrawer />
           </div>
         </div>
         {/* Mobile Navigation Menu */}
