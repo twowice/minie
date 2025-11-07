@@ -18,7 +18,6 @@ import {
 import { HamburgerIcon } from "@chakra-ui/icons";
 
 export default function Header() {
-  const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -116,18 +115,15 @@ export default function Header() {
             ))}
           </HStack>
 
-          {/* Icons */}
+          {/* Icon Menus including mobileNavigationMenu */}
           <HStack gap={{ base: 3, md: 4 }} color="black">
-            {" "}
-            {/* spacing -> gap */}
             <IconButton
               aria-label="메뉴"
               display={{ base: "flex", lg: "none" }}
+              color={isMobileMenuOpen ? "#FA6D6D" : "black"}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              variant="ghost"
-              _hover={{ opacity: 0.7 }}
             >
-              <HamburgerIcon /> {/* icon prop -> child */}
+              <HamburgerIcon />
             </IconButton>
             <ShoppingCartDrawer />
           </HStack>
@@ -155,6 +151,8 @@ export default function Header() {
                     as={NextLink}
                     key={link.href}
                     href={link.href}
+                    color={pathname === link.href ? "#FA6D6D" : "inherit"}
+                    _focus={{ boxShadow: "none", outline: "none" }}
                     _hover={{ color: "gray.600" }}
                     py={2}
                   >
@@ -176,6 +174,8 @@ export default function Header() {
                     as={NextLink}
                     key={link.href}
                     href={link.href}
+                    color={"black"}
+                    _focus={{ boxShadow: "none", outline: "none" }}
                     _hover={{ color: "black" }}
                   >
                     {link.label}
