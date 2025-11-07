@@ -29,9 +29,9 @@ export default function HomeCarousel() {
     return () => clearInterval(timer);
   }, [nextSlide]);
   return (
-    <section className="relative w-full h-[calc(100vh-395px)] my-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <section className="relative w-full h-[calc(100vh-278px)] my-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       {/* ^^^^^ 메인 캐러셀 섹션 ^^^^^
-        height: 화면 높이에서 헤더와 푸터 높이(336px) + padding 값(16+16px) + unknown(27px)를 뺀 값 368
+        height: 화면 높이에서 헤더와 푸터 높이(101+145px) + padding 값(16+16px)=278px를 뺀 값
      */}
       <div className="relative w-full h-full rounded-lg overflow-hidden">
         {/* 배경 이미지들 */}
