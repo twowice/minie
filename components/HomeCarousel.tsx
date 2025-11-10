@@ -17,7 +17,6 @@ export default function HomeCarousel() {
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    console.log("Total Slides:", totalSlides);
   }, [totalSlides]);
 
   const prevSlide = () => {
