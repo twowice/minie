@@ -1,5 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { Box, IconButton, Text } from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 
 export default function HomeCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -13,97 +15,114 @@ export default function HomeCarousel() {
   ];
   const totalSlides = slides.length;
 
-  // 다음 슬라이드
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
     console.log("Total Slides:", totalSlides);
   }, [totalSlides]);
 
-  // 이전 슬라이드
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
 
-  // 자동 슬라이드 (5초마다)
   useEffect(() => {
     const timer = setInterval(nextSlide, 5000);
     return () => clearInterval(timer);
   }, [nextSlide]);
+
   return (
-    <section className="relative w-full h-[calc(100vh-251px)]">
-      {/* ^^^^^ 메인 캐러셀 섹션 ^^^^^
-        height: 화면 높이에서 헤더와 푸터 높이(101+145px) + padding 값(16+16px)=278px를 뺀 값
-     */}
-      <div className="relative w-full h-full overflow-hidden">
-        {/* 배경 이미지들 */}
+    <Box
+      as="section"
+      position="relative"
+      w="full"
+      flexGrow={1}
+      h={{ base: "200px", sm: "300px", md: "400px", lg: "500px" }}
+    >
+      <Box position="relative" w="full" h="full" overflow="hidden">
         {slides.map((slide, index) => (
-          <div
+          <Box
             key={index}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
-            }`}
-            style={{
-              backgroundImage: `url(${slide})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
+            position="absolute"
+            inset="0"
+            transition="opacity 0.7s ease-in-out"
+            opacity={index === currentSlide ? 1 : 0}
+            bgImage={`url(${slide})`}
+            bgSize="cover"
+            backgroundPosition="center"
+            bgRepeat="no-repeat"
           />
         ))}
 
         {/* 이전 버튼 */}
-        <button
+        <IconButton
           onClick={prevSlide}
-          className="absolute left-4 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 md:p-4 shadow-xl transition-all duration-200 z-20"
           aria-label="이전 슬라이드"
+          position="absolute"
+          left={{ base: 4, sm: 6, md: 8 }}
+          top="50%"
+          transform="translateY(-50%)"
+          bgColor="whiteAlpha.900"
+          _hover={{ bgColor: "white" }}
+          borderRadius="full"
+          size={{ base: "sm", sm: "md", md: "lg" }}
+          shadow="xl"
+          transition="all 0.2s"
+          zIndex="docked"
         >
-          <svg
-            className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.5}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
+          <ChevronLeftIcon
+            w={{ base: 4, sm: 5, md: 6 }}
+            h={{ base: 4, sm: 5, md: 6 }}
+          />
+        </IconButton>
 
         {/* 다음 버튼 */}
-        <button
+        <IconButton
           onClick={nextSlide}
-          className="absolute right-4 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 md:p-4 shadow-xl transition-all duration-200 z-20"
           aria-label="다음 슬라이드"
+          position="absolute"
+          right={{ base: 4, sm: 6, md: 8 }}
+          top="50%"
+          transform="translateY(-50%)"
+          bgColor="whiteAlpha.900"
+          _hover={{ bgColor: "white" }}
+          borderRadius="full"
+          size={{ base: "sm", sm: "md", md: "lg" }}
+          shadow="xl"
+          transition="all 0.2s"
+          zIndex="docked"
         >
-          <svg
-            className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.5}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
+          <ChevronRightIcon
+            w={{ base: 4, sm: 5, md: 6 }}
+            h={{ base: 4, sm: 5, md: 6 }}
+          />
+        </IconButton>
 
         {/* 슬라이드 인디케이터 */}
-        <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 bg-white/90 px-3 sm:px-4 py-1 sm:py-2 rounded-full shadow-lg z-20">
-          <span className="text-xs sm:text-sm font-semibold text-black">
+        <Box
+          position="absolute"
+          bottom={{ base: 4, sm: 6, md: 8 }}
+          left="50%"
+          transform="translateX(-50%)"
+          bgColor="whiteAlpha.900"
+          px={{ base: 3, sm: 4 }}
+          py={{ base: 1, sm: 2 }}
+          borderRadius="full"
+          shadow="lg"
+          zIndex="docked"
+        >
+          <Text
+            as="span"
+            fontSize={{ base: "xs", sm: "sm" }}
+            fontWeight="semibold"
+            color="black"
+          >
             {String(currentSlide + 1).padStart(2, "0")}
-          </span>
-          <span className="text-xs sm:text-sm text-gray-600">
+          </Text>
+          <Text as="span" fontSize={{ base: "xs", sm: "sm" }} color="gray.600">
             {" "}
             / {String(totalSlides).padStart(2, "0")}
-          </span>
-        </div>
-      </div>
-    </section>
+          </Text>
+        </Box>
+      </Box>
+    </Box>
   );
 }

@@ -1,54 +1,109 @@
-export default function Footer() {
-   return (
-      <footer className="py-2 bg-[#cccccc]/16">
-         <div className="max-w-7xl mx-auto px-4 lg:px-8">
-            <div className="flex mb-2">
-               {/* Left side */}
-               <h1
-                  className="text-3xl font-bold text-blackcursor-pointer font-croissant w-50 flex justify-center items-center mr-[90px]"
-                  style={{ fontFamily: 'CroissantOne, cursive' }}
-               >
-                  Minié
-               </h1>
-               {/* Right side */}
-               <div className="flex justify-between  grow">
-                  <div>
-                     <h1
-                        className="text-xs font-bold mb-2 text-[#000000]/64"
-                        style={{ fontFamily: 'CroissantOne, cursive', fontWeight: 'lighter' }}
-                     >
-                        Minié
-                     </h1>
-                     <div className="text-xs text-[#000000]/64">
-                        <div>대표이사 : 이선영 | 사업자등록번호 : 000-00-00000</div>
-                        <div className="break-all">
-                           주소: (04320) 서울특별시 용산구 원효대로 372, 24층 (용산동, KDB타워)
-                        </div>
-                        <div>호스팅사업자 : Minié</div>
-                        <div>통신판매업신고번호 : 2019-서울용산-1428</div>
-                        <div className="break-all">
-                           이메일 :{' '}
-                           <a href="mailto:Miniéweb@Minie@.net" className="hover:text-black">
-                              Miniéweb@Minie@.net
-                           </a>
-                        </div>
-                     </div>
-                  </div>
-                  <div className="md:text-right text-[#000000]/64">
-                     <div className="flex justify-end items-center gap-2 mb-2">
-                        <div className="text-base font-bold">고객센터</div>
-                        <div className="text-base font-bold ">1577-1577</div>
-                     </div>
-                     <div className="text-xs ">09:00~18:00 월-금</div>
-                     <div className="text-xs ">휴무 토-일</div>
-                  </div>
-               </div>
-            </div>
-            <div className="py-2 border-t border-[#000000]/16 text-center text-xs text-[#000000]/50">
-               Copyright © Minié. All Rights Reserved.
-            </div>
-         </div>
-      </footer>
-   );
-}
+"use client";
+import {
+  Box,
+  Container,
+  Flex,
+  Heading,
+  Text,
+  Link,
+  HStack,
+} from "@chakra-ui/react";
+import NextLink from "next/link";
 
+export default function Footer() {
+  return (
+    <Box as="footer" py={2} bg="rgba(204, 204, 204, 0.16)">
+      <Container maxW="7xl" px={{ base: 4, lg: 8 }}>
+        <Flex mb={2} direction={{ base: "column", md: "row" }}>
+          {/* Left side */}
+          <Heading
+            as="h1"
+            fontSize="24px"
+            fontWeight="normal"
+            color="black"
+            cursor="pointer"
+            fontStyle={"normal"}
+            fontFamily="CroissantOne, cursive"
+            display="flex"
+            justifyContent="start"
+            alignItems="center"
+            mr={{ base: 0, md: "90px" }}
+            mb={{ base: 4, md: 0 }}
+          >
+            Minié
+          </Heading>
+          {/* Right side */}
+          <Flex
+            justify="space-between"
+            flexGrow={1}
+            direction={{ base: "column", md: "row" }}
+          >
+            <Box mb={{ base: 4, md: 0 }}>
+              <Heading
+                as="h1"
+                fontSize="12px"
+                fontWeight="lighter"
+                fontStyle={"normal"}
+                mb={2}
+                color="rgba(0, 0, 0, 0.64)"
+                fontFamily="CroissantOne, cursive"
+              >
+                Minié
+              </Heading>
+              <Box fontSize="12px" color="rgba(0, 0, 0, 0.64)">
+                <Box>대표이사 : 이선영 | 사업자등록번호 : 000-00-00000</Box>
+                <Box wordBreak="break-all">
+                  주소: (04320) 서울특별시 용산구 원효대로 372, 24층 (용산동,
+                  KDB타워)
+                </Box>
+                <Box>호스팅사업자 : Minié</Box>
+                <Box>통신판매업신고번호 : 2019-서울용산-1428</Box>
+                <Box wordBreak="break-all">
+                  이메일 :{" "}
+                  <Link
+                    as={NextLink}
+                    href="mailto:Miniéweb@Minie@.net"
+                    color={"rgba(0, 0, 0, 0.64)"}
+                    _hover={{ color: "black" }}
+                  >
+                    Miniéweb@Minie@.net
+                  </Link>
+                </Box>
+              </Box>
+            </Box>
+            <Box
+              textAlign={{ base: "left", md: "right" }}
+              color="rgba(0, 0, 0, 0.64)"
+            >
+              <Flex
+                justify={{ base: "flex-start", md: "flex-end" }}
+                align="center"
+                gap={2}
+                mb={2}
+              >
+                <Text fontSize="base" fontWeight="bold">
+                  고객센터
+                </Text>
+                <Text fontSize="base" fontWeight="bold">
+                  1577-1577
+                </Text>
+              </Flex>
+              <Text fontSize="xs">09:00~18:00 월-금</Text>
+              <Text fontSize="xs">휴무 토-일</Text>
+            </Box>
+          </Flex>
+        </Flex>
+        <Box
+          py={2}
+          borderTopWidth="1px"
+          borderTopColor="rgba(0, 0, 0, 0.16)"
+          textAlign="center"
+          fontSize="xs"
+          color="rgba(0, 0, 0, 0.50)"
+        >
+          Copyright © Minié. All Rights Reserved.
+        </Box>
+      </Container>
+    </Box>
+  );
+}
