@@ -33,6 +33,7 @@ export default function Header() {
 
   const topBarLinks = [
     { href: "/login", label: "로그인" },
+    { href: "/signup", label: "회원가입" }, // 2025월 11월 10일 수정 (박영준)
     { href: "/orders", label: "주문조회" },
     { href: "/mypage", label: "마이페이지" },
     { href: "/support", label: "고객센터" },
