@@ -1,5 +1,9 @@
-import { Box, Checkbox, Image } from "@chakra-ui/react";
+"use client";
+
+import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
 import { ShoppingCartProps } from "./ShoppingCartDrawer";
+import HeartFilledIcon from "./ui/HeartIcon";
+import { useState } from "react";
 
 export default function ShoppingCartItem({
   item,
@@ -8,6 +12,8 @@ export default function ShoppingCartItem({
   item: ShoppingCartProps;
   handleToggleChecked: () => void;
 }) {
+  const [like, setLike] = useState(false);
+
   return (
     <Box
       display={"flex"}
@@ -32,7 +38,17 @@ export default function ShoppingCartItem({
           <Box>{item.brand}</Box>
         </Box>
         <Box>
-          <Box>
+          <Box display={"flex"} alignItems={"center"}>
+            <IconButton
+              onClick={() => {
+                setLike((prev) => !prev);
+              }}
+            >
+              <HeartFilledIcon
+                filledColor={like ? "#FA6D6D" : "none"}
+                strokeColor={like ? "#FA6D6D" : "#CCCCCC"}
+              />
+            </IconButton>
             <Box>{item.price * item.num} 원</Box>
           </Box>
         </Box>
