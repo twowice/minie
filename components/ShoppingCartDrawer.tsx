@@ -7,6 +7,8 @@ import {
   Tabs,
   Box,
   Checkbox,
+  Float,
+  Circle,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { CartIcon } from "./ui/CartIcon";
@@ -58,28 +60,6 @@ export default function ShoppingCartDrawer({
       isDiscounted: false,
       discountMount: 0,
     },
-    {
-      checked: true,
-      title: "test2",
-      brand: "brand temp 2",
-      image:
-        "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
-      num: 2,
-      price: 1500,
-      isDiscounted: false,
-      discountMount: 0,
-    },
-    {
-      checked: true,
-      title: "test2",
-      brand: "brand temp 2",
-      image:
-        "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
-      num: 2,
-      price: 1500,
-      isDiscounted: false,
-      discountMount: 0,
-    },
   ],
 }: {
   headerHeight: number;
@@ -89,6 +69,18 @@ export default function ShoppingCartDrawer({
   const [shoppingCartItems, setShoppingCartItems] = useState(
     initShoppingCartItems
   );
+  const isAllChecked = shoppingCartItems.every((item) => item.checked);
+  const isInderterminate =
+    shoppingCartItems.some((item) => item.checked) && !isAllChecked;
+
+  const handleDeleteAll = () => {
+    setShoppingCartItems([]);
+  };
+
+  const handleToggleAllChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setShoppingCartItems((prev) => prev.map((item) => ({ ...item, checked })));
+  };
 
   const handleToggleChecked = (index: number) => {
     setShoppingCartItems((prev) =>
@@ -99,7 +91,7 @@ export default function ShoppingCartDrawer({
   };
 
   const totalPrice = shoppingCartItems.reduce(
-    (sum, item) => sum + (item.checked ? item.price : 0),
+    (sum, item) => sum + (item.checked ? item.price * item.num : 0),
     0
   );
 
@@ -115,12 +107,19 @@ export default function ShoppingCartDrawer({
             setIsCartActivity((prev) => !prev);
           }}
           cursor="pointer"
+          position={"relative"}
         >
           <CartIcon
             w={{ base: 5, md: 6 }}
             h={{ base: 5, md: 6 }}
             color={isCartActivity ? "#FA6D6D" : "black"}
-          />
+          >
+            <Float>
+              <Circle size="5" bg="red" color="white">
+                3
+              </Circle>
+            </Float>
+          </CartIcon>
         </IconButton>
       </Drawer.Trigger>
 
@@ -137,7 +136,6 @@ export default function ShoppingCartDrawer({
           >
             <Tabs.Root
               defaultValue="cart"
-              color={"black"}
               display="flex"
               flexDirection="column"
               flex="1"
@@ -152,7 +150,8 @@ export default function ShoppingCartDrawer({
                 <Tabs.List borderBottom={"none"}>
                   <Tabs.Trigger
                     value="cart"
-                    color="black"
+                    color="#B2B2B2"
+                    borderBottom={"1px solid #B2B2B2"}
                     _selected={{ color: "#FA6D6D" }}
                   >
                     <Drawer.Title fontSize="16px" fontWeight="medium">
@@ -161,7 +160,8 @@ export default function ShoppingCartDrawer({
                   </Tabs.Trigger>
                   <Tabs.Trigger
                     value="like"
-                    color="black"
+                    color="#B2B2B2"
+                    borderBottom={"1px solid #B2B2B2"}
                     _selected={{ color: "#FA6D6D" }}
                   >
                     <Drawer.Title fontSize="16px" fontWeight="medium">
@@ -171,13 +171,18 @@ export default function ShoppingCartDrawer({
                   <Tabs.Indicator
                     height="1px"
                     bg="#FA6D6D"
-                    borderRadius="1px"
                     boxShadow="none"
                     position={"absolute"}
-                    bottom={"-2px"}
+                    bottom={"-1px"}
                   />
                 </Tabs.List>
-                <Button>전체 삭제</Button>
+                <Button
+                  fontSize={"12px"}
+                  fontWeight="medium"
+                  onClick={handleDeleteAll}
+                >
+                  전체 삭제
+                </Button>
               </Drawer.Header>
 
               <Drawer.Body
@@ -189,11 +194,28 @@ export default function ShoppingCartDrawer({
                 flexDirection={"column"}
                 paddingTop={"20px"}
               >
-                <Box display={"flex"} flexDirection={"row"}>
+                <Box
+                  display={"flex"}
+                  flexDirection={"row"}
+                  w={"100%"}
+                  h={"20px"}
+                  gap={"16px"}
+                  alignItems={"center"}
+                >
                   <Checkbox.Root>
                     <Checkbox.HiddenInput />
                     <Checkbox.Control />
                   </Checkbox.Root>
+                  <Box color="#CCCCCC">|</Box>
+                  <Box
+                    display={"flex"}
+                    flex={1}
+                    justifyContent={"center"}
+                    color={"black"}
+                    fontWeight={"bold"}
+                  >
+                    상품정보
+                  </Box>
                 </Box>
                 <Tabs.Content value="cart">
                   {shoppingCartItems.length === 0 && (
@@ -205,6 +227,7 @@ export default function ShoppingCartDrawer({
                         key={idx}
                         item={item}
                         handleToggleChecked={() => handleToggleChecked(idx)}
+                        allChecked={isAllChecked}
                       />
                     );
                   })}
