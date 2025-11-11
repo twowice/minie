@@ -33,7 +33,7 @@ export default function ShoppingCartItem({
     >
       <Checkbox.Root
         variant={"outline"}
-        checked={item.checked || allChecked}
+        checked={item.checked}
         onCheckedChange={handleToggleChecked}
         alignItems={"center"}
         colorPalette={"red"}

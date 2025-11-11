@@ -26,42 +26,46 @@ export interface ShoppingCartProps {
   discountMount: number;
 }
 
+const testShoppingCartItems = [
+  {
+    checked: false,
+    title: "test1",
+    brand: "brand temp 1",
+    image: "https://cdn.imweb.me/thumbnail/20220924/2f7f6930fd5c3.png",
+    num: 1,
+    price: 10000,
+    isDiscounted: true,
+    discountMount: 1000,
+  },
+  {
+    checked: true,
+    title: "test2",
+    brand: "brand temp 2",
+    image:
+      "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
+    num: 2,
+    price: 1500,
+    isDiscounted: false,
+    discountMount: 0,
+  },
+  {
+    checked: true,
+    title: "test33333",
+    brand: "brand temp 3",
+    image:
+      "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
+    num: 2,
+    price: 6000,
+    isDiscounted: true,
+    discountMount: 5000,
+  },
+];
+
+const testLikeItems = [];
+
 export default function ShoppingCartDrawer({
   headerHeight,
-  initShoppingCartItems = [
-    {
-      checked: false,
-      title: "test1",
-      brand: "brand temp 1",
-      image: "https://cdn.imweb.me/thumbnail/20220924/2f7f6930fd5c3.png",
-      num: 1,
-      price: 10000,
-      isDiscounted: true,
-      discountMount: 1000,
-    },
-    {
-      checked: true,
-      title: "test2",
-      brand: "brand temp 2",
-      image:
-        "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
-      num: 2,
-      price: 1500,
-      isDiscounted: false,
-      discountMount: 0,
-    },
-    {
-      checked: true,
-      title: "test33333",
-      brand: "brand temp 3",
-      image:
-        "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
-      num: 2,
-      price: 6000,
-      isDiscounted: true,
-      discountMount: 5000,
-    },
-  ],
+  initShoppingCartItems = testShoppingCartItems,
 }: {
   headerHeight: number;
   initShoppingCartItems?: ShoppingCartProps[];
@@ -70,19 +74,16 @@ export default function ShoppingCartDrawer({
   const [shoppingCartItems, setShoppingCartItems] = useState(
     initShoppingCartItems
   );
+  const [likeItems, setLikeItems] = useState();
   const isAllChecked = shoppingCartItems.every((item) => item.checked);
-  const isInderterminate =
-    shoppingCartItems.some((item) => item.checked) && !isAllChecked;
 
   const handleDeleteAll = () => {
     setShoppingCartItems([]);
   };
 
-  const handleToggleAllChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
+  const handleToggleAllChecked = (checked: boolean) => {
     setShoppingCartItems((prev) => prev.map((item) => ({ ...item, checked })));
   };
-
   const handleToggleChecked = (index: number) => {
     setShoppingCartItems((prev) =>
       prev.map((item, i) =>
@@ -229,6 +230,10 @@ export default function ShoppingCartDrawer({
                     w="20px"
                     variant={"outline"}
                     colorPalette={"red"}
+                    checked={isAllChecked}
+                    onCheckedChange={(e) => {
+                      handleToggleAllChecked(!!e.checked);
+                    }}
                   >
                     <Checkbox.HiddenInput />
                     <Checkbox.Control />
