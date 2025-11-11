@@ -7,17 +7,20 @@ import { useState } from "react";
 import { AiFillMinusCircle, AiFillPlusCircle } from "react-icons/ai";
 import { numberFormatter } from "../utils/formatter/numberFomatter";
 import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
+import { MdClose } from "react-icons/md";
 
 export default function ShoppingCartItem({
   item,
   allChecked,
   handleToggleChecked,
   handleNumChanged,
+  handleDelete,
 }: {
   item: ShoppingCartProps;
   allChecked: boolean;
   handleToggleChecked: () => void;
   handleNumChanged: (type?: string) => void;
+  handleDelete: () => void;
 }) {
   const [like, setLike] = useState(false);
 
@@ -42,10 +45,24 @@ export default function ShoppingCartItem({
         <Checkbox.Control />
       </Checkbox.Root>
       <Image src={item.image} w={130} h={130}></Image>
-      <Box flexGrow={1} display={"flex"} flexDirection={"column"}>
-        <Box>
-          <Box fontWeight={"medium"}>{item.title}</Box>
-          <Box color={"#808080"}>{item.brand}</Box>
+      <Box
+        flexGrow={1}
+        display={"flex"}
+        flexDirection={"column"}
+        justifyContent={"space-between"}
+      >
+        <Box
+          display={"flex"}
+          justifyContent={"space-between"}
+          alignItems={"start"}
+        >
+          <Box>
+            <Box fontWeight={"medium"}>{item.title}</Box>
+            <Box color={"#808080"}>{item.brand}</Box>
+          </Box>
+          <IconButton onClick={handleDelete}>
+            <MdClose />
+          </IconButton>
         </Box>
         <Box
           display={"flex"}

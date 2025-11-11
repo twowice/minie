@@ -59,6 +59,17 @@ const testShoppingCartItems = [
     isDiscounted: true,
     discountMount: 5000,
   },
+  {
+    checked: true,
+    title: "test33333",
+    brand: "brand temp 3",
+    image:
+      "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
+    num: 2,
+    price: 6000,
+    isDiscounted: true,
+    discountMount: 5000,
+  },
 ];
 
 const testLikeItems = [];
@@ -74,11 +85,22 @@ export default function ShoppingCartDrawer({
   const [shoppingCartItems, setShoppingCartItems] = useState(
     initShoppingCartItems
   );
+  const totalPrice = shoppingCartItems.reduce(
+    (sum, item) =>
+      sum + (item.checked ? (item.price - item.discountMount) * item.num : 0),
+    0
+  );
   const [likeItems, setLikeItems] = useState();
-  const isAllChecked = shoppingCartItems.every((item) => item.checked);
+
+  const isAllShoppingCartItemsChecked = shoppingCartItems.every(
+    (item) => item.checked
+  );
 
   const handleDeleteAll = () => {
     setShoppingCartItems([]);
+  };
+  const handleDelete = (index: number) => {
+    setShoppingCartItems((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleToggleAllChecked = (checked: boolean) => {
@@ -111,11 +133,6 @@ export default function ShoppingCartDrawer({
       return;
     }
   };
-
-  const totalPrice = shoppingCartItems.reduce(
-    (sum, item) => sum + (item.checked ? item.price * item.num : 0),
-    0
-  );
 
   return (
     <Drawer.Root
@@ -161,6 +178,7 @@ export default function ShoppingCartDrawer({
               display="flex"
               flexDirection="column"
               flex="1"
+              overflow="hidden"
             >
               <Drawer.Header
                 justifyContent="space-between"
@@ -230,7 +248,7 @@ export default function ShoppingCartDrawer({
                     w="20px"
                     variant={"outline"}
                     colorPalette={"red"}
-                    checked={isAllChecked}
+                    checked={isAllShoppingCartItemsChecked}
                     onCheckedChange={(e) => {
                       handleToggleAllChecked(!!e.checked);
                     }}
@@ -263,7 +281,8 @@ export default function ShoppingCartDrawer({
                           handleNumChanged={(type?: string) =>
                             handleNumChanged(idx, type)
                           }
-                          allChecked={isAllChecked}
+                          handleDelete={() => handleDelete(idx)}
+                          allChecked={isAllShoppingCartItemsChecked}
                         />
                       );
                     })}
