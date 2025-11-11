@@ -10,12 +10,13 @@ import {
   Float,
   Circle,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CartIcon } from "./ui/CartIcon";
 import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 
 export interface CartItemProps {
+  id: number;
   checked: boolean;
   title: string;
   brand: string;
@@ -28,6 +29,7 @@ export interface CartItemProps {
 
 const testCartItems = [
   {
+    id: 0,
     checked: false,
     title: "test1",
     brand: "brand temp 1",
@@ -38,6 +40,7 @@ const testCartItems = [
     discountMount: 1000,
   },
   {
+    id: 1,
     checked: true,
     title: "test2",
     brand: "brand temp 2",
@@ -49,6 +52,7 @@ const testCartItems = [
     discountMount: 0,
   },
   {
+    id: 2,
     checked: true,
     title: "test33333",
     brand: "brand temp 3",
@@ -60,6 +64,7 @@ const testCartItems = [
     discountMount: 5000,
   },
   {
+    id: 3,
     checked: true,
     title: "test33333",
     brand: "brand temp 3",
@@ -71,8 +76,9 @@ const testCartItems = [
     discountMount: 5000,
   },
 ];
+const testLikeItemsIds = new Set([0, 1, 3]);
 
-const testLikeItemsIds = [0, 1, 3];
+/* 각 아이템들을 인자로 넣어주지 않으면 테스트케이스로 작동합니다. */
 
 export default function ShoppingCartDrawer({
   headerHeight,
@@ -81,7 +87,7 @@ export default function ShoppingCartDrawer({
 }: {
   headerHeight: number;
   initCartItems?: CartItemProps[];
-  initLikedItemsIds?: number[];
+  initLikedItemsIds?: Set<number>;
 }) {
   const [isCartActivity, setIsCartActivity] = useState(false);
   const [cartItems, setcartItems] = useState(initCartItems);
@@ -90,7 +96,12 @@ export default function ShoppingCartDrawer({
       sum + (item.checked ? (item.price - item.discountMount) * item.num : 0),
     0
   );
-  const [likedItems, setLikeItems] = useState();
+  const [likedItems, setLikeItems] = useState(
+    initCartItems.filter((item) => initLikedItemsIds.has(item.id))
+  );
+  const likedItemIdsAllSet = useMemo(() => {
+    return new Set(likedItems.map((item) => item.id));
+  }, [likedItems]);
 
   const isAllCartChecked =
     cartItems.every((item) => item.checked) && cartItems.length !== 0;
@@ -147,17 +158,26 @@ export default function ShoppingCartDrawer({
           cursor="pointer"
           position={"relative"}
         >
-          <CartIcon
+          <Box
+            position="relative"
+            display="inline-block"
             w={{ base: 5, md: 6 }}
             h={{ base: 5, md: 6 }}
-            color={isCartActivity ? "#FA6D6D" : "black"}
           >
-            <Float>
-              <Circle size="5" bg="red" color="white">
-                3
-              </Circle>
-            </Float>
-          </CartIcon>
+            <CartIcon
+              w="100%"
+              h="100%"
+              color={isCartActivity ? "#FA6D6D" : "black"}
+            />
+
+            {cartItems.length !== 0 && (
+              <Float placement={"top-end"} offset={[0, 0.5]}>
+                <Circle size="3" bg="red" color="white" fontSize="11px">
+                  {cartItems.length}
+                </Circle>
+              </Float>
+            )}
+          </Box>
         </IconButton>
       </Drawer.Trigger>
 
@@ -278,6 +298,7 @@ export default function ShoppingCartDrawer({
                         <ShoppingCartItem
                           key={idx}
                           item={item}
+                          isLiked={likedItemIdsAllSet.has(item.id)}
                           handleCartChecked={() => handleCartChecked(idx)}
                           handleNumChanged={(type?: string) =>
                             handleNumChanged(idx, type)
