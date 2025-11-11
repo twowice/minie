@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
-import { ShoppingCartProps } from "./ShoppingCartDrawer";
+import { CartItemProps } from "./ShoppingCartDrawer";
 import HeartFilledIcon from "./ui/HeartIcon";
 import { useState } from "react";
 import { AiFillMinusCircle, AiFillPlusCircle } from "react-icons/ai";
@@ -9,20 +9,28 @@ import { numberFormatter } from "../utils/formatter/numberFomatter";
 import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
 import { MdClose } from "react-icons/md";
 
+/* 
+TODO: 기록할 것
+ShoppingCartDrawer에서 기본적으로 인자에 건네주는 함수
+
+  
+  
+*/
+
 export default function ShoppingCartItem({
   item,
-  allChecked,
-  handleToggleChecked,
+  isLiked,
+  handleCartChecked,
   handleNumChanged,
-  handleDelete,
+  handleCartDelete,
 }: {
-  item: ShoppingCartProps;
-  allChecked: boolean;
-  handleToggleChecked: () => void;
+  item: CartItemProps;
+  isLiked: boolean;
+  handleCartChecked: () => void;
   handleNumChanged: (type?: string) => void;
-  handleDelete: () => void;
+  handleCartDelete: () => void;
 }) {
-  const [like, setLike] = useState(false);
+  const [like, setLike] = useState(isLiked);
 
   return (
     <Box
@@ -37,7 +45,7 @@ export default function ShoppingCartItem({
       <Checkbox.Root
         variant={"outline"}
         checked={item.checked}
-        onCheckedChange={handleToggleChecked}
+        onCheckedChange={handleCartChecked}
         alignItems={"center"}
         colorPalette={"red"}
       >
@@ -60,7 +68,7 @@ export default function ShoppingCartItem({
             <Box fontWeight={"medium"}>{item.title}</Box>
             <Box color={"#808080"}>{item.brand}</Box>
           </Box>
-          <IconButton onClick={handleDelete}>
+          <IconButton onClick={handleCartDelete}>
             <MdClose />
           </IconButton>
         </Box>

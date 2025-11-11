@@ -15,7 +15,7 @@ import { CartIcon } from "./ui/CartIcon";
 import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 
-export interface ShoppingCartProps {
+export interface CartItemProps {
   checked: boolean;
   title: string;
   brand: string;
@@ -26,7 +26,7 @@ export interface ShoppingCartProps {
   discountMount: number;
 }
 
-const testShoppingCartItems = [
+const testCartItems = [
   {
     checked: false,
     title: "test1",
@@ -72,42 +72,41 @@ const testShoppingCartItems = [
   },
 ];
 
-const testLikeItems = [];
+const testLikeItemsIds = [0, 1, 3];
 
 export default function ShoppingCartDrawer({
   headerHeight,
-  initShoppingCartItems = testShoppingCartItems,
+  initCartItems = testCartItems,
+  initLikedItemsIds = testLikeItemsIds,
 }: {
   headerHeight: number;
-  initShoppingCartItems?: ShoppingCartProps[];
+  initCartItems?: CartItemProps[];
+  initLikedItemsIds?: number[];
 }) {
   const [isCartActivity, setIsCartActivity] = useState(false);
-  const [shoppingCartItems, setShoppingCartItems] = useState(
-    initShoppingCartItems
-  );
-  const totalPrice = shoppingCartItems.reduce(
+  const [cartItems, setcartItems] = useState(initCartItems);
+  const totalPrice = cartItems.reduce(
     (sum, item) =>
       sum + (item.checked ? (item.price - item.discountMount) * item.num : 0),
     0
   );
-  const [likeItems, setLikeItems] = useState();
+  const [likedItems, setLikeItems] = useState();
 
-  const isAllShoppingCartItemsChecked = shoppingCartItems.every(
-    (item) => item.checked
-  );
+  const isAllCartChecked =
+    cartItems.every((item) => item.checked) && cartItems.length !== 0;
 
-  const handleDeleteAll = () => {
-    setShoppingCartItems([]);
+  const handleCartDeleteAll = () => {
+    setcartItems([]);
   };
-  const handleDelete = (index: number) => {
-    setShoppingCartItems((prev) => prev.filter((_, i) => i !== index));
+  const handleCartDelete = (index: number) => {
+    setcartItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleToggleAllChecked = (checked: boolean) => {
-    setShoppingCartItems((prev) => prev.map((item) => ({ ...item, checked })));
+  const handleCartAllChecked = (checked: boolean) => {
+    setcartItems((prev) => prev.map((item) => ({ ...item, checked })));
   };
-  const handleToggleChecked = (index: number) => {
-    setShoppingCartItems((prev) =>
+  const handleCartChecked = (index: number) => {
+    setcartItems((prev) =>
       prev.map((item, i) =>
         i === index ? { ...item, checked: !item.checked } : item
       )
@@ -116,7 +115,7 @@ export default function ShoppingCartDrawer({
 
   const handleNumChanged = (index: number, type?: string) => {
     if (type === "plus") {
-      setShoppingCartItems((prev) =>
+      setcartItems((prev) =>
         prev.map((item, i) =>
           i === index ? { ...item, num: item.num + 1 } : item
         )
@@ -125,7 +124,7 @@ export default function ShoppingCartDrawer({
     }
 
     if (type === "minus") {
-      setShoppingCartItems((prev) =>
+      setcartItems((prev) =>
         prev.map((item, i) =>
           i === index ? { ...item, num: item.num > 1 ? item.num - 1 : 1 } : item
         )
@@ -221,7 +220,7 @@ export default function ShoppingCartDrawer({
                 <Button
                   fontSize={"12px"}
                   fontWeight="medium"
-                  onClick={handleDeleteAll}
+                  onClick={handleCartDeleteAll}
                 >
                   전체 삭제
                 </Button>
@@ -248,9 +247,9 @@ export default function ShoppingCartDrawer({
                     w="20px"
                     variant={"outline"}
                     colorPalette={"red"}
-                    checked={isAllShoppingCartItemsChecked}
+                    checked={isAllCartChecked}
                     onCheckedChange={(e) => {
-                      handleToggleAllChecked(!!e.checked);
+                      handleCartAllChecked(!!e.checked);
                     }}
                   >
                     <Checkbox.HiddenInput />
@@ -269,26 +268,27 @@ export default function ShoppingCartDrawer({
                 </Box>
                 <Box flex="1" overflowY="auto">
                   <Tabs.Content value="cart" style={{ height: "100%" }}>
-                    {shoppingCartItems.length === 0 && (
-                      <Box>장바구니에 담긴 상품이 없습니다.</Box>
+                    {cartItems.length === 0 && (
+                      <Box color={"black"}>
+                        장바구니에 담긴 상품이 없습니다.
+                      </Box>
                     )}
-                    {shoppingCartItems.map((item, idx) => {
+                    {cartItems.map((item, idx) => {
                       return (
                         <ShoppingCartItem
                           key={idx}
                           item={item}
-                          handleToggleChecked={() => handleToggleChecked(idx)}
+                          handleCartChecked={() => handleCartChecked(idx)}
                           handleNumChanged={(type?: string) =>
                             handleNumChanged(idx, type)
                           }
-                          handleDelete={() => handleDelete(idx)}
-                          allChecked={isAllShoppingCartItemsChecked}
+                          handleCartDelete={() => handleCartDelete(idx)}
                         />
                       );
                     })}
                   </Tabs.Content>
                   <Tabs.Content value="like" style={{ height: "100%" }}>
-                    <Box>좋아요에 담긴 상품이 없습니다.</Box>
+                    <Box color={"black"}>좋아요에 담긴 상품이 없습니다.</Box>
                   </Tabs.Content>
                 </Box>
               </Drawer.Body>
