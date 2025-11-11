@@ -1,6 +1,8 @@
 "use client";
 
-import { Box, Text, HStack, VStack, Flex, Portal, Select, createListCollection, Checkbox, Image, Dialog, Button, CloseButton } from "@chakra-ui/react";
+import { Box, Text, HStack, VStack, Flex, Portal, Select, createListCollection, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination } from "@chakra-ui/react";
+import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
+import ReviewTextDialog from "@/components/ReviewTextDialog";
 
 // Dummy DATA
 const reviewTotalData = {
@@ -31,7 +33,7 @@ const reviewNoticeData = [
         userName: "불타는 스킨",
         userImage: "/images/review/profile2.png",
         createdAt: "2025.10.22",
-        score: 5.0,
+        score: 2.5,
         productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
         reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
         productImage: "images/review/product2.jpg",
@@ -41,7 +43,7 @@ const reviewNoticeData = [
         userName: "불타는 스킨",
         userImage: "/images/review/profile2.png",
         createdAt: "2025.10.22",
-        score: 5.0,
+        score: 3.0,
         productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
         reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
         productImage: "images/review/product2.jpg",
@@ -194,98 +196,148 @@ export default function Page() {
             {/* 게시판 컨텐츠 */}
             <VStack mt="20px" align="stretch">
                 {reviewNoticeData.map((review) => (
-                    <Flex key={review.id} borderBottom="1px solid #E3E3E3" p="16px" gap="30px" borderRadius="5px">
-                        <VStack align="center" w="80px">
-                            <Image
-                                src={review.userImage}
-                                alt={review.userName}
-                                boxSize="83px"
-                                borderRadius="50%"
-                                objectFit="cover"
-                            />
-                            <Text fontSize="13px" fontWeight="bold" color="black">
-                                {review.userName}
-                            </Text>
-                        </VStack>
 
-                        <VStack align="stretch" flex="1">
-                            <Flex justifyContent="space-between" alignItems="center">
-                                <Text fontSize="12px" color="#5C5C5C">
-                                    {review.createdAt}
+                    <Dialog.Root key={review.id}>
+                        <Flex key={review.id} borderBottom="1px solid #E3E3E3" p="16px" gap="30px" borderRadius="5px">
+                            <VStack align="center" w="80px">
+                                <Image
+                                    src={review.userImage}
+                                    alt={review.userName}
+                                    boxSize="83px"
+                                    borderRadius="50%"
+                                    objectFit="cover"
+                                />
+                                <Text fontSize="13px" fontWeight="bold" color="black">
+                                    {review.userName}
                                 </Text>
-                                <HStack>
-                                    {Array(Math.floor(review.score))
-                                        .fill(0)
-                                        .map((_, i) => (
-                                            <Text key={`full-${i}`} color="yellow.400" fontSize="19px">
-                                                ★
-                                            </Text>
-                                        ))}
-                                    {review.score % 1 >= 0.5 && (
-                                        <Text color="yellow.400" fontSize="19px">
-                                            ⯨
-                                        </Text>
-                                    )}
-                                    {Array(5 - Math.ceil(review.score))
-                                        .fill(0)
-                                        .map((_, i) => (
-                                            <Text key={`empty-${i}`} color="gray.300" fontSize="19px">
-                                                ★
-                                            </Text>
-                                        ))}
-                                </HStack>
-                            </Flex>
+                            </VStack>
 
-                            <Text fontSize="12px" color="#A8A8A8">
-                                {review.productName}
-                            </Text>
-                            <Text fontSize="12px" color="#5C5C5C">
-                                {review.reviewText}
-                            </Text>
-                            <Image
-                                src={review.productImage}
-                                alt={review.productName}
-                                boxSize="100px"
-                                objectFit="cover"
-                                borderRadius="8px"
-                            />
-                        </VStack>
-                    </Flex>
+                            <VStack align="stretch" flex="1">
+                                <Flex justifyContent="space-between" alignItems="center">
+                                    <Text fontSize="12px" color="#5C5C5C">
+                                        {review.createdAt}
+                                    </Text>
+                                    <HStack>
+                                        {Array(Math.floor(review.score))
+                                            .fill(0)
+                                            .map((_, i) => (
+                                                <Text key={`full-${i}`} color="yellow.400" fontSize="19px">
+                                                    ★
+                                                </Text>
+                                            ))}
+                                        {review.score % 1 >= 0.5 && (
+                                            <Text color="yellow.400" fontSize="19px">
+                                                ⯨
+                                            </Text>
+                                        )}
+                                        {Array(5 - Math.ceil(review.score))
+                                            .fill(0)
+                                            .map((_, i) => (
+                                                <Text key={`empty-${i}`} color="gray.300" fontSize="19px">
+                                                    ★
+                                                </Text>
+                                            ))}
+                                    </HStack>
+                                </Flex>
+
+                                <Text fontSize="12px" color="#A8A8A8">
+                                    {review.productName}
+                                </Text>
+
+                                <ReviewTextDialog
+                                    reviewProductName={review.productName}
+                                    reviewText={review.reviewText}
+                                    productName={review.productName}
+                                    productImage={review.productImage}
+                                    reviewScore={review.score}
+                                />
+
+                                <Dialog.Trigger asChild>
+                                    <Box position="relative" display="inline-block" w="100px" h="100px">
+                                        {/* 리뷰 이미지 */}
+                                        <Image
+                                            src={review.productImage}
+                                            alt={review.productName}
+                                            boxSize="100px"
+                                            objectFit="cover"
+                                            borderRadius="8px"
+                                            cursor="pointer"
+                                            _hover={{ opacity: 0.8 }}
+                                        />
+
+                                        <Button
+                                            position="absolute"
+                                            bottom="4px"
+                                            right="4px"
+                                            size="sm"
+                                            borderRadius="50%"
+                                            w="24px"
+                                            h="24px"
+                                            minW="0"
+                                            p="0"
+                                            bg="black"
+                                            color="white"
+                                            fontWeight="bold"
+                                            _hover={{ bg: "gray.800" }}
+                                        >
+                                            +
+                                        </Button>
+                                    </Box>
+
+                                </Dialog.Trigger>
+                            </VStack>
+                        </Flex>
+
+                        <Portal>
+                            <Dialog.Backdrop />
+                            <Dialog.Positioner>
+                                <Dialog.Content bg="#f9f9f9">
+                                    <Dialog.Header>
+                                        <Dialog.Title color="black" fontWeight="bold">자세히 보기</Dialog.Title>
+                                    </Dialog.Header>
+                                    <Dialog.Body>
+                                        <Image
+                                            src={review.productImage}
+                                            alt={review.productName}
+                                            w="100%"
+                                            borderRadius="10px"
+                                            objectFit="cover"
+                                        />
+                                    </Dialog.Body>
+                                    <Dialog.CloseTrigger asChild>
+                                        <CloseButton size="sm" color="black" _hover={{ bg: "#f9f9f9" }} />
+                                    </Dialog.CloseTrigger>
+                                </Dialog.Content>
+                            </Dialog.Positioner>
+                        </Portal>
+                    </Dialog.Root>
                 ))}
             </VStack>
+            <Flex justify="center" mt="20px">
+                <Pagination.Root count={20} pageSize={2} defaultPage={1}>
+                    <ButtonGroup variant="ghost" size="sm">
+                        <Pagination.PrevTrigger asChild >
+                            <IconButton>
+                                <LuChevronLeft />
+                            </IconButton>
+                        </Pagination.PrevTrigger>
 
-            <Dialog.Root>
-                <Dialog.Trigger asChild>
-                    <Button variant="outline" size="sm">
-                        Open Dialog
-                    </Button>
-                </Dialog.Trigger>
-                <Portal>
-                    <Dialog.Backdrop />
-                    <Dialog.Positioner>
-                        <Dialog.Content>
-                            <Dialog.Header>
-                                <Dialog.Title>Dialog Title</Dialog.Title>
-                            </Dialog.Header>
-                            <Dialog.Body>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                                    eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                                </p>
-                            </Dialog.Body>
-                            <Dialog.Footer>
-                                <Dialog.ActionTrigger asChild>
-                                    <Button variant="outline">Cancel</Button>
-                                </Dialog.ActionTrigger>
-                                <Button>Save</Button>
-                            </Dialog.Footer>
-                            <Dialog.CloseTrigger asChild>
-                                <CloseButton size="sm" />
-                            </Dialog.CloseTrigger>
-                        </Dialog.Content>
-                    </Dialog.Positioner>
-                </Portal>
-            </Dialog.Root>
+                        <Pagination.Items  
+                            render={(page) => (
+                                <IconButton variant={{ base: "ghost", _selected: "outline" }} color="#929292ff" _hover={{ color: "#ffffffff" }}>
+                                    {page.value}
+                                </IconButton>
+                            )}
+                        />
+
+                        <Pagination.NextTrigger asChild>
+                            <IconButton>
+                                <LuChevronRight />
+                            </IconButton>
+                        </Pagination.NextTrigger>
+                    </ButtonGroup>
+                </Pagination.Root>
+            </Flex>
         </Box>
     );
 }
