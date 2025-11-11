@@ -7,7 +7,7 @@ export default function ShoppingItem() {
    const [isLike, setIsLike] = useState(false);
    return (
       <>
-         <Box>
+         <Box >
             <Image src={'/images/image 18-1.png'} w={'200px'} h={'280px'} position={'absolute'} alt="test" />
             <Box w={'200px'} h={'280px'}>
                <Box
@@ -47,7 +47,7 @@ export default function ShoppingItem() {
                   </Box>
                </Box>
             </Box>
-            <Flex color={'black'} m={'0 8px'} flexDirection={'column'} position={'absolute'}>
+            <Flex color={'black'} m={'0 8px'} flexDirection={'column'} position={'relative'}>
                <Text fontSize={'16px'} fontWeight={'700'}>
                   ${}원
                </Text>

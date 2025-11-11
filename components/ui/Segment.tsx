@@ -5,7 +5,7 @@ export default function Segment() {
       <Box>
          <Tabs.Root defaultValue={'skincare'} variant={'enclosed'} w={'100%'}>
             <Tabs.List bg={'rgba(204,204,204,0.16)'} rounded={'4'} p={'1'} w={'100%'}>
-               <Tabs.Trigger value="skincare" w={'100%'}>
+               <Tabs.Trigger value="skincare" w={'100%'} >
                   스킨케어
                </Tabs.Trigger>
                <Tabs.Trigger value="use" w={'100%'}>
@@ -18,7 +18,7 @@ export default function Segment() {
                   제형
                </Tabs.Trigger>
             </Tabs.List>
-            <Tabs.Content value="skincare">
+            <Tabs.Content value="skincare" h={'103px'}>
                <Flex>
                   <VStack w={'100%'} alignItems={'flex-start'}>
                      <Checkbox.Root variant={'solid'} colorPalette={'red'}>
@@ -56,10 +56,10 @@ export default function Segment() {
                   </VStack>
                </Flex>
             </Tabs.Content>
-            <Tabs.Content value="use">
+            <Tabs.Content value="use" h={'103px'}>
                <Flex>
                   <VStack w={'100%'} alignItems={'flex-start'}>
-                     <Checkbox.Root variant={'solid'} _checked={{ background: "red" }}>
+                     <Checkbox.Root variant={'solid'} colorPalette={'red'}>
                         <Checkbox.HiddenInput />
                         <Checkbox.Control />
                         <Checkbox.Label color={'black'}>온몸</Checkbox.Label>
@@ -89,7 +89,7 @@ export default function Segment() {
                   </VStack>
                </Flex>
             </Tabs.Content>
-            <Tabs.Content value="type">
+            <Tabs.Content value="type" h={'103px'}>
                <Flex>
                   <VStack w={'100%'} alignItems={'flex-start'}>
                      <Checkbox.Root variant={'solid'} colorPalette={'red'}>
@@ -117,7 +117,7 @@ export default function Segment() {
                   </VStack>
                </Flex>
             </Tabs.Content>
-            <Tabs.Content value="style">
+            <Tabs.Content value="style" h={'103px'}>
                <Flex>
                   <VStack w={'100%'} alignItems={'flex-start'}>
                      <Checkbox.Root variant={'solid'} colorPalette={'red'}>
