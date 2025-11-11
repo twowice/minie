@@ -4,15 +4,20 @@ import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
 import { ShoppingCartProps } from "./ShoppingCartDrawer";
 import HeartFilledIcon from "./ui/HeartIcon";
 import { useState } from "react";
+import { AiFillMinusCircle, AiFillPlusCircle } from "react-icons/ai";
+import { numberFormatter } from "../utils/formatter/numberFomatter";
+import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
 
 export default function ShoppingCartItem({
   item,
-  handleToggleChecked,
   allChecked,
+  handleToggleChecked,
+  handleNumChanged,
 }: {
   item: ShoppingCartProps;
-  handleToggleChecked: () => void;
   allChecked: boolean;
+  handleToggleChecked: () => void;
+  handleNumChanged: (type?: string) => void;
 }) {
   const [like, setLike] = useState(false);
 
@@ -23,18 +28,15 @@ export default function ShoppingCartItem({
       alignItems={"center"}
       gap={"16px"}
       color={"black"}
+      borderBottom={"1px solid #CCCCCC"}
+      py={"10px"}
     >
       <Checkbox.Root
         variant={"outline"}
         checked={item.checked || allChecked}
         onCheckedChange={handleToggleChecked}
         alignItems={"center"}
-        _checked={{
-          borderColor: "#FA6D6D",
-          "& .chakra-checkbox__control[data-checked] svg": {
-            color: "#FA6D6D",
-          },
-        }}
+        colorPalette={"red"}
       >
         <Checkbox.HiddenInput />
         <Checkbox.Control />
@@ -43,11 +45,52 @@ export default function ShoppingCartItem({
       <Box flexGrow={1} display={"flex"} flexDirection={"column"}>
         <Box>
           <Box fontWeight={"medium"}>{item.title}</Box>
-          <Box>{item.brand}</Box>
+          <Box color={"#808080"}>{item.brand}</Box>
         </Box>
-        <Box>
-          <Box>{item.num}</Box>
+        <Box
+          display={"flex"}
+          flexDirection={"row"}
+          alignItems={"center"}
+          justifyContent={"end"}
+          gap={"4px"}
+        >
+          <IconButton
+            color={item.num === 1 ? "#CCCCCC" : ""}
+            onClick={() => handleNumChanged("minus")}
+            disabled={item.num === 1}
+          >
+            <AiFillMinusCircle />
+          </IconButton>
+          <Box fontWeight={"medium"} fontSize={"16px"}>
+            {item.num}
+          </Box>
+          <IconButton onClick={() => handleNumChanged("plus")}>
+            <AiFillPlusCircle />
+          </IconButton>
         </Box>
+        {item.isDiscounted && (
+          <Box
+            display={"flex"}
+            flexDirection={"row"}
+            alignItems={"center"}
+            justifyContent={"end"}
+            gap={"4px"}
+          >
+            <Box fontWeight={"medium"} color={"#FA6D6D"} fontSize={"12px"}>
+              {getDiscountRate(item.price, item.discountMount)}%
+            </Box>
+            <Box
+              fontSize={"12px"}
+              textDecoration={"line-through"}
+              color={"#808080"}
+            >
+              {item.price * item.num}
+            </Box>
+            <Box fontSize={"12px"} color={"#808080"}>
+              원
+            </Box>
+          </Box>
+        )}
         <Box>
           <Box
             display={"flex"}
@@ -64,8 +107,15 @@ export default function ShoppingCartItem({
                 strokeColor={like ? "#FA6D6D" : "#CCCCCC"}
               />
             </IconButton>
-            <Box fontSize={"16px"} fontWeight={"semibold"}>
-              {item.price * item.num} 원
+            <Box display={"flex"} gap={"2px"}>
+              <Box fontSize={"16px"} fontWeight={"semibold"}>
+                {numberFormatter.format(
+                  (item.price - item.discountMount) * item.num
+                )}
+              </Box>
+              <Box fontSize={"16px"} fontWeight={"medium"}>
+                원
+              </Box>
             </Box>
           </Box>
         </Box>

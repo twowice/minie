@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 import { CartIcon } from "./ui/CartIcon";
 import ShoppingCartItem from "./ShoppingCartItem";
+import { numberFormatter } from "@/utils/formatter/numberFomatter";
 
 export interface ShoppingCartProps {
   checked: boolean;
@@ -51,14 +52,14 @@ export default function ShoppingCartDrawer({
     },
     {
       checked: true,
-      title: "test2",
-      brand: "brand temp 2",
+      title: "test33333",
+      brand: "brand temp 3",
       image:
         "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
       num: 2,
-      price: 1500,
-      isDiscounted: false,
-      discountMount: 0,
+      price: 6000,
+      isDiscounted: true,
+      discountMount: 5000,
     },
   ],
 }: {
@@ -88,6 +89,26 @@ export default function ShoppingCartDrawer({
         i === index ? { ...item, checked: !item.checked } : item
       )
     );
+  };
+
+  const handleNumChanged = (index: number, type?: string) => {
+    if (type === "plus") {
+      setShoppingCartItems((prev) =>
+        prev.map((item, i) =>
+          i === index ? { ...item, num: item.num + 1 } : item
+        )
+      );
+      return;
+    }
+
+    if (type === "minus") {
+      setShoppingCartItems((prev) =>
+        prev.map((item, i) =>
+          i === index ? { ...item, num: item.num > 1 ? item.num - 1 : 1 } : item
+        )
+      );
+      return;
+    }
   };
 
   const totalPrice = shoppingCartItems.reduce(
@@ -152,9 +173,10 @@ export default function ShoppingCartDrawer({
                     value="cart"
                     color="#B2B2B2"
                     borderBottom={"1px solid #B2B2B2"}
-                    _selected={{ color: "#FA6D6D" }}
+                    bottom={"-1px"}
+                    _selected={{ color: "#FA6D6D", bottom: "0px" }}
                   >
-                    <Drawer.Title fontSize="16px" fontWeight="medium">
+                    <Drawer.Title w="80px" fontSize="16px" fontWeight="medium">
                       장바구니
                     </Drawer.Title>
                   </Tabs.Trigger>
@@ -162,9 +184,10 @@ export default function ShoppingCartDrawer({
                     value="like"
                     color="#B2B2B2"
                     borderBottom={"1px solid #B2B2B2"}
-                    _selected={{ color: "#FA6D6D" }}
+                    bottom={"-1px"}
+                    _selected={{ color: "#FA6D6D", bottom: "0px" }}
                   >
-                    <Drawer.Title fontSize="16px" fontWeight="medium">
+                    <Drawer.Title w="80px" fontSize="16px" fontWeight="medium">
                       좋아요
                     </Drawer.Title>
                   </Tabs.Trigger>
@@ -189,7 +212,7 @@ export default function ShoppingCartDrawer({
                 px="40px"
                 minHeight={0}
                 flex={1}
-                overflowY={"scroll"}
+                overflowY={"hidden"}
                 display={"flex"}
                 flexDirection={"column"}
                 paddingTop={"20px"}
@@ -202,7 +225,11 @@ export default function ShoppingCartDrawer({
                   gap={"16px"}
                   alignItems={"center"}
                 >
-                  <Checkbox.Root>
+                  <Checkbox.Root
+                    w="20px"
+                    variant={"outline"}
+                    colorPalette={"red"}
+                  >
                     <Checkbox.HiddenInput />
                     <Checkbox.Control />
                   </Checkbox.Root>
@@ -217,25 +244,29 @@ export default function ShoppingCartDrawer({
                     상품정보
                   </Box>
                 </Box>
-                <Tabs.Content value="cart">
-                  {shoppingCartItems.length === 0 && (
-                    <Box>장바구니에 담긴 상품이 없습니다.</Box>
-                  )}
-                  {shoppingCartItems.map((item, idx) => {
-                    return (
-                      <ShoppingCartItem
-                        key={idx}
-                        item={item}
-                        handleToggleChecked={() => handleToggleChecked(idx)}
-                        allChecked={isAllChecked}
-                      />
-                    );
-                  })}
-                </Tabs.Content>
-
-                <Tabs.Content value="like">
-                  <Box p={4}>좋아요에 담긴 상품이 없습니다.</Box>
-                </Tabs.Content>
+                <Box flex="1" overflowY="auto">
+                  <Tabs.Content value="cart" style={{ height: "100%" }}>
+                    {shoppingCartItems.length === 0 && (
+                      <Box>장바구니에 담긴 상품이 없습니다.</Box>
+                    )}
+                    {shoppingCartItems.map((item, idx) => {
+                      return (
+                        <ShoppingCartItem
+                          key={idx}
+                          item={item}
+                          handleToggleChecked={() => handleToggleChecked(idx)}
+                          handleNumChanged={(type?: string) =>
+                            handleNumChanged(idx, type)
+                          }
+                          allChecked={isAllChecked}
+                        />
+                      );
+                    })}
+                  </Tabs.Content>
+                  <Tabs.Content value="like" style={{ height: "100%" }}>
+                    <Box>좋아요에 담긴 상품이 없습니다.</Box>
+                  </Tabs.Content>
+                </Box>
               </Drawer.Body>
             </Tabs.Root>
 
@@ -246,7 +277,7 @@ export default function ShoppingCartDrawer({
                 bg={"#FA6D6D"}
                 fontWeight={"medium"}
               >
-                {totalPrice}원 구매하기
+                {numberFormatter.format(totalPrice)}원 구매하기
               </Button>
             </Drawer.Footer>
           </Drawer.Content>
