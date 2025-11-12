@@ -1,9 +1,6 @@
-"use client";
-
 import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
 import { CartItemProps } from "./ShoppingCartDrawer";
 import HeartFilledIcon from "./ui/HeartIcon";
-import { useState } from "react";
 import { AiFillMinusCircle, AiFillPlusCircle } from "react-icons/ai";
 import { numberFormatter } from "../utils/formatter/numberFomatter";
 import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
@@ -13,7 +10,70 @@ import { MdClose } from "react-icons/md";
 TODO: 기록할 것
 ShoppingCartDrawer에서 기본적으로 인자에 건네주는 함수
 
-  
+  const handleCartDeleteAll = () => {
+    if (currentTabsValue === "cart") {
+      setcartItems([]);
+    } else if (currentTabsValue) {
+      setLikedItems([]);
+    }
+  };
+  const handleCartDelete = (id: number) => {
+    setcartItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleCartAllChecked = (checked: boolean) => {
+    setcartItems((prev) => prev.map((item) => ({ ...item, checked })));
+  };
+  const handleCartChecked = (id: number) => {
+    setcartItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
+  };
+
+  const handleNumChanged = (id: number, type?: string) => {
+    switch (type) {
+      case "plus":
+        setcartItems((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, num: item.num + 1 } : item
+          )
+        );
+        break;
+      case "minus":
+        setcartItems((prev) =>
+          prev.map((item) =>
+            item.id === id
+              ? { ...item, num: item.num > 1 ? item.num - 1 : 1 }
+              : item
+          )
+        );
+        break;
+      default:
+        console.error("[handleNumChanged] 알 수 없는 조작 감지 ", type);
+        break;
+    }
+  };
+
+  const handleLike = (id: number, type?: string) => {
+    switch (type) {
+      case "like":
+        setLikedItems((prev) => {
+          const newLikedItem = cartItems.find((item) => item.id === id);
+          return newLikedItem
+            ? [...prev, { ...newLikedItem, checked: false }]
+            : prev;
+        });
+        break;
+      case "unlike":
+        setLikedItems((prev) => prev.filter((item) => item.id !== id));
+        break;
+      default:
+        console.error("[handleLike] 알 수 없는 조작 감지 ", type);
+        break;
+    }
+  };
   
 */
 

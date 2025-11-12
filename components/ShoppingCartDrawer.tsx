@@ -10,7 +10,7 @@ import {
   Float,
   Circle,
 } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CartIcon } from "./ui/CartIcon";
 import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
@@ -28,6 +28,7 @@ export interface CartItemProps {
   discountMount: number;
 }
 
+/* 테스트 케이스용 더미데이터 */
 const testCartItems = [
   {
     id: 0,
@@ -91,15 +92,21 @@ export default function ShoppingCartDrawer({
   initLikedItemsIds?: Set<number>;
 }) {
   const [isCartActivity, setIsCartActivity] = useState(false);
+  const [currentTabsValue, setCurrentTabsValue] = useState("cart");
   const [cartItems, setcartItems] = useState(initCartItems);
   const totalPrice = cartItems.reduce(
     (sum, item) =>
       sum + (item.checked ? (item.price - item.discountMount) * item.num : 0),
     0
   );
-  const [likedItems, setLikeItems] = useState(
-    initCartItems.filter((item) => initLikedItemsIds.has(item.id))
-  );
+  const [likedItems, setLikedItems] = useState<CartItemProps[]>(() => {
+    const filtered = initCartItems.filter((item) =>
+      initLikedItemsIds.has(item.id)
+    );
+    const mapped = filtered.map((item) => ({ ...item, checked: false }));
+
+    return mapped;
+  });
   const likedItemIdsAllSet = useMemo(() => {
     return new Set(likedItems.map((item) => item.id));
   }, [likedItems]);
@@ -110,16 +117,26 @@ export default function ShoppingCartDrawer({
 
   const isAllCartChecked =
     cartItems.every((item) => item.checked) && cartItems.length !== 0;
+  const isAllLikedItemChecked =
+    likedItems.every((item) => item.checked) && likedItems.length !== 0;
 
   const handleCartDeleteAll = () => {
-    setcartItems([]);
+    if (currentTabsValue === "cart") {
+      setcartItems([]);
+    } else if (currentTabsValue === "like") {
+      setLikedItems([]);
+    }
   };
   const handleCartDelete = (id: number) => {
     setcartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleCartAllChecked = (checked: boolean) => {
-    setcartItems((prev) => prev.map((item) => ({ ...item, checked })));
+    if (currentTabsValue === "cart") {
+      setcartItems((prev) => prev.map((item) => ({ ...item, checked: true })));
+    } else if (currentTabsValue === "like") {
+      setLikedItems((prev) => prev.map((item) => ({ ...item, checked: true })));
+    }
   };
   const handleCartChecked = (id: number) => {
     setcartItems((prev) =>
@@ -156,13 +173,15 @@ export default function ShoppingCartDrawer({
   const handleLike = (id: number, type?: string) => {
     switch (type) {
       case "like":
-        setLikeItems((prev) => {
+        setLikedItems((prev) => {
           const newLikedItem = cartItems.find((item) => item.id === id);
-          return newLikedItem ? [...prev, newLikedItem] : prev;
+          return newLikedItem
+            ? [...prev, { ...newLikedItem, checked: false }]
+            : prev;
         });
         break;
       case "unlike":
-        setLikeItems((prev) => prev.filter((item) => item.id !== id));
+        setLikedItems((prev) => prev.filter((item) => item.id !== id));
         break;
       default:
         console.error("[handleLike] 알 수 없는 조작 감지 ", type);
@@ -224,6 +243,8 @@ export default function ShoppingCartDrawer({
               flexDirection="column"
               flex="1"
               overflow="hidden"
+              value={currentTabsValue}
+              onValueChange={(e) => setCurrentTabsValue(e.value)}
             >
               <Drawer.Header
                 justifyContent="space-between"
@@ -293,7 +314,11 @@ export default function ShoppingCartDrawer({
                     w="20px"
                     variant={"outline"}
                     colorPalette={"red"}
-                    checked={isAllCartChecked}
+                    checked={
+                      currentTabsValue === "cart"
+                        ? isAllCartChecked
+                        : isAllLikedItemChecked
+                    }
                     onCheckedChange={(e) => {
                       handleCartAllChecked(!!e.checked);
                     }}
@@ -358,14 +383,26 @@ export default function ShoppingCartDrawer({
             </Tabs.Root>
 
             <Drawer.Footer px="40px" flexShrink={0}>
-              <Button
-                w={"100%"}
-                color={"white"}
-                bg={"#FA6D6D"}
-                fontWeight={"medium"}
-              >
-                {numberFormatter.format(totalPrice)}원 구매하기
-              </Button>
+              {currentTabsValue === "cart" && (
+                <Button
+                  w={"100%"}
+                  color={"white"}
+                  bg={"#FA6D6D"}
+                  fontWeight={"medium"}
+                >
+                  {numberFormatter.format(totalPrice)}원 구매하기
+                </Button>
+              )}
+              {currentTabsValue === "like" && (
+                <Button
+                  w={"100%"}
+                  color={"white"}
+                  bg={"#FA6D6D"}
+                  fontWeight={"medium"}
+                >
+                  장바구니 담기
+                </Button>
+              )}
             </Drawer.Footer>
           </Drawer.Content>
         </Drawer.Positioner>

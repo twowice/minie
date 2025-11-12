@@ -1,9 +1,6 @@
-"use client";
-
 import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
 import { CartItemProps } from "./ShoppingCartDrawer";
 import HeartFilledIcon from "./ui/HeartIcon";
-import { useState } from "react";
 import { numberFormatter } from "../utils/formatter/numberFomatter";
 import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
 
