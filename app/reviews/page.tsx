@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Text, HStack, VStack, Flex, Portal, Select, createListCollection, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination } from "@chakra-ui/react";
+import { useState, useMemo } from "react";
+import { Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeSelectIndicator, createListCollection, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import ReviewTextDialog from "@/components/ReviewTextDialog";
 
@@ -22,7 +23,7 @@ const reviewNoticeData = [
         id: 1,
         userName: "따가운 볼",
         userImage: "/images/review/profile1.png",
-        createdAt: "2025.10.23",
+        createdAt: "2025.10.15",
         score: 4.5,
         productName: "[신상/블랙에디션/리뷰이벤트] 파넬 시카마누 세럼쿠션(미니/단품/기획)",
         reviewText: "아이가 아주 만족해하며 잘 쓰고있어요 피부에 밀착력이 좋고 커버가 잘된다고 해요♡",
@@ -40,13 +41,33 @@ const reviewNoticeData = [
     },
     {
         id: 3,
-        userName: "불타는 스킨",
+        userName: "랄랄랄 스킨",
         userImage: "/images/review/profile2.png",
-        createdAt: "2025.10.22",
+        createdAt: "2025.10.14",
         score: 3.0,
         productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
         reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
         productImage: "images/review/product2.jpg",
+    },
+    {
+        id: 4,
+        userName: "뮤텍스",
+        userImage: "/images/review/profile2.png",
+        createdAt: "2025.10.16",
+        score: 5.0,
+        productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
+        reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
+        productImage: "",
+    },
+    {
+        id: 5,
+        userName: "콸콸콸",
+        userImage: "/images/review/profile2.png",
+        createdAt: "2025.10.18",
+        score: 4.5,
+        productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
+        reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
+        productImage: "",
     },
 ]
 
@@ -56,13 +77,25 @@ export default function Page() {
     const hasHalfStar = reviewTotalData.score % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
-    /* SELECT */
-    const frameworks = createListCollection({
-        items: [
-            { label: "최신 순", value: "recent" },
-            { label: "별점 순", value: "score" },
-        ],
-    })
+    /* SORT */
+    const [sortType, setSortType] = useState<"latest" | "score">("latest");
+    const [photoFilter, setPhotoFilter] = useState(false);
+    const [normalFilter, setNormalFilter] = useState(false);
+    const sortedReviews = useMemo(() => {
+        return [...reviewNoticeData]
+            .filter((review) => {
+                if (photoFilter && !normalFilter) return review.productImage;
+                if (!photoFilter && normalFilter) return !review.productImage;
+                return true;
+            })
+            .sort((a, b) => {
+                if (sortType === "latest") {
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                } else return b.score - a.score;
+            });
+    }, [sortType, photoFilter, normalFilter]);
+
+
 
     return (
         <Box px="40px" py="24px">
@@ -144,29 +177,22 @@ export default function Page() {
                 alignItems="center"
                 py="15px"
             >
-                <Select.Root collection={frameworks} size="sm" width="87px" height="30px">
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                        <Select.Trigger>
-                            <Select.ValueText fontSize="12px" color="#000000" placeholder="최신 순"></Select.ValueText>
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                            <Select.Indicator />
-                        </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                        <Select.Positioner>
-                            <Select.Content bg="#cccccc20" color="black">
-                                {frameworks.items.map((framework) => (
-                                    <Select.Item bg="#ececec20" item={framework} key={framework.value} fontSize="12px">
-                                        {framework.label}
-                                        <Select.ItemIndicator />
-                                    </Select.Item>
-                                ))}
-                            </Select.Content>
-                        </Select.Positioner>
-                    </Portal>
-                </Select.Root>
+
+                <NativeSelect.Root size={'xs'} w={'60px'} variant={'plain'}>
+                    <NativeSelect.Field
+                        padding={'2px 4px'}
+                        h={'24px'}
+                        color={'rgba(0, 0, 0, 0.7)'}
+                        value={sortType === "latest" ? "최신 순" : "별점 순"}
+                        onChange={(e) => setSortType(e.target.value === "최신 순" ? "latest" : "score")}
+                    >
+                        <option value="최신 순" defaultChecked style={{ backgroundColor: "#ffffff" }} >
+                            최신 순
+                        </option>
+                        <option value="별점 순" style={{ backgroundColor: "#ffffff" }}>별점 순</option>
+                    </NativeSelect.Field>
+                    <NativeSelectIndicator />
+                </NativeSelect.Root>
                 <Flex alignItems="center" gap="10px">
                     <Text color="#4A4A4A"
                         borderLeft="1px solid #D8D8D8"
@@ -180,12 +206,12 @@ export default function Page() {
                     >
                         검색 필터
                     </Text>
-                    <Checkbox.Root invalid>
+                    <Checkbox.Root colorPalette={"red"} checked={photoFilter} onCheckedChange={(e) => setPhotoFilter(!!e.checked)}>
                         <Checkbox.HiddenInput />
                         <Checkbox.Control />
                         <Checkbox.Label color="#4A4A4A" fontSize="13px">포토 리뷰</Checkbox.Label>
                     </Checkbox.Root>
-                    <Checkbox.Root invalid>
+                    <Checkbox.Root colorPalette={"red"} checked={normalFilter} onCheckedChange={(e) => setNormalFilter(!!e.checked)}>
                         <Checkbox.HiddenInput />
                         <Checkbox.Control />
                         <Checkbox.Label color="#4A4A4A" fontSize="13px">일반 리뷰</Checkbox.Label>
@@ -195,8 +221,7 @@ export default function Page() {
 
             {/* 게시판 컨텐츠 */}
             <VStack mt="20px" align="stretch">
-                {reviewNoticeData.map((review) => (
-
+                {sortedReviews.map((review) => (
                     <Dialog.Root key={review.id}>
                         <Flex key={review.id} borderBottom="1px solid #E3E3E3" p="16px" gap="30px" borderRadius="5px">
                             <VStack align="center" w="80px">
@@ -252,39 +277,40 @@ export default function Page() {
                                     reviewScore={review.score}
                                 />
 
-                                <Dialog.Trigger asChild>
-                                    <Box position="relative" display="inline-block" w="100px" h="100px">
-                                        {/* 리뷰 이미지 */}
-                                        <Image
-                                            src={review.productImage}
-                                            alt={review.productName}
-                                            boxSize="100px"
-                                            objectFit="cover"
-                                            borderRadius="8px"
-                                            cursor="pointer"
-                                            _hover={{ opacity: 0.8 }}
-                                        />
+                                {review.productImage && (
+                                    <Dialog.Trigger asChild>
+                                        <Box position="relative" display="inline-block" w="100px" h="100px">
+                                            {/* 리뷰 이미지 */}
+                                            <Image
+                                                src={review.productImage}
+                                                alt={review.productName}
+                                                boxSize="100px"
+                                                objectFit="cover"
+                                                borderRadius="8px"
+                                                cursor="pointer"
+                                                _hover={{ opacity: 0.8 }}
+                                            />
 
-                                        <Button
-                                            position="absolute"
-                                            bottom="4px"
-                                            right="4px"
-                                            size="sm"
-                                            borderRadius="50%"
-                                            w="24px"
-                                            h="24px"
-                                            minW="0"
-                                            p="0"
-                                            bg="black"
-                                            color="white"
-                                            fontWeight="bold"
-                                            _hover={{ bg: "gray.800" }}
-                                        >
-                                            +
-                                        </Button>
-                                    </Box>
-
-                                </Dialog.Trigger>
+                                            <Button
+                                                position="absolute"
+                                                bottom="4px"
+                                                right="4px"
+                                                size="sm"
+                                                borderRadius="50%"
+                                                w="24px"
+                                                h="24px"
+                                                minW="0"
+                                                p="0"
+                                                bg="black"
+                                                color="white"
+                                                fontWeight="bold"
+                                                _hover={{ bg: "gray.800" }}
+                                            >
+                                                +
+                                            </Button>
+                                        </Box>
+                                    </Dialog.Trigger>
+                                )}
                             </VStack>
                         </Flex>
 
@@ -314,24 +340,21 @@ export default function Page() {
                 ))}
             </VStack>
             <Flex justify="center" mt="20px">
-                <Pagination.Root count={20} pageSize={2} defaultPage={1}>
+                <Pagination.Root count={20} pageSize={2} defaultPage={1} m={'0 auto'} w={'100%'} textAlign={'center'} p={'4'}>
                     <ButtonGroup variant="ghost" size="sm">
-                        <Pagination.PrevTrigger asChild >
-                            <IconButton>
+                        <Pagination.PrevTrigger asChild color={'black'}>
+                            <IconButton _hover={{ color: 'white' }}>
                                 <LuChevronLeft />
                             </IconButton>
                         </Pagination.PrevTrigger>
-
-                        <Pagination.Items  
-                            render={(page) => (
-                                <IconButton variant={{ base: "ghost", _selected: "outline" }} color="#929292ff" _hover={{ color: "#ffffffff" }}>
-                                    {page.value}
-                                </IconButton>
+                        <Pagination.Items
+                            color='black'
+                            render={page => (
+                                <IconButton variant={{ base: 'ghost', _selected: 'outline' }} _hover={{ color: 'white' }}>{page.value}</IconButton>
                             )}
                         />
-
-                        <Pagination.NextTrigger asChild>
-                            <IconButton>
+                        <Pagination.NextTrigger asChild color={'black'}>
+                            <IconButton _hover={{ color: 'white' }}>
                                 <LuChevronRight />
                             </IconButton>
                         </Pagination.NextTrigger>
