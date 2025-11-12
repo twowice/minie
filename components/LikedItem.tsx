@@ -4,33 +4,19 @@ import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
 import { CartItemProps } from "./ShoppingCartDrawer";
 import HeartFilledIcon from "./ui/HeartIcon";
 import { useState } from "react";
-import { AiFillMinusCircle, AiFillPlusCircle } from "react-icons/ai";
 import { numberFormatter } from "../utils/formatter/numberFomatter";
 import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
-import { MdClose } from "react-icons/md";
 
-/* 
-TODO: 기록할 것
-ShoppingCartDrawer에서 기본적으로 인자에 건네주는 함수
-
-  
-  
-*/
-
-export default function ShoppingCartItem({
+export default function LikedItem({
   item,
-  isLiked,
+  cartHas,
   handleCartChecked,
-  handleNumChanged,
   handleCartDelete,
-  handleLike,
 }: {
   item: CartItemProps;
-  isLiked: boolean;
+  cartHas: boolean;
   handleCartChecked: () => void;
-  handleNumChanged: (type?: string) => void;
   handleCartDelete: () => void;
-  handleLike: (type?: string) => void;
 }) {
   return (
     <Box
@@ -68,31 +54,17 @@ export default function ShoppingCartItem({
             <Box fontWeight={"medium"}>{item.title}</Box>
             <Box color={"#808080"}>{item.brand}</Box>
           </Box>
-          <IconButton onClick={handleCartDelete}>
-            <MdClose />
-          </IconButton>
         </Box>
-        <Box
-          display={"flex"}
-          flexDirection={"row"}
-          alignItems={"center"}
-          justifyContent={"end"}
-          gap={"4px"}
-        >
-          <IconButton
-            color={item.num === 1 ? "#CCCCCC" : ""}
-            onClick={() => handleNumChanged("minus")}
-            disabled={item.num === 1}
+        {cartHas && (
+          <Box
+            display={"flex"}
+            justifyContent={"flex-end"}
+            fontSize={"12px"}
+            fontWeight={"medium"}
           >
-            <AiFillMinusCircle />
-          </IconButton>
-          <Box fontWeight={"medium"} fontSize={"16px"}>
-            {item.num}
+            장바구니에 담긴 상품
           </Box>
-          <IconButton onClick={() => handleNumChanged("plus")}>
-            <AiFillPlusCircle />
-          </IconButton>
-        </Box>
+        )}
         {item.isDiscounted && (
           <Box
             display={"flex"}
@@ -109,7 +81,7 @@ export default function ShoppingCartItem({
               textDecoration={"line-through"}
               color={"#808080"}
             >
-              {item.price * item.num}
+              {item.price}
             </Box>
             <Box fontSize={"12px"} color={"#808080"}>
               원
@@ -122,21 +94,15 @@ export default function ShoppingCartItem({
             alignItems={"center"}
             justifyContent={"space-between"}
           >
-            <IconButton
-              onClick={() => {
-                isLiked ? handleLike("unlike") : handleLike("like");
-              }}
-            >
+            <IconButton onClick={() => {}}>
               <HeartFilledIcon
-                filledColor={isLiked ? "#FA6D6D" : "none"}
-                strokeColor={isLiked ? "#FA6D6D" : "#CCCCCC"}
+                filledColor={"#FA6D6D"}
+                strokeColor={"#FA6D6D"}
               />
             </IconButton>
             <Box display={"flex"} gap={"2px"}>
               <Box fontSize={"16px"} fontWeight={"semibold"}>
-                {numberFormatter.format(
-                  (item.price - item.discountMount) * item.num
-                )}
+                {numberFormatter.format(item.price - item.discountMount)}
               </Box>
               <Box fontSize={"16px"} fontWeight={"medium"}>
                 원

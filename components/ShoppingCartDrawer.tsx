@@ -14,6 +14,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CartIcon } from "./ui/CartIcon";
 import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
+import LikedItem from "./LikedItem";
 
 export interface CartItemProps {
   id: number;
@@ -54,8 +55,8 @@ const testCartItems = [
   {
     id: 2,
     checked: true,
-    title: "test33333",
-    brand: "brand temp 3",
+    title: "unlike test33333",
+    brand: "unlike brand temp 3",
     image:
       "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
     num: 2,
@@ -66,7 +67,7 @@ const testCartItems = [
   {
     id: 3,
     checked: true,
-    title: "test33333",
+    title: "test44like",
     brand: "brand temp 3",
     image:
       "https://cafe24.poxo.com/ec01/romand/6aDrbsrpgztyixM+aENnH1D89vbvN874SJZ0smDxiaa/k9zGF5hClK+Cdcc6Crl70h/a8RobAiR24eeOO4zRMg==/_/web/product/extra/big/202309/d8ec45bee3b0c4c201521845e7c8f5a9.jpg",
@@ -103,44 +104,69 @@ export default function ShoppingCartDrawer({
     return new Set(likedItems.map((item) => item.id));
   }, [likedItems]);
 
+  const cartItemsIdsAllSet = useMemo(() => {
+    return new Set(cartItems.map((item) => item.id));
+  }, [cartItems]);
+
   const isAllCartChecked =
     cartItems.every((item) => item.checked) && cartItems.length !== 0;
 
   const handleCartDeleteAll = () => {
     setcartItems([]);
   };
-  const handleCartDelete = (index: number) => {
-    setcartItems((prev) => prev.filter((_, i) => i !== index));
+  const handleCartDelete = (id: number) => {
+    setcartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleCartAllChecked = (checked: boolean) => {
     setcartItems((prev) => prev.map((item) => ({ ...item, checked })));
   };
-  const handleCartChecked = (index: number) => {
+  const handleCartChecked = (id: number) => {
     setcartItems((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, checked: !item.checked } : item
+      prev.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item
       )
     );
   };
 
-  const handleNumChanged = (index: number, type?: string) => {
-    if (type === "plus") {
-      setcartItems((prev) =>
-        prev.map((item, i) =>
-          i === index ? { ...item, num: item.num + 1 } : item
-        )
-      );
-      return;
+  const handleNumChanged = (id: number, type?: string) => {
+    switch (type) {
+      case "plus":
+        setcartItems((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, num: item.num + 1 } : item
+          )
+        );
+        break;
+      case "minus":
+        setcartItems((prev) =>
+          prev.map((item) =>
+            item.id === id
+              ? { ...item, num: item.num > 1 ? item.num - 1 : 1 }
+              : item
+          )
+        );
+        break;
+      default:
+        console.error("[handleNumChanged] 알 수 없는 조작 감지 ", type);
+        break;
     }
+  };
 
-    if (type === "minus") {
-      setcartItems((prev) =>
-        prev.map((item, i) =>
-          i === index ? { ...item, num: item.num > 1 ? item.num - 1 : 1 } : item
-        )
-      );
-      return;
+  const handleLike = (id: number, type?: string) => {
+    switch (type) {
+      case "like":
+        setLikeItems((prev) => {
+          const newLikedItem = cartItems.find((item) => item.id === id);
+          return newLikedItem ? [...prev, newLikedItem] : prev;
+        });
+        break;
+      case "unlike":
+        setLikeItems((prev) => prev.filter((item) => item.id !== id));
+        break;
+      default:
+        console.error("[handleLike] 알 수 없는 조작 감지 ", type);
+        break;
     }
   };
 
@@ -293,23 +319,39 @@ export default function ShoppingCartDrawer({
                         장바구니에 담긴 상품이 없습니다.
                       </Box>
                     )}
-                    {cartItems.map((item, idx) => {
+                    {cartItems.map((item) => {
                       return (
                         <ShoppingCartItem
-                          key={idx}
+                          key={item.id}
                           item={item}
                           isLiked={likedItemIdsAllSet.has(item.id)}
-                          handleCartChecked={() => handleCartChecked(idx)}
+                          handleCartChecked={() => handleCartChecked(item.id)}
                           handleNumChanged={(type?: string) =>
-                            handleNumChanged(idx, type)
+                            handleNumChanged(item.id, type)
                           }
-                          handleCartDelete={() => handleCartDelete(idx)}
+                          handleCartDelete={() => handleCartDelete(item.id)}
+                          handleLike={(type?: string) =>
+                            handleLike(item.id, type)
+                          }
                         />
                       );
                     })}
                   </Tabs.Content>
                   <Tabs.Content value="like" style={{ height: "100%" }}>
-                    <Box color={"black"}>좋아요에 담긴 상품이 없습니다.</Box>
+                    {likedItems.length === 0 && (
+                      <Box color={"black"}>좋아요에 담긴 상품이 없습니다.</Box>
+                    )}
+                    {likedItems.map((item) => {
+                      return (
+                        <LikedItem
+                          key={item.id}
+                          item={item}
+                          cartHas={cartItemsIdsAllSet.has(item.id)}
+                          handleCartChecked={() => handleCartChecked(item.id)}
+                          handleCartDelete={() => handleCartDelete(item.id)}
+                        />
+                      );
+                    })}
                   </Tabs.Content>
                 </Box>
               </Drawer.Body>
