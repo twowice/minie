@@ -11,7 +11,29 @@ import { FcGoogle } from "react-icons/fc";  // 구글 아이콘
 import { RiKakaoTalkFill } from "react-icons/ri";  // 카카오 아이콘
 import { SiNaver } from "react-icons/si";  // 네이버 아이콘
 
+import { useState } from "react" // ID/PW를 기억하기 위한 상태 관리 HOOK
+import { useRouter } from "next/navigation" // 로그인 성공 시 다른 곳으로 이동하기 위한 HOOK
+import { auth } from "@/firebase/firebaseConfig" // 파이어베이스가 제공하는 인증 문지기
+import { signInWithEmailAndPassword } from "firebase/auth"; // 파이어베이스가 제공하는 로그인 함수
+
 export default function LoginPage(){
+
+  const [email, setEmail] = useState(""); // 아이디
+  const [password, setPassword] = useState(""); // 비밀번호
+  const [error, setError] = useState(""); // 에러 메세지 출력을 위한 상태
+  const router = useRouter(); // 라우터 변수
+
+  // 이메일 로그인 비동기 함수
+  const handleEmailLogin = async () => {  
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/");
+     }catch(err: any) {
+      setError(err.message);
+    }
+  };
+
+
   return(
     // body 전체 영역
     <Box 
@@ -52,6 +74,8 @@ export default function LoginPage(){
                 borderColor="rgba(0, 0, 0, 0.3)" // 바깥 선 검정색에 투명도 30%
                 height="56px"
                 fontSize="16px"
+                value={email}
+                onChange = { (e) => setEmail(e.target.value) }
                 _focus={{ // 차크라 ui의 클릭시 스타일 변경 문법 _focus={{, , ,}}
                   borderColor: "#FA6D6D", // 클릭시 외곽 색상 변경
                   outline: "none", // 기본 회색 그림자 없애기
@@ -68,6 +92,8 @@ export default function LoginPage(){
                 borderColor="rgba(0, 0, 0, 0.3)"
                 height="56px"
                 fontSize="16px"
+                value={password}
+                onChange = { (e) => setPassword(e.target.value) }
                 _focus={{
                   borderColor: "#FA6D6D",
                   outline: "none",
@@ -75,6 +101,7 @@ export default function LoginPage(){
                   borderTop: "2px solid #FA6D6D",
                 }}
                 />
+                {error && <Text fontSize="sm" color="red.500">{error}</Text>}
             </VStack>
           </Box>
 
@@ -107,6 +134,7 @@ export default function LoginPage(){
               color="#ffffff"
               fontSize="16px"
               fontWeight="medium"
+              onClick = {handleEmailLogin}
               >
               로그인
             </Button>
