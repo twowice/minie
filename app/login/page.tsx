@@ -30,11 +30,15 @@ export default function LoginPage(){
         <VStack gap ={4}>
 
           {/* 첫 번째 책꽃이(제목) */}
-          <Box textAlign="center">
-            <Heading as="h1" fontSize="28px" color="#000000">
-              Minié 로그인
+          <Box display="flex" alignItems="center" justifyContent="center">
+            <Heading as="h1" color="#000000" fontSize="28px" display="flex" alignItems="center">
+              <Text as="span" fontFamily="Croissant One">
+                Minié
+              </Text>
+              &nbsp;로그인
             </Heading>
           </Box>
+
 
           {/* 두 번째 책꽃이(ID,PW) */}
           <Box w="full">
