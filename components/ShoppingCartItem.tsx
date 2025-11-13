@@ -1,5 +1,6 @@
 import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
-import { CartItemProps } from "./ShoppingCartDrawer";
+import { CartItemProps } from "@/app/api/cart/cart";
+
 import HeartFilledIcon from "./ui/HeartIcon";
 import { AiFillMinusCircle, AiFillPlusCircle } from "react-icons/ai";
 import { numberFormatter } from "../utils/formatter/numberFomatter";
@@ -7,7 +8,6 @@ import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
 import { MdClose } from "react-icons/md";
 
 /* 
-TODO: 기록할 것
 ShoppingCartDrawer에서 기본적으로 인자에 건네주는 함수
 
   const handleDeleteAll = () => {
@@ -162,7 +162,7 @@ export default function ShoppingCartItem({
             gap={"4px"}
           >
             <Box fontWeight={"medium"} color={"#FA6D6D"} fontSize={"12px"}>
-              {getDiscountRate(item.price, item.discountMount)}%
+              {getDiscountRate(item.price, item.discountAmount)}%
             </Box>
             <Box
               fontSize={"12px"}
@@ -195,7 +195,7 @@ export default function ShoppingCartItem({
             <Box display={"flex"} gap={"2px"}>
               <Box fontSize={"16px"} fontWeight={"semibold"}>
                 {numberFormatter.format(
-                  (item.price - item.discountMount) * item.num
+                  (item.price - item.discountAmount) * item.num
                 )}
               </Box>
               <Box fontSize={"16px"} fontWeight={"medium"}>
