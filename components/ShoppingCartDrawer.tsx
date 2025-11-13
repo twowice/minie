@@ -57,7 +57,6 @@ const testCartItems = [
     discountAmount: 5000,
   },
 ];
-
 const testLikedItems = [
   {
     id: 4,
