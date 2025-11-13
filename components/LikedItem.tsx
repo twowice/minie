@@ -1,5 +1,6 @@
 import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
-import { CartItemProps } from "./ShoppingCartDrawer";
+import { CartItemProps } from "@/app/api/cart/cart";
+
 import HeartFilledIcon from "./ui/HeartIcon";
 import { numberFormatter } from "../utils/formatter/numberFomatter";
 import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
@@ -71,7 +72,7 @@ export default function LikedItem({
             gap={"4px"}
           >
             <Box fontWeight={"medium"} color={"#FA6D6D"} fontSize={"12px"}>
-              {getDiscountRate(item.price, item.discountMount)}%
+              {getDiscountRate(item.price, item.discountAmount)}%
             </Box>
             <Box
               fontSize={"12px"}
@@ -103,7 +104,7 @@ export default function LikedItem({
             </IconButton>
             <Box display={"flex"} gap={"2px"}>
               <Box fontSize={"16px"} fontWeight={"semibold"}>
-                {numberFormatter.format(item.price - item.discountMount)}
+                {numberFormatter.format(item.price - item.discountAmount)}
               </Box>
               <Box fontSize={"16px"} fontWeight={"medium"}>
                 원

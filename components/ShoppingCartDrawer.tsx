@@ -5,18 +5,7 @@ import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import LikedItem from "./LikedItem";
 import ShoppingCartIconButton from "./ui/ShoppingCartIconButton";
-
-export interface CartItemProps {
-  id: number;
-  checked: boolean;
-  title: string;
-  brand: string;
-  image: string;
-  num: number;
-  price: number;
-  isDiscounted: boolean;
-  discountMount: number;
-}
+import { CartItemProps } from "@/app/api/cart/cart";
 
 /* 테스트 케이스용 더미데이터 */
 const testCartItems = [
@@ -29,7 +18,7 @@ const testCartItems = [
     num: 1,
     price: 10000,
     isDiscounted: true,
-    discountMount: 1000,
+    discountAmount: 1000,
   },
   {
     id: 1,
@@ -41,7 +30,7 @@ const testCartItems = [
     num: 2,
     price: 1500,
     isDiscounted: false,
-    discountMount: 0,
+    discountAmount: 0,
   },
   {
     id: 2,
@@ -53,7 +42,7 @@ const testCartItems = [
     num: 2,
     price: 6000,
     isDiscounted: true,
-    discountMount: 5000,
+    discountAmount: 5000,
   },
   {
     id: 3,
@@ -65,7 +54,7 @@ const testCartItems = [
     num: 2,
     price: 6000,
     isDiscounted: true,
-    discountMount: 5000,
+    discountAmount: 5000,
   },
 ];
 
@@ -80,7 +69,7 @@ const testLikedItems = [
     num: 1,
     price: 6000,
     isDiscounted: true,
-    discountMount: 5000,
+    discountAmount: 5000,
   },
 ];
 const testLikedItemsIds = new Set([0, 1, 3]);
@@ -103,7 +92,7 @@ export default function ShoppingCartDrawer({
   const [cartItems, setcartItems] = useState(initCartItems);
   const totalPrice = cartItems.reduce(
     (sum, item) =>
-      sum + (item.checked ? (item.price - item.discountMount) * item.num : 0),
+      sum + (item.checked ? (item.price - item.discountAmount) * item.num : 0),
     0
   );
   const [likedItems, setLikedItems] = useState<CartItemProps[]>(() => {
