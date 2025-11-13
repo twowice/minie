@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase"
 import { CartItemProps, RawCartItem } from "./cart";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(): Promise<NextResponse<CartItemProps[] | { error: string }>> {
+export async function GET() {
     const tempUid = 1
     /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
 
@@ -81,6 +81,25 @@ export async function POST(request: NextRequest) {
 
     if(error){
         return NextResponse.json({error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({success: true})
+}
+
+export async function PATCH(request : NextRequest) {
+     const tempUid = 1
+    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+
+    const {product_id:id, product_num: num} = await request.json()
+
+    const {error} = await supabase
+    .from('carts')
+    .update({product_num: num})
+    .eq('user_id', tempUid)
+    .eq('product_id', id)
+    
+    if(error){
+        return NextResponse.json({error: error.message }, { status: 400 })
     }
 
     return NextResponse.json({success: true})

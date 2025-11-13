@@ -85,7 +85,7 @@ export default function ShoppingCartDrawer({
   headerHeight: number;
   initCartItems?: CartItemProps[];
   initLikedItemsIds?: Set<number>;
-  initLikedItems: CartItemProps[];
+  initLikedItems?: CartItemProps[];
 }) {
   const [isCartActivity, setIsCartActivity] = useState(false);
   const [currentTabsValue, setCurrentTabsValue] = useState("cart");
