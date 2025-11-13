@@ -1,101 +1,79 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeSelectIndicator, createListCollection, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination } from "@chakra-ui/react";
+import { useState, useMemo, useEffect } from "react";
+import { Spinner, Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeSelectIndicator, createListCollection, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
-import ReviewTextDialog from "@/components/ReviewTextDialog";
-
-// Dummy DATA
-const reviewTotalData = {
-    totalCount: 60200,
-    score: 4.5,
-    distribution: {
-        5: 60,
-        4: 25,
-        3: 10,
-        2: 4,
-        1: 1,
-    },
-};
-
-const reviewNoticeData = [
-    {
-        id: 1,
-        userName: "따가운 볼",
-        userImage: "/images/review/profile1.png",
-        createdAt: "2025.10.15",
-        score: 4.5,
-        productName: "[신상/블랙에디션/리뷰이벤트] 파넬 시카마누 세럼쿠션(미니/단품/기획)",
-        reviewText: "아이가 아주 만족해하며 잘 쓰고있어요 피부에 밀착력이 좋고 커버가 잘된다고 해요♡",
-        productImage: "images/review/product1.png",
-    },
-    {
-        id: 2,
-        userName: "불타는 스킨",
-        userImage: "/images/review/profile2.png",
-        createdAt: "2025.10.22",
-        score: 2.5,
-        productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
-        reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
-        productImage: "images/review/product2.jpg",
-    },
-    {
-        id: 3,
-        userName: "랄랄랄 스킨",
-        userImage: "/images/review/profile2.png",
-        createdAt: "2025.10.14",
-        score: 3.0,
-        productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
-        reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
-        productImage: "images/review/product2.jpg",
-    },
-    {
-        id: 4,
-        userName: "뮤텍스",
-        userImage: "/images/review/profile2.png",
-        createdAt: "2025.10.16",
-        score: 5.0,
-        productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
-        reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
-        productImage: "",
-    },
-    {
-        id: 5,
-        userName: "콸콸콸",
-        userImage: "/images/review/profile2.png",
-        createdAt: "2025.10.18",
-        score: 4.5,
-        productName: "[1위 광채쿠션] 파넬 세럼 인 하이글로우 쿠션 (본품+리필)",
-        reviewText: "악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에 얇고 가볍게 올라가서 좋았어욤",
-        productImage: "",
-    },
-]
+import ContentDialog from "@/components/ContentDialog";
 
 export default function Page() {
-    /* SCORE */
-    const fullStars = Math.floor(reviewTotalData.score);
-    const hasHalfStar = reviewTotalData.score % 1 >= 0.5;
+    /* FETCH DATA */
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [reviewTotalData, setReviewTotal] = useState<{ totalCount: number; rating: number; distribution: Record<number, number> }>
+        ({
+            totalCount: 0,
+            rating: 0,
+            distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+        });
+    const [page, setPage] = useState(1);
+    const pageSize = 5;
+
+    useEffect(() => {
+        const fetchReviews = async () => {
+            try {
+                const res = await fetch(`http://localhost:3000/api/reviews?page=${page}&pageSize=${pageSize}`);
+                const result = await res.json();
+
+                if (res.ok && result.data) {
+                    setReviews(result.data);
+                    setReviewTotal({
+                        totalCount: result.totalCount,
+                        rating: result.rating,
+                        distribution: result.distribution
+                    })
+                } else {
+                    console.error("리뷰 불러오기 실패:", result.message || result.error);
+                }
+            } catch (e) {
+                console.error("서버 연결 실패:", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchReviews();
+    }, [page]);
+
+    /* rating */
+    const fullStars = Math.floor(reviewTotalData.rating);
+    const hasHalfStar = reviewTotalData.rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
     /* SORT */
-    const [sortType, setSortType] = useState<"latest" | "score">("latest");
+    const [sortType, setSortType] = useState<"latest" | "rating">("latest");
     const [photoFilter, setPhotoFilter] = useState(false);
     const [normalFilter, setNormalFilter] = useState(false);
     const sortedReviews = useMemo(() => {
-        return [...reviewNoticeData]
+        return [...reviews]
             .filter((review) => {
-                if (photoFilter && !normalFilter) return review.productImage;
-                if (!photoFilter && normalFilter) return !review.productImage;
+                if (photoFilter && !normalFilter) return review.products.image;
+                if (!photoFilter && normalFilter) return !review.products.image;
                 return true;
             })
             .sort((a, b) => {
                 if (sortType === "latest") {
-                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                } else return b.score - a.score;
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                } else return b.rating - a.rating;
             });
-    }, [sortType, photoFilter, normalFilter]);
+    }, [reviews, sortType, photoFilter, normalFilter]);
 
-
+    if (loading) {
+        return (
+            <VStack colorPalette="pink">
+                <Spinner color="colorPalette.600" />
+                <Text color="colorPalette.600">불러오는 중...</Text>
+            </VStack>
+        );
+    }
 
     return (
         <Box px="40px" py="24px">
@@ -114,7 +92,7 @@ export default function Page() {
             <HStack h="42px" py="5px" paddingTop="10px">
                 <Text fontSize="16px" color="black" paddingRight="10px">
                     <Text as="span" fontSize="32px" fontWeight="bold" color="black">
-                        {reviewTotalData.score.toFixed(1)}
+                        {reviewTotalData.rating.toFixed(1)}
                     </Text>
                     {" "}점
                 </Text>
@@ -184,7 +162,7 @@ export default function Page() {
                         h={'24px'}
                         color={'rgba(0, 0, 0, 0.7)'}
                         value={sortType === "latest" ? "최신 순" : "별점 순"}
-                        onChange={(e) => setSortType(e.target.value === "최신 순" ? "latest" : "score")}
+                        onChange={(e) => setSortType(e.target.value === "최신 순" ? "latest" : "rating")}
                     >
                         <option value="최신 순" defaultChecked style={{ backgroundColor: "#ffffff" }} >
                             최신 순
@@ -226,36 +204,36 @@ export default function Page() {
                         <Flex key={review.id} borderBottom="1px solid #E3E3E3" p="16px" gap="30px" borderRadius="5px">
                             <VStack align="center" w="80px">
                                 <Image
-                                    src={review.userImage}
-                                    alt={review.userName}
+                                    src={review.users.profile_image}
+                                    alt={review.users.name}
                                     boxSize="83px"
                                     borderRadius="50%"
                                     objectFit="cover"
                                 />
                                 <Text fontSize="13px" fontWeight="bold" color="black">
-                                    {review.userName}
+                                    {review.users.name}
                                 </Text>
                             </VStack>
 
                             <VStack align="stretch" flex="1">
                                 <Flex justifyContent="space-between" alignItems="center">
                                     <Text fontSize="12px" color="#5C5C5C">
-                                        {review.createdAt}
+                                        {new Date(review.created_at).toISOString().split("T")[0]}
                                     </Text>
                                     <HStack>
-                                        {Array(Math.floor(review.score))
+                                        {Array(Math.floor(review.rating))
                                             .fill(0)
                                             .map((_, i) => (
                                                 <Text key={`full-${i}`} color="yellow.400" fontSize="19px">
                                                     ★
                                                 </Text>
                                             ))}
-                                        {review.score % 1 >= 0.5 && (
+                                        {review.rating % 1 >= 0.5 && (
                                             <Text color="yellow.400" fontSize="19px">
                                                 ⯨
                                             </Text>
                                         )}
-                                        {Array(5 - Math.ceil(review.score))
+                                        {Array(5 - Math.ceil(review.rating))
                                             .fill(0)
                                             .map((_, i) => (
                                                 <Text key={`empty-${i}`} color="gray.300" fontSize="19px">
@@ -266,24 +244,27 @@ export default function Page() {
                                 </Flex>
 
                                 <Text fontSize="12px" color="#A8A8A8">
-                                    {review.productName}
+                                    {review.products.name}
                                 </Text>
 
-                                <ReviewTextDialog
-                                    reviewProductName={review.productName}
-                                    reviewText={review.reviewText}
-                                    productName={review.productName}
-                                    productImage={review.productImage}
-                                    reviewScore={review.score}
+                                <ContentDialog
+                                    reviewProductName={review.products.name}
+                                    content={review.content}
+                                    productName={review.products.name}
+                                    productImage={review.products.image}
+                                    reviewrating={review.rating}
+                                    userId={review.user_id}
+                                    productId={review.product_id}
+                                    id={review.id}
                                 />
 
-                                {review.productImage && (
+                                {review.products.image && (
                                     <Dialog.Trigger asChild>
                                         <Box position="relative" display="inline-block" w="100px" h="100px">
                                             {/* 리뷰 이미지 */}
                                             <Image
-                                                src={review.productImage}
-                                                alt={review.productName}
+                                                src={review.products.image}
+                                                alt={review.products.name}
                                                 boxSize="100px"
                                                 objectFit="cover"
                                                 borderRadius="8px"
@@ -323,8 +304,8 @@ export default function Page() {
                                     </Dialog.Header>
                                     <Dialog.Body>
                                         <Image
-                                            src={review.productImage}
-                                            alt={review.productName}
+                                            src={review.products.image}
+                                            alt={review.products.name}
                                             w="100%"
                                             borderRadius="10px"
                                             objectFit="cover"
@@ -340,7 +321,7 @@ export default function Page() {
                 ))}
             </VStack>
             <Flex justify="center" mt="20px">
-                <Pagination.Root count={20} pageSize={2} defaultPage={1} m={'0 auto'} w={'100%'} textAlign={'center'} p={'4'}>
+                <Pagination.Root count={Math.ceil(reviewTotalData.totalCount)} pageSize={5} page={page} defaultPage={1} m={'0 auto'} w={'100%'} textAlign={'center'} p={'4'}>
                     <ButtonGroup variant="ghost" size="sm">
                         <Pagination.PrevTrigger asChild color={'black'}>
                             <IconButton _hover={{ color: 'white' }}>
@@ -349,8 +330,8 @@ export default function Page() {
                         </Pagination.PrevTrigger>
                         <Pagination.Items
                             color='black'
-                            render={page => (
-                                <IconButton variant={{ base: 'ghost', _selected: 'outline' }} _hover={{ color: 'white' }}>{page.value}</IconButton>
+                            render={(page) => (
+                                <IconButton key={page.value} onClick={() => setPage(page.value)} variant={{ base: 'ghost', _selected: 'outline' }} _hover={{ color: 'white' }}>{page.value}</IconButton>
                             )}
                         />
                         <Pagination.NextTrigger asChild color={'black'}>

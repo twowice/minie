@@ -3,19 +3,23 @@
 import { Text, Portal, CloseButton, Dialog, Button, Image, Flex, VStack, HStack, Box, Textarea } from "@chakra-ui/react";
 import { useState } from "react";
 
-interface ReviewTextDialogProps {
-    reviewText: string;
+interface contentDialogProps {
+    content: string;
     reviewProductName: string;
     productName: string;
     productImage: string;
-    reviewScore: number;
+    reviewrating: number;
+    userId: string;
+    productId: string;
+    id:string;
 }
 
-export default function ReviewTextDialog({ reviewText, reviewProductName, productName, productImage, reviewScore }: ReviewTextDialogProps) {
-    const [rating, setRating] = useState(reviewScore);
+export default function contentDialog({ id, content, reviewProductName, productName, productImage, reviewrating, userId, productId }: contentDialogProps) {
+
+    const [rating, setRating] = useState(reviewrating);
     const [photo, setPhoto] = useState<File | null>(null);
     const [photoURL, setPhotoURL] = useState<string | null>(null);
-    const [reviewTextContent, setReviewTextContent] = useState("");
+    const [contentContent, setcontentContent] = useState(content);
 
     const handleStarClick = (
         e: React.MouseEvent<HTMLDivElement>,
@@ -28,19 +32,48 @@ export default function ReviewTextDialog({ reviewText, reviewProductName, produc
     };
 
     /* START SUBMIT */
-    const handleSave = () => {
-        console.log("점수:", rating);
-        console.log("상세 리뷰:", reviewTextContent);
-        console.log("업로드 이미지:", photo);
+    const handleSave = async () => {
+        const formData = new FormData();
+        formData.append("id", id);
+        formData.append("rating", rating.toString());
+        formData.append("content", contentContent);
+        formData.append("user_id", userId);
+        formData.append("product_id", productId);
+        if(photo){
+            formData.append("image", photo);
+        }
+
+        console.log("=== FormData 내용 ===");
+        for (const [key, value] of formData.entries()) {
+            if (value instanceof File) {
+            console.log(`${key}: [파일] ${value.name}, ${value.size} bytes`);
+            } else {
+            console.log(`${key}: ${value}`);
+            }
+        }
+
+        try {
+            const res = await fetch("/api/reviews", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await res.json();
+            console.log("서버 응답:", result);
+            
+        }catch (err) {
+            console.error("에러:", err);
+        }
     }
 
     return (
         <Dialog.Root
             onOpenChange={(open) => {
                 if (open) {
-                    setRating(reviewScore);
+                    setRating(reviewrating);
                     setPhoto(null);
                     setPhotoURL(null);
+                    setcontentContent(content);
                 }
             }}>
 
@@ -52,7 +85,7 @@ export default function ReviewTextDialog({ reviewText, reviewProductName, produc
                     cursor="pointer"
                     _hover={{ textDecoration: "underline" }}
                 >
-                    {reviewText}
+                    {content}
                 </Text>
             </Dialog.Trigger>
 
@@ -94,12 +127,28 @@ export default function ReviewTextDialog({ reviewText, reviewProductName, produc
                             }}
                         >
                             <Flex gap="16px" alignItems="flex-start" borderBottom="1px solid #CCCCCC" padding="8px">
-                                <Image
-                                    src={productImage}
-                                    alt={productName}
-                                    boxSize="130px"
-                                    objectFit="cover"
-                                />
+                                {productImage ? (
+                                    <Image
+                                        src={productImage}
+                                        alt={productName}
+                                        boxSize="130px"
+                                        objectFit="cover"
+                                    />
+                                ) : (
+                                    <Box
+                                        boxSize="130px"
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                        border="1px solid #CCCCCC"
+                                        borderRadius="5px"
+                                        bg="#f5f5f5"
+                                    >
+                                        <Text fontSize="12px" color="#999999" textAlign="center">
+                                            이미지 없음
+                                        </Text>
+                                    </Box>
+                                )}
                                 <VStack align="start">
                                     <Text fontSize="14px" fontWeight="Medium" color="#000000" whiteSpace="pre-wrap" p="8px">
                                         {reviewProductName.replace(/]\s*/g, ']\n')}
@@ -171,8 +220,8 @@ export default function ReviewTextDialog({ reviewText, reviewProductName, produc
                                     border="1px solid #929292"
                                     color="black"
                                     maxLength={500}
-                                    value={reviewTextContent}
-                                    onChange={(e) => setReviewTextContent(e.target.value)}
+                                    value={contentContent}
+                                    onChange={(e) => setcontentContent(e.target.value)}
                                 />
                             </Flex>
 
