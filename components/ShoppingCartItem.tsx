@@ -10,7 +10,7 @@ import { MdClose } from "react-icons/md";
 TODO: 기록할 것
 ShoppingCartDrawer에서 기본적으로 인자에 건네주는 함수
 
-  const handleCartDeleteAll = () => {
+  const handleDeleteAll = () => {
     if (currentTabsValue === "cart") {
       setcartItems([]);
     } else if (currentTabsValue) {
@@ -21,10 +21,10 @@ ShoppingCartDrawer에서 기본적으로 인자에 건네주는 함수
     setcartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleCartAllChecked = (checked: boolean) => {
+  const handleAllChecked = (checked: boolean) => {
     setcartItems((prev) => prev.map((item) => ({ ...item, checked })));
   };
-  const handleCartChecked = (id: number) => {
+  const handleChecked = (id: number) => {
     setcartItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, checked: !item.checked } : item
@@ -80,14 +80,14 @@ ShoppingCartDrawer에서 기본적으로 인자에 건네주는 함수
 export default function ShoppingCartItem({
   item,
   isLiked,
-  handleCartChecked,
+  handleChecked,
   handleNumChanged,
   handleCartDelete,
   handleLike,
 }: {
   item: CartItemProps;
   isLiked: boolean;
-  handleCartChecked: () => void;
+  handleChecked: () => void;
   handleNumChanged: (type?: string) => void;
   handleCartDelete: () => void;
   handleLike: (type?: string) => void;
@@ -105,7 +105,7 @@ export default function ShoppingCartItem({
       <Checkbox.Root
         variant={"outline"}
         checked={item.checked}
-        onCheckedChange={handleCartChecked}
+        onCheckedChange={handleChecked}
         alignItems={"center"}
         colorPalette={"red"}
       >

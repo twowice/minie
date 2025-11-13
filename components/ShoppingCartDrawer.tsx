@@ -68,18 +68,35 @@ const testCartItems = [
     discountMount: 5000,
   },
 ];
-const testLikeItemsIds = new Set([0, 1, 3]);
+
+const testLikedItems = [
+  {
+    id: 4,
+    checked: true,
+    title: "only like",
+    brand: "brandC",
+    image:
+      "https://www.clarins.co.kr/dw/image/v2/AAJY_PRD/on/demandware.static/-/Sites-clarins-master-products/default/dw0594baa6/original/80104492_original_original_A.jpg?sw=680&sh=680",
+    num: 1,
+    price: 6000,
+    isDiscounted: true,
+    discountMount: 5000,
+  },
+];
+const testLikedItemsIds = new Set([0, 1, 3]);
 
 /* 각 아이템들을 인자로 넣어주지 않으면 테스트케이스로 작동합니다. */
 
 export default function ShoppingCartDrawer({
   headerHeight,
   initCartItems = testCartItems,
-  initLikedItemsIds = testLikeItemsIds,
+  initLikedItemsIds = testLikedItemsIds,
+  initLikedItems = testLikedItems,
 }: {
   headerHeight: number;
   initCartItems?: CartItemProps[];
   initLikedItemsIds?: Set<number>;
+  initLikedItems: CartItemProps[];
 }) {
   const [isCartActivity, setIsCartActivity] = useState(false);
   const [currentTabsValue, setCurrentTabsValue] = useState("cart");
@@ -95,7 +112,7 @@ export default function ShoppingCartDrawer({
     );
     const mapped = filtered.map((item) => ({ ...item, checked: false }));
 
-    return mapped;
+    return [...initLikedItems, ...mapped];
   });
   const likedItemIdsAllSet = useMemo(() => {
     return new Set(likedItems.map((item) => item.id));
@@ -111,7 +128,7 @@ export default function ShoppingCartDrawer({
     likedItems.every((item) => item.checked) && likedItems.length !== 0;
 
   /* 컴포넌트 제어용 함수 시작 */
-  const handleCartDeleteAll = () => {
+  const handleDeleteAll = () => {
     if (currentTabsValue === "cart") {
       setcartItems([]);
     } else if (currentTabsValue === "like") {
@@ -122,19 +139,27 @@ export default function ShoppingCartDrawer({
     setcartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleCartAllChecked = (checked: boolean) => {
+  const handleAllChecked = (checked: boolean) => {
     if (currentTabsValue === "cart") {
       setcartItems((prev) => prev.map((item) => ({ ...item, checked: true })));
     } else if (currentTabsValue === "like") {
       setLikedItems((prev) => prev.map((item) => ({ ...item, checked: true })));
     }
   };
-  const handleCartChecked = (id: number) => {
-    setcartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
+  const handleChecked = (id: number) => {
+    if (currentTabsValue === "cart") {
+      setcartItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, checked: !item.checked } : item
+        )
+      );
+    } else if (currentTabsValue === "like") {
+      setLikedItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, checked: !item.checked } : item
+        )
+      );
+    }
   };
 
   const handleNumChanged = (id: number, type?: string) => {
@@ -167,7 +192,7 @@ export default function ShoppingCartDrawer({
         setLikedItems((prev) => {
           const newLikedItem = cartItems.find((item) => item.id === id);
           return newLikedItem
-            ? [...prev, { ...newLikedItem, checked: false }]
+            ? [{ ...newLikedItem, checked: false }, ...prev]
             : prev;
         });
         break;
@@ -180,7 +205,16 @@ export default function ShoppingCartDrawer({
     }
   };
 
-  /* 화면 시작 */
+  const handleAddCartItems = () => {
+    setcartItems((prev) => {
+      const newCartItems = likedItems.filter(
+        (item) => item.checked && !cartItemsIdsAllSet.has(item.id)
+      );
+      return [...newCartItems, ...prev];
+    });
+  };
+
+  /* 화면UI 시작 */
   return (
     <Drawer.Root
       open={isCartActivity}
@@ -255,7 +289,7 @@ export default function ShoppingCartDrawer({
                 <Button
                   fontSize={"12px"}
                   fontWeight="medium"
-                  onClick={handleCartDeleteAll}
+                  onClick={handleDeleteAll}
                 >
                   전체 삭제
                 </Button>
@@ -288,7 +322,7 @@ export default function ShoppingCartDrawer({
                         : isAllLikedItemChecked
                     }
                     onCheckedChange={(e) => {
-                      handleCartAllChecked(!!e.checked);
+                      handleAllChecked(!!e.checked);
                     }}
                   >
                     <Checkbox.HiddenInput />
@@ -318,7 +352,7 @@ export default function ShoppingCartDrawer({
                           key={item.id}
                           item={item}
                           isLiked={likedItemIdsAllSet.has(item.id)}
-                          handleCartChecked={() => handleCartChecked(item.id)}
+                          handleChecked={() => handleChecked(item.id)}
                           handleNumChanged={(type?: string) =>
                             handleNumChanged(item.id, type)
                           }
@@ -340,8 +374,10 @@ export default function ShoppingCartDrawer({
                           key={item.id}
                           item={item}
                           cartHas={cartItemsIdsAllSet.has(item.id)}
-                          handleCartChecked={() => handleCartChecked(item.id)}
-                          handleCartDelete={() => handleCartDelete(item.id)}
+                          handleChecked={() => handleChecked(item.id)}
+                          handleLike={(type?: string) =>
+                            handleLike(item.id, type)
+                          }
                         />
                       );
                     })}
@@ -367,6 +403,7 @@ export default function ShoppingCartDrawer({
                   color={"white"}
                   bg={"#FA6D6D"}
                   fontWeight={"medium"}
+                  onClick={handleAddCartItems}
                 >
                   장바구니 담기
                 </Button>

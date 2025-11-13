@@ -7,13 +7,13 @@ import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
 export default function LikedItem({
   item,
   cartHas,
-  handleCartChecked,
-  handleCartDelete,
+  handleChecked,
+  handleLike,
 }: {
   item: CartItemProps;
   cartHas: boolean;
-  handleCartChecked: () => void;
-  handleCartDelete: () => void;
+  handleChecked: () => void;
+  handleLike: (type?: string) => void;
 }) {
   return (
     <Box
@@ -28,7 +28,7 @@ export default function LikedItem({
       <Checkbox.Root
         variant={"outline"}
         checked={item.checked}
-        onCheckedChange={handleCartChecked}
+        onCheckedChange={handleChecked}
         alignItems={"center"}
         colorPalette={"red"}
       >
@@ -91,7 +91,11 @@ export default function LikedItem({
             alignItems={"center"}
             justifyContent={"space-between"}
           >
-            <IconButton onClick={() => {}}>
+            <IconButton
+              onClick={() => {
+                handleLike("unlike");
+              }}
+            >
               <HeartFilledIcon
                 filledColor={"#FA6D6D"}
                 strokeColor={"#FA6D6D"}
