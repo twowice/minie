@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase"
 import { CartItemProps, RawCartItem } from "./cart";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(): Promise<NextResponse<CartItemProps[] | { error: string }>> {
     const tempUid = 1
@@ -26,7 +26,6 @@ export async function GET(): Promise<NextResponse<CartItemProps[] | { error: str
 
 
     if (error) {
-        console.error('Error fetching cart items:', error);
         return NextResponse.json({ error: 'Failed to fetch cart items: ' + error.message }, { status: 500 });
     }
 
@@ -40,7 +39,7 @@ export async function GET(): Promise<NextResponse<CartItemProps[] | { error: str
             checked: false,
             title: item.products.name,
             brand: item.products.brand,
-            image: item.products.image,
+            image: item.products.image.length !==0 ?item.products.image : "images/review/product3.jpg",
             num: item.product_num,
             price: item.products.price,
             isDiscounted: item.products.is_discounted,
@@ -51,7 +50,7 @@ export async function GET(): Promise<NextResponse<CartItemProps[] | { error: str
    return NextResponse.json(transformedCartItems, { status: 200 });
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
      const tempUid = 1
     /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
 
@@ -64,9 +63,25 @@ export async function DELETE(request: Request) {
     .eq('product_id', productId)
     
     if(error){
-       console.error('Error deleting cart item', error);
         return NextResponse.json({ error: 'Failed to deleting cart item: ' + error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true })
+}
+
+export async function POST(request: NextRequest) {
+    const tempUid = 1
+    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+
+    const {product_id:id, product_num:num} = await request.json()
+
+    const {error} = await supabase
+    .from('carts')
+    .insert({user_id:tempUid, product_id:id, product_num:num})
+
+    if(error){
+        return NextResponse.json({error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({success: true})
 }
