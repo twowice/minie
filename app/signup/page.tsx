@@ -5,7 +5,44 @@ import { Text, Input, Button, Flex } from "@chakra-ui/react" // 입력폼에서 
 import { NativeSelectRoot, NativeSelectField } from "@chakra-ui/react" // 생년월일 드롭다운 박스에서 쓰인 라이브러리
 import FormField from "@/components/FormField"; // text와 input 컴포넌트
 
+import { useState } from "react" // 각 Input에 들어갈 내용들의 상태 관리를 도와줄 React Hook
+import { useRouter } from "next/navigation"
+
+import { auth } from "@/firebase/firebaseConfig" // 인증 문지기
+import { createUserWithEmailAndPassword } from "firebase/auth" // 회원가입 시켜주는 firebase 함수
+
 export default function SignupPage() {
+  
+  const [email, setEmail] = useState(""); // 이메일 형식의 아이디
+  const [password, setPassword] = useState(""); // 비밀번호
+  const [confirmPassword, setConfirmPassword] = useState(""); // 비밀번호 확인
+  const [name, setName] = useState(""); // 이름
+  const [phone, setPhone] = useState(""); // 전화번호
+  const [birthdate, setBirthdate] = useState({year: "", month: "", day: ""}) // {} 키와 값으로 이루어진 객체 -> 생년월일
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  // 회원가입 비동기 함수
+  const handleSignUP = async () => {
+    if(password !== confirmPassword){
+      setError("비밀번호가 일치하지 않습니다.");
+      return; // 종료
+    }
+
+    try{
+      await createUserWithEmailAndPassword(auth, email, password);
+      router.push("/login");
+
+      }catch(err: any){
+        setError(err.message);
+      }
+    };
+
+  
+
+
+
+
   return (
     // 전체 body 박스
     <Box
@@ -58,6 +95,8 @@ export default function SignupPage() {
                 color="#000000"
                 px="12px"
                 pr="90px" // 오른쪽에 버튼 공간 확보
+                value={email}
+                onChange={( (e)=> setEmail(e.target.value) )}
                 _focus={{
                   outline: "none",
                   borderColor: "#FA6D6D",
@@ -88,6 +127,8 @@ export default function SignupPage() {
             label="비밀번호"
             placeholder="비밀번호 8~12자, 영문+숫자+특수문자"
             type="password"
+            value={password}
+            onChange={(  (e) => setPassword(e.target.value)    )}
           />
 
 
@@ -96,6 +137,8 @@ export default function SignupPage() {
             label="비밀번호 확인"
             placeholder="비밀번호 재입력"
             type="password"
+            value = {confirmPassword}
+            onChange={  (e) => setConfirmPassword(e.target.value)    }
           />
 
 
@@ -103,6 +146,8 @@ export default function SignupPage() {
           <FormField
             label="이름"
             placeholder="이름을 입력해주세요."
+            value = {name}
+            onChange={ (e) => setName(e.target.value) }
           />
 
 
@@ -110,6 +155,8 @@ export default function SignupPage() {
           <FormField
             label="전화번호"
             placeholder="휴대폰 번호 (‘-’ 제외 11자리 입력)"
+            value = {phone}
+            onChange={ (e) => setPhone(e.target.value) }
           />
 
           {/* 일곱 번째 책꽃이(생년월일) */}
@@ -137,6 +184,8 @@ export default function SignupPage() {
                   borderColor="rgba(0, 0, 0, 0.3)"
                   color="rgba(0, 0, 0, 0.3)"
                   height="48px"
+                  value={birthdate.year}
+                  onChange={   (e) => setBirthdate({...birthdate, year: e.target.value})  }
                   css={{
                     "& option": {
                       backgroundColor: "white",
@@ -177,6 +226,8 @@ export default function SignupPage() {
                   borderColor="rgba(0, 0, 0, 0.3)"
                   color="rgba(0, 0, 0, 0.3)"
                   height="48px"
+                  value={birthdate.month}
+                  onChange={ (e)=>setBirthdate({...birthdate, month: e.target.value})}
                   css={{
                     "& option": {
                       backgroundColor: "white",
@@ -217,6 +268,8 @@ export default function SignupPage() {
                   borderColor="rgba(0, 0, 0, 0.3)"
                   color="rgba(0, 0, 0, 0.3)"
                   height="48px"
+                  value={birthdate.day}
+                  onChange={(e) => setBirthdate({...birthdate, day: e.target.value})}
                   css={{
                     "& option": {
                       backgroundColor: "white",
@@ -261,6 +314,7 @@ export default function SignupPage() {
                 borderColor="rgba(0, 0, 0, 0.2)"
                 fontSize="16px"
                 height="48px"
+                onClick={() => router.push("/login")} // 취소 클릭 시 로그인 화면으로 이동
               >
                 취소
               </Button>
@@ -271,10 +325,12 @@ export default function SignupPage() {
                 fontSize="16px"
                 color="#ffffff"
                 height="48px"
+                onClick={handleSignUP}
               >
                 가입하기
               </Button>
             </Flex>
+            {error && <Text fontSize="sm" color="red.500">{error}</Text>} {/* 에러 표시 */}
           </Box>
 
 
