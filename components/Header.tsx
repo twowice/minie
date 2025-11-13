@@ -22,6 +22,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
+    { href: "/shoppingDetail", label: "쇼핑상세" }, // 이 링크를 추가합니다.
     { href: "/shopping", label: "스킨케어" },
     { href: "/cleansing", label: "클렌징" },
     { href: "/suncare", label: "선케어" },
