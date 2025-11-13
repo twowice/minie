@@ -408,7 +408,7 @@ export default function SignupPage() {
             <Flex w="full" gap={2}>
               <Button
                 flex="1"
-                bg="rgba(255, 255, 2555, 0.2)"
+                bg="rgba(255, 255, 255, 0.2)"
                 border="1px solid"
                 borderRadius="4px"
                 borderColor="rgba(0, 0, 0, 0.2)"
