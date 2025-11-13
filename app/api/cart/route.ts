@@ -55,10 +55,10 @@ export async function DELETE(request: Request) {
      const tempUid = 1
     /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
 
-    const {productId} = await request.json()
+    const {product_id:productId} = await request.json()
 
     const {error} = await supabase
-    .from('cart')
+    .from('carts')
     .delete()
     .eq('user_id', tempUid)
     .eq('product_id', productId)
