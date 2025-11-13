@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase"
-import { CartItemProps, RawCartItem } from "./cart";
+import { CartItem, RawCartItem } from "./cart";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
@@ -33,7 +33,7 @@ export async function GET() {
         return NextResponse.json([], { status: 200 });
     }
 
-    const transformedCartItems: CartItemProps[] = typedRawCartItems.map((item: RawCartItem) => {
+    const transformedCartItems: CartItem[] = typedRawCartItems.map((item: RawCartItem) => {
         return {
             id: item.product_id,
             checked: false,
@@ -45,7 +45,7 @@ export async function GET() {
             isDiscounted: item.products.is_discounted,
             discountAmount: item.products.discount_amount,
         };
-    }).filter(item => item !== null) as CartItemProps[];
+    }).filter(item => item !== null) as CartItem[];
 
    return NextResponse.json(transformedCartItems, { status: 200 });
 }

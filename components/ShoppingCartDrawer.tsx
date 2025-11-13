@@ -5,7 +5,7 @@ import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import LikedItem from "./LikedItem";
 import ShoppingCartIconButton from "./ui/ShoppingCartIconButton";
-import { CartItemProps } from "@/app/api/cart/cart";
+import { CartItem } from "@/app/api/cart/cart";
 
 /* 테스트 케이스용 더미데이터 */
 const testCartItems = [
@@ -79,13 +79,13 @@ const testLikedItemsIds = new Set([0, 1, 3]);
 export default function ShoppingCartDrawer({
   headerHeight,
   initCartItems = testCartItems,
-  initLikedItemsIds = testLikedItemsIds,
+  _initLikedItemsIdsForTest = testLikedItemsIds,
   initLikedItems = testLikedItems,
 }: {
   headerHeight: number;
-  initCartItems?: CartItemProps[];
-  initLikedItemsIds?: Set<number>;
-  initLikedItems?: CartItemProps[];
+  initCartItems?: CartItem[];
+  _initLikedItemsIdsForTest?: Set<number>;
+  initLikedItems?: CartItem[];
 }) {
   const [isCartActivity, setIsCartActivity] = useState(false);
   const [currentTabsValue, setCurrentTabsValue] = useState("cart");
@@ -95,9 +95,12 @@ export default function ShoppingCartDrawer({
       sum + (item.checked ? (item.price - item.discountAmount) * item.num : 0),
     0
   );
-  const [likedItems, setLikedItems] = useState<CartItemProps[]>(() => {
+  const [likedItems, setLikedItems] = useState<CartItem[]>(() => {
+    if (initLikedItems !== testLikedItems) {
+      return initLikedItems;
+    }
     const filtered = initCartItems.filter((item) =>
-      initLikedItemsIds.has(item.id)
+      _initLikedItemsIdsForTest.has(item.id)
     );
     const mapped = filtered.map((item) => ({ ...item, checked: false }));
 

@@ -1,4 +1,4 @@
-export interface CartItemProps {
+export interface CartItem {
     id: number; // product_id
     checked: boolean; // 초기값 false
     title: string; // product.name

@@ -1,5 +1,5 @@
 import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
-import { CartItemProps } from "@/app/api/cart/cart";
+import { CartItem } from "@/app/api/cart/cart";
 
 import HeartFilledIcon from "./ui/HeartIcon";
 import { numberFormatter } from "../utils/formatter/numberFomatter";
@@ -11,7 +11,7 @@ export default function LikedItem({
   handleChecked,
   handleLike,
 }: {
-  item: CartItemProps;
+  item: CartItem;
   cartHas: boolean;
   handleChecked: () => void;
   handleLike: (type?: string) => void;

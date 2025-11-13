@@ -1,5 +1,5 @@
 import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
-import { CartItemProps } from "@/app/api/cart/cart";
+import { CartItem } from "@/app/api/cart/cart";
 
 import HeartFilledIcon from "./ui/HeartIcon";
 import { AiFillMinusCircle, AiFillPlusCircle } from "react-icons/ai";
@@ -85,7 +85,7 @@ export default function ShoppingCartItem({
   handleCartDelete,
   handleLike,
 }: {
-  item: CartItemProps;
+  item: CartItem;
   isLiked: boolean;
   handleChecked: () => void;
   handleNumChanged: (type?: string) => void;

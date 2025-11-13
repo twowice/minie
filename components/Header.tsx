@@ -16,12 +16,14 @@ import {
   Collapsible,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
+import { useCart } from "@/contexts/ShoppingCartContext";
 
 export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const { cartItems, setCartItems } = useCart();
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
@@ -144,7 +146,10 @@ export default function Header() {
             >
               <HamburgerIcon />
             </IconButton>
-            <ShoppingCartDrawer headerHeight={headerHeight} />
+            <ShoppingCartDrawer
+              headerHeight={headerHeight}
+              initCartItems={cartItems}
+            />
           </HStack>
         </Flex>
 
