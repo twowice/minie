@@ -1,20 +1,10 @@
 "use client";
-import {
-  Drawer,
-  Portal,
-  Button,
-  IconButton,
-  Tabs,
-  Box,
-  Checkbox,
-  Float,
-  Circle,
-} from "@chakra-ui/react";
+import { Drawer, Portal, Button, Tabs, Box, Checkbox } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
-import { CartIcon } from "./ui/CartIcon";
 import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import LikedItem from "./LikedItem";
+import ShoppingCartIconButton from "./ui/ShoppingCartIconButton";
 
 export interface CartItemProps {
   id: number;
@@ -120,6 +110,7 @@ export default function ShoppingCartDrawer({
   const isAllLikedItemChecked =
     likedItems.every((item) => item.checked) && likedItems.length !== 0;
 
+  /* 컴포넌트 제어용 함수 시작 */
   const handleCartDeleteAll = () => {
     if (currentTabsValue === "cart") {
       setcartItems([]);
@@ -189,41 +180,18 @@ export default function ShoppingCartDrawer({
     }
   };
 
+  /* 화면 시작 */
   return (
     <Drawer.Root
       open={isCartActivity}
       onOpenChange={(details) => setIsCartActivity(details.open)}
     >
       <Drawer.Trigger asChild>
-        <IconButton
-          aria-label="장바구니"
-          onClick={() => {
-            setIsCartActivity((prev) => !prev);
-          }}
-          cursor="pointer"
-          position={"relative"}
-        >
-          <Box
-            position="relative"
-            display="inline-block"
-            w={{ base: 5, md: 6 }}
-            h={{ base: 5, md: 6 }}
-          >
-            <CartIcon
-              w="100%"
-              h="100%"
-              color={isCartActivity ? "#FA6D6D" : "black"}
-            />
-
-            {cartItems.length !== 0 && (
-              <Float placement={"top-end"} offset={[0, 0.5]}>
-                <Circle size="3" bg="red" color="white" fontSize="11px">
-                  {cartItems.length}
-                </Circle>
-              </Float>
-            )}
-          </Box>
-        </IconButton>
+        <ShoppingCartIconButton
+          cartItemsLength={cartItems.length}
+          isCartActivity={isCartActivity}
+          setIsCartActivity={setIsCartActivity}
+        />
       </Drawer.Trigger>
 
       <Portal>
