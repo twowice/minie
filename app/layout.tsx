@@ -50,7 +50,7 @@ export default async function RootLayout({
     <html lang="ko">
       <body className={croissantOne.className}>
         <Provider>
-          <CartProvider initialCartItems={initCartItems}>
+          <CartProvider initialCartItems={initCartItems} initialLikedItems={[]}>
             <Box
               display="flex"
               flexDirection="column"

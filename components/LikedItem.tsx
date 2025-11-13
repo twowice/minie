@@ -5,6 +5,9 @@ import HeartFilledIcon from "./ui/HeartIcon";
 import { numberFormatter } from "../utils/formatter/numberFomatter";
 import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
 
+/* useCart()를 통해 커스텀 Context에 든 데이터 및 함수를 이용하셔야 합니다.
+ */
+
 export default function LikedItem({
   item,
   cartHas,
