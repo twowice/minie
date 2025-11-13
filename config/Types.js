@@ -109,3 +109,37 @@ export const getTypeConfig = (typeName) => {
 export const getAllTypeNames = () => {
   return Object.keys(TYPES);
 };
+
+
+// 한글 → TYPES 키 변환 매핑
+const TYPE_MAP = {
+  수분공급: "hydration",
+  "진정/보습" : "sooth_moisturizing",
+  트러블케어: "trouble",
+  각질케어: "exfoliating",
+  브라이트닝: "brightening",
+  안티에이징: "antiaging",
+
+  온몸: "entire",
+  얼굴: "face",
+  입술: "lip",
+  눈: "eye",
+  바디: "body",
+
+  건성: "dry",
+  지성: "oily",
+  복합성: "complexity",
+  민감성: "sensitivity",
+
+  젤: "jell",
+  크림: "cream",
+  로션: "lotion",
+  리퀴드: "liquid",
+  밤: "balm",
+};
+
+// 한글값으로 getTypeConfig() 호출할 수 있게 도와주는 함수
+export const getBadgeConfig = (value) => {
+  const key = TYPE_MAP[value];
+  return key ? getTypeConfig(key) : null;
+};

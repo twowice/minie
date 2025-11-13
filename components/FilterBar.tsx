@@ -14,44 +14,40 @@ import {
 import { useEffect, useState } from 'react';
 import { MdFilterListAlt } from 'react-icons/md';
 import Segment from './ui/Segment';
+import items from '@/data/items.json';
 
 export default function FilterBar() {
-   //더미데이터
-   const items = [
-      { id: 1, name: '상품 1', gender: 'male', price: 9000 },
-      { id: 2, name: '상품 2', gender: 'female', price: 12000 },
-      { id: 3, name: '상품 3', gender: 'male', price: 18000 },
-      { id: 4, name: '상품 4', gender: 'male', type: 'MyType', price: 20000 },
-      { id: 5, name: '상품 5', gender: 'male', price: 5000 },
-   ];
-
-   const maxPrice = items.reduce((prev, curr) => (curr.price > prev.price ? curr : prev)).price;
-
-   const { open, onOpen, onClose } = useDisclosure();
+   // --- 상단 버튼 필터 State ---
    const [male, setMale] = useState(false);
    const [female, setFemale] = useState(false);
-   const [dialog, setDialog] = useState(false);
    const [myType, setMyType] = useState(false);
-   const [data, setData] = useState(items);
 
+   // --- 다이얼로그 ---
+   const { open, onOpen, onClose } = useDisclosure();
+   const [dialog, setDialog] = useState(false);
    const [filterMale, setFilterMale] = useState(false);
    const [filterFemale, setFilterFemale] = useState(false);
    const [filterBoth, setFilterBoth] = useState(true);
    const [filterPrice, setFilterPrice] = useState([]);
 
+
+
+   // --- 최종 데이터 ---
+   const [data, setData] = useState(items);
+
    useEffect(() => {
       let selected = items;
 
       if (male && !female) {
-         selected = selected.filter(item => item.gender === 'male');
+         selected = selected.filter(item => item.gender === '남성');
       } else if (!male && female) {
-         selected = selected.filter(item => item.gender === 'female');
+         selected = selected.filter(item => item.gender === '여성');
       } else if (male && female) {
-         selected = selected.filter(item => item.gender === 'male' || item.gender === 'female');
+         selected = selected.filter(item => item.gender === '남성' || item.gender === '여성');
       }
 
       if (myType) {
-         selected = selected.filter(item => item.type === 'MyType');
+         selected = selected.filter(item => item.mytype === 'MyType');
       }
 
       setData(selected);
@@ -63,11 +59,11 @@ export default function FilterBar() {
       if (filterBoth || filterFemale || filterMale) {
          if (filterBoth) {
          } else if (filterMale && filterFemale) {
-            checked = checked.filter(item => item.gender === 'male' || item.gender === 'female');
+            checked = checked.filter(item => item.gender === '남성' || item.gender === '여성');
          } else if (filterMale) {
-            checked = checked.filter(item => item.gender === 'male');
+            checked = checked.filter(item => item.gender === '남성');
          } else if (filterFemale) {
-            checked = checked.filter(item => item.gender === 'female');
+            checked = checked.filter(item => item.gender === '여성');
          }
       }
 
@@ -100,9 +96,9 @@ export default function FilterBar() {
       setDialog(false);
    };
 
-   const togglePrice = (price) => {
-    setFilterPrice(prev => prev.includes(price) ? prev.filter(p => p !== price) : [...prev, price])
-   }
+   const togglePrice = price => {
+      setFilterPrice(prev => (prev.includes(price) ? prev.filter(p => p !== price) : [...prev, price]));
+   };
 
    return (
       <Flex mb={2} direction={{ base: 'column', md: 'row' }} flexDirection={'column'}>
@@ -178,7 +174,9 @@ export default function FilterBar() {
                      <option value="인기순" defaultChecked>
                         인기순
                      </option>
-                     <option value="최신순">최신순</option>
+                     <option value="가격순" onChange={() => setFilterPrice(price).sort((a, b) => a - b)}>
+                        가격 순
+                     </option>
                   </NativeSelect.Field>
                   <NativeSelectIndicator />
                </NativeSelect.Root>
@@ -194,7 +192,7 @@ export default function FilterBar() {
                   </Dialog.Header>
                   <Dialog.Body>
                      <Flex flexDirection={'column'} gap={'16px'} alignItems={'flex-start'}>
-                        <Flex direction={'column'} gap={'8px'}>
+                        <Flex direction={'column'} gap={'8px'} w={'full'}>
                            <Text fontWeight={'500'} fontSize={'16px'}>
                               성별
                            </Text>
@@ -202,6 +200,7 @@ export default function FilterBar() {
                               <Checkbox.Root
                                  variant={'solid'}
                                  colorPalette={'red'}
+                                 w={'full'}
                                  checked={filterBoth}
                                  onCheckedChange={e => {
                                     setFilterBoth(e.checked);
@@ -217,6 +216,7 @@ export default function FilterBar() {
                               </Checkbox.Root>
                               <Checkbox.Root
                                  variant={'solid'}
+                                 w={'full'}
                                  colorPalette={'red'}
                                  checked={filterMale}
                                  onCheckedChange={e => {
@@ -233,6 +233,7 @@ export default function FilterBar() {
                               <Checkbox.Root
                                  variant={'solid'}
                                  colorPalette={'red'}
+                                 w={'full'}
                                  checked={filterFemale}
                                  onCheckedChange={e => {
                                     setFilterFemale(e.checked);
@@ -247,12 +248,13 @@ export default function FilterBar() {
                               </Checkbox.Root>
                            </HStack>
                         </Flex>
-                        <Flex direction={'column'} gap={'8px'}>
+                        <Flex direction={'column'} gap={'8px'} w={'full'}>
                            <Text fontWeight={'500'} fontSize={'16px'}>
                               가격
                            </Text>
                            <HStack>
                               <Checkbox.Root
+                                 w={'full'}
                                  variant={'solid'}
                                  colorPalette={'red'}
                                  checked={filterPrice.includes(10000)}
@@ -263,6 +265,7 @@ export default function FilterBar() {
                                  <Checkbox.Label>10,000원 이하</Checkbox.Label>
                               </Checkbox.Root>
                               <Checkbox.Root
+                                 w={'full'}
                                  variant={'solid'}
                                  colorPalette={'red'}
                                  checked={filterPrice.includes(15000)}
@@ -273,6 +276,7 @@ export default function FilterBar() {
                                  <Checkbox.Label>15,000원 이하</Checkbox.Label>
                               </Checkbox.Root>
                               <Checkbox.Root
+                                 w={'full'}
                                  variant={'solid'}
                                  colorPalette={'red'}
                                  checked={filterPrice.includes(20000)}
