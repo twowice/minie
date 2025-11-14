@@ -16,6 +16,7 @@ export default function ShoppingCartIconButton({
       aria-label="장바구니"
       cursor="pointer"
       position={"relative"}
+      bg={"white"}
       onClick={() => {
         setIsCartActivity((prev) => !prev);
       }}
