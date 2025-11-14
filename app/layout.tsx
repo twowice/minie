@@ -8,6 +8,8 @@ import { Provider } from "../components/ui/provider";
 import { Box } from "@chakra-ui/react";
 import { CartProvider } from "@/contexts/ShoppingCartContext";
 import { CartItem } from "./api/cart/cart";
+import { getCartItems } from "@/lib/minie/cartAPI";
+import { getLikedItems } from "@/lib/minie/likeAPI";
 
 export const metadata: Metadata = {
   title: "Minié",
@@ -25,32 +27,28 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  /* 장바구니 정보 불러오기 */
-  let initCartItems: CartItem[] = [];
+  let initialCartItems: CartItem[] = [];
+  let initialLikedItems: CartItem[] = [];
+
   try {
-    const shoppingCartResponse = await fetch("http://localhost:3000/api/cart", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    if (!shoppingCartResponse.ok) {
-      const errorData = await shoppingCartResponse.json();
-      console.error(
-        "Failed to fetch cart items:",
-        shoppingCartResponse.status,
-        errorData
-      );
-    } else {
-      initCartItems = (await shoppingCartResponse.json()) as CartItem[];
-    }
+    [initialCartItems, initialLikedItems] = await Promise.all([
+      getCartItems(),
+      getLikedItems(),
+    ]);
   } catch (error) {
-    console.error("Error during cart items fetch:", error);
+    console.error("Error during parallel data fetch:", error);
+    initialCartItems = [];
+    initialLikedItems = [];
   }
 
   return (
     <html lang="ko">
       <body className={croissantOne.className}>
         <Provider>
-          <CartProvider initialCartItems={initCartItems} initialLikedItems={[]}>
+          <CartProvider
+            initialCartItems={initialCartItems}
+            initialLikedItems={initialLikedItems}
+          >
             <Box
               display="flex"
               flexDirection="column"

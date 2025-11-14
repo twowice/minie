@@ -39,7 +39,7 @@ export default function LikedItem({
         <Checkbox.HiddenInput />
         <Checkbox.Control />
       </Checkbox.Root>
-      <Image src={item.image} w={130} h={130}></Image>
+      <Image src={item.image} w={130} h={130} fit={"contain"} />
       <Box
         flexGrow={1}
         display={"flex"}
