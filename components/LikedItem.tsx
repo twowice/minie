@@ -21,6 +21,7 @@ export default function LikedItem({
 }) {
   return (
     <Box
+      background={"white"}
       display={"flex"}
       flexDirection={"row"}
       alignItems={"center"}
@@ -28,6 +29,8 @@ export default function LikedItem({
       color={"black"}
       borderBottom={"1px solid #CCCCCC"}
       py={"10px"}
+      mx={"40px"}
+      px={0}
     >
       <Checkbox.Root
         variant={"outline"}
@@ -48,6 +51,7 @@ export default function LikedItem({
       >
         <Box
           display={"flex"}
+          flex={1}
           justifyContent={"space-between"}
           alignItems={"start"}
         >
