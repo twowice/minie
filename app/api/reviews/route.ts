@@ -119,7 +119,7 @@ export async function POST(req: Request) {
       const uploadDir = path.join(process.cwd(), "public/images/review");
       await mkdir(uploadDir, { recursive: true });
 
-      const fileName = `${Date.now()}-${image.name}`;
+      const fileName = `${image.name}`;
       const filePath = path.join(uploadDir, fileName);
 
       await writeFile(filePath, buffer);

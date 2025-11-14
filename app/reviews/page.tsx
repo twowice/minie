@@ -53,6 +53,7 @@ export default function Page() {
     const [photoFilter, setPhotoFilter] = useState(false);
     const [normalFilter, setNormalFilter] = useState(false);
     const sortedReviews = useMemo(() => {
+        console.log(reviews);
         return [...reviews]
             .filter((review) => {
                 if (photoFilter && !normalFilter) return review.products.image;
@@ -258,13 +259,13 @@ export default function Page() {
                                     id={review.id}
                                 />
 
-                                {review.products.image && (
+                                {review.image_url && (
                                     <Dialog.Trigger asChild>
                                         <Box position="relative" display="inline-block" w="100px" h="100px">
                                             {/* 리뷰 이미지 */}
                                             <Image
-                                                src={review.products.image}
-                                                alt={review.products.name}
+                                                src={review.image_url}
+                                                alt={review.image_url}
                                                 boxSize="100px"
                                                 objectFit="cover"
                                                 borderRadius="8px"
