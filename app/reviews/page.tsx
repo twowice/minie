@@ -45,8 +45,12 @@ export default function Page() {
 
     /* rating */
     const fullStars = Math.floor(reviewTotalData.rating);
-    const hasHalfStar = reviewTotalData.rating % 1 >= 0.5;
+    const hasHalfStar = reviewTotalData.rating * 10 % 10 >= 5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    // const fullStars2 = Math.floor(reviewTotalData.rating);
+    // const hasHalfStar2 = reviewTotalData.rating * 10 % 10 >= 5;
+    // const emptyStars2 = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
     /* SORT */
     const [sortType, setSortType] = useState<"latest" | "rating">("latest");
@@ -56,8 +60,8 @@ export default function Page() {
         console.log(reviews);
         return [...reviews]
             .filter((review) => {
-                if (photoFilter && !normalFilter) return review.products.image;
-                if (!photoFilter && normalFilter) return !review.products.image;
+                if (photoFilter && !normalFilter) return review.image_url;
+                if (!photoFilter && normalFilter) return !review.image_url;
                 return true;
             })
             .sort((a, b) => {
@@ -106,11 +110,36 @@ export default function Page() {
                                 ★
                             </Text>
                         ))}
-                    {hasHalfStar && (
-                        <Text key="half" color="yellow.400" fontSize="32px">
-                            ⯨
+
+                    <Box
+                        width="32px"
+                        height="32px"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        position="relative"
+                    >
+                        <Text key="half" color="gray.300" fontSize="32px">
+                            ★
                         </Text>
-                    )}
+                        {hasHalfStar && (
+                            <Text
+                                fontSize="32px"
+                                color="yellow.400"
+                                userSelect="none"
+                                lineHeight="1"
+                                position="absolute"
+                                top="0"
+                                left="0"
+                                width={hasHalfStar ? "50%" : "100%"}
+                                overflow="hidden"
+                                clipPath={hasHalfStar ? "inset(0 0 0 0)" : "none"}
+                            >
+                                ★
+                            </Text>
+
+                        )}
+                    </Box>
                     {Array(emptyStars)
                         .fill(0)
                         .map((_, i) => (
@@ -222,25 +251,59 @@ export default function Page() {
                                         {new Date(review.created_at).toISOString().split("T")[0]}
                                     </Text>
                                     <HStack>
-                                        {Array(Math.floor(review.rating))
-                                            .fill(0)
-                                            .map((_, i) => (
-                                                <Text key={`full-${i}`} color="yellow.400" fontSize="19px">
-                                                    ★
-                                                </Text>
-                                            ))}
-                                        {review.rating % 1 >= 0.5 && (
-                                            <Text color="yellow.400" fontSize="19px">
-                                                ⯨
-                                            </Text>
-                                        )}
-                                        {Array(5 - Math.ceil(review.rating))
-                                            .fill(0)
-                                            .map((_, i) => (
-                                                <Text key={`empty-${i}`} color="gray.300" fontSize="19px">
-                                                    ★
-                                                </Text>
-                                            ))}
+                                        {(() => {
+                                            const full = Math.floor(review.rating);
+                                            const half = (review.rating * 10) % 10 >= 5;
+                                            const empty = 5 - full - (half ? 1 : 0);
+
+                                            return (
+                                                <>
+                                                    {Array(full)
+                                                        .fill(0)
+                                                        .map((_, i) => (
+                                                            <Text key={`full-${i}`} color="yellow.400" fontSize="19px">
+                                                                ★
+                                                            </Text>
+                                                        ))}
+
+                                                    {half && (
+                                                        <Box
+                                                            width="19px"
+                                                            height="19px"
+                                                            display="flex"
+                                                            alignItems="center"
+                                                            justifyContent="center"
+                                                            position="relative"
+                                                        >
+                                                            <Text color="gray.300" fontSize="19px">
+                                                                ★
+                                                            </Text>
+                                                            <Text
+                                                                fontSize="19px"
+                                                                color="yellow.400"
+                                                                userSelect="none"
+                                                                lineHeight="1"
+                                                                position="absolute"
+                                                                top="0"
+                                                                left="0"
+                                                                width="50%"
+                                                                overflow="hidden"
+                                                            >
+                                                                ★
+                                                            </Text>
+                                                        </Box>
+                                                    )}
+
+                                                    {Array(empty)
+                                                        .fill(0)
+                                                        .map((_, i) => (
+                                                            <Text key={`empty-${i}`} color="gray.300" fontSize="19px">
+                                                                ★
+                                                            </Text>
+                                                    ))}
+                                                </>
+                                            );
+                                        })()}
                                     </HStack>
                                 </Flex>
 
