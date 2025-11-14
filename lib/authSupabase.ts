@@ -1,4 +1,4 @@
-// lib/authSupabase.tsㅣ
+// lib/authSupabase.ts
 
 // createClient = Supabase와 연결하는 클라이언트를 만드는 함수
 import { createClient } from '@supabase/supabase-js'
