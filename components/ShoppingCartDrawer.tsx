@@ -48,6 +48,7 @@ export default function ShoppingCartDrawer({
     <Drawer.Root
       open={isCartActivity}
       onOpenChange={(details) => setIsCartActivity(details.open)}
+      preventScroll={false}
     >
       <Drawer.Trigger asChild>
         <ShoppingCartIconButton
@@ -125,13 +126,13 @@ export default function ShoppingCartDrawer({
               </Drawer.Header>
 
               <Drawer.Body
-                px="40px"
                 minHeight={0}
-                flex={1}
                 overflowY={"hidden"}
                 display={"flex"}
+                padding={0}
                 flexDirection={"column"}
                 paddingTop={"20px"}
+                background={"white"}
               >
                 <Box
                   display={"flex"}
@@ -140,6 +141,7 @@ export default function ShoppingCartDrawer({
                   h={"20px"}
                   gap={"16px"}
                   alignItems={"center"}
+                  px={"40px"}
                 >
                   <Checkbox.Root
                     w="20px"
