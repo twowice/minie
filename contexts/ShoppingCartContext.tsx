@@ -1,6 +1,7 @@
 "use client";
 
 import { CartItem as ApiCartItem } from "@/app/api/cart/cart";
+import { deleteCartItem } from "@/lib/minie/cartAPI";
 import {
   useContext,
   createContext,
@@ -107,12 +108,13 @@ export function CartProvider({
     [cartItems]
   );
 
-  const removeItem = useCallback(
-    async (itemId: number) => {
-      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-    },
-    [cartItems]
-  );
+  const removeItem = useCallback(async (itemId: number) => {
+    const isSuccess = await deleteCartItem(itemId);
+
+    isSuccess
+      ? setCartItems((prev) => prev.filter((item) => item.id !== itemId))
+      : console.log("delete Cart Item failed : ", itemId);
+  }, []);
 
   const clear = useCallback(async (type: string) => {
     switch (type) {

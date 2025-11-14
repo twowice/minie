@@ -19,6 +19,24 @@ export async function getCartItems(): Promise<CartItem[]> {
   }
 }
 
-export async function deleteCartItem({id}:{id:number}) {
-    
+export async function deleteCartItem(id:number) : Promise<boolean> {
+    try{
+     const response = await fetch("http://localhost:3000/api/cart", {
+        method: "DELETE",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({product_id: id})
+      })
+
+      if(!response.ok){
+        const errorData = await response.json();
+        console.error(Error(errorData.error || "Failed to delete cart item"))
+        return false
+      }
+
+      return true
+
+    }catch(error){
+      console.error("Error during cart items deleting:")
+      return false
+    }
 }

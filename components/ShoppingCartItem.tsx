@@ -27,6 +27,8 @@ export default function ShoppingCartItem({
 }) {
   return (
     <Box
+      background={"white"}
+      mx={"40px"}
       display={"flex"}
       flexDirection={"row"}
       alignItems={"center"}
