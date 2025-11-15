@@ -1,6 +1,6 @@
 "use client";
 import { Drawer, Portal, Button, Tabs, Box, Checkbox } from "@chakra-ui/react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import LikedItem from "./LikedItem";
@@ -21,6 +21,7 @@ export default function ShoppingCartDrawer({
     toggleChecked,
     toggleAllChecked,
     updateQuantity,
+    updateAllQuantities,
     removeItem,
     clear,
     toggleLike,
@@ -42,6 +43,13 @@ export default function ShoppingCartDrawer({
     cartItems.length > 0 && cartItems.every((item) => item.checked);
   const isAllLikedItemChecked =
     likedItems.length > 0 && likedItems.every((item) => item.checked);
+
+  useEffect(() => {
+    console.log("ShoppingCartDrawer is opened ? : ", isCartActivity);
+    if (!isCartActivity) {
+      updateAllQuantities();
+    }
+  }, [isCartActivity]);
 
   /* 화면UI 시작 (모든 핸들러 함수가 Context의 함수로 대체됨) */
   return (
