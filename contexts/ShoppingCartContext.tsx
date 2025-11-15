@@ -1,7 +1,11 @@
 "use client";
 
 import { CartItem as ApiCartItem } from "@/app/api/cart/cart";
-import { deleteCartItem } from "@/lib/minie/cartAPI";
+import {
+  addCartItems,
+  deleteAllCartItems,
+  deleteCartItem,
+} from "@/lib/minie/cartAPI";
 import {
   useContext,
   createContext,
@@ -119,9 +123,8 @@ export function CartProvider({
   const clear = useCallback(async (type: string) => {
     switch (type) {
       case "cart":
-        setCartItems([]);
+        clearCart();
         break;
-
       case "like":
         setLikedItems([]);
         break;
@@ -132,6 +135,11 @@ export function CartProvider({
         break;
     }
   }, []);
+
+  const clearCart = async () => {
+    const response = await deleteAllCartItems();
+    response ? setCartItems([]) : console.log("delete All Cart Item failed");
+  };
 
   const toggleLike = useCallback(
     (item: CartItem) => {
@@ -148,6 +156,18 @@ export function CartProvider({
     const itemsToAdd = likedItems.filter((item) => item.checked);
     const cartItemIds = new Set(cartItems.map((i) => i.id));
     const newItems = itemsToAdd.filter((item) => !cartItemIds.has(item.id));
+    const payload = newItems.map((item) => ({
+      product_id: item.id,
+      product_num: item.num,
+    }));
+
+    const isSuccess = await addCartItems(payload);
+
+    if (!isSuccess) {
+      console.log("delete Cart Item failed : ", payload);
+      return;
+    }
+
     setCartItems((prev) => [
       ...newItems.map((i) => ({ ...i, checked: false })),
       ...prev,

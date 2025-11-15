@@ -36,6 +36,7 @@ export default function ShoppingCartItem({
       color={"black"}
       borderBottom={"1px solid #CCCCCC"}
       py={"10px"}
+      h={"146px"}
     >
       <Checkbox.Root
         variant={"outline"}
@@ -47,7 +48,7 @@ export default function ShoppingCartItem({
         <Checkbox.HiddenInput />
         <Checkbox.Control />
       </Checkbox.Root>
-      <Image src={item.image} w={130} h={130} fit={"contain"} />
+      <Image src={item.image} w={"120px"} h={"120px"} fit={"contain"} />
       <Box
         flexGrow={1}
         display={"flex"}
