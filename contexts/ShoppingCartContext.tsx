@@ -1,10 +1,11 @@
 "use client";
 
-import { CartItem as ApiCartItem } from "@/app/api/cart/cart";
+import { CartItem } from "@/app/api/cart/cart";
 import {
   addCartItems,
   deleteAllCartItems,
   deleteCartItem,
+  updateCartItems,
 } from "@/lib/minie/cartAPI";
 import {
   useContext,
@@ -15,11 +16,6 @@ import {
   useMemo,
 } from "react";
 
-// 'checked' 속성을 포함하는 내부적인 CartItem 타입을 정의
-export interface CartItem extends ApiCartItem {
-  checked: boolean;
-}
-
 // Context가 제공할 데이터와 함수의 타입을 정의
 interface CartContextDataType {
   cartItems: CartItem[];
@@ -27,6 +23,7 @@ interface CartContextDataType {
   toggleChecked: (id: number, type: "cart" | "like") => void;
   toggleAllChecked: (type: "cart" | "like") => void;
   updateQuantity: (itemId: number, type: "plus" | "minus") => void;
+  updateAllQuantities: () => void;
   removeItem: (itemId: number) => void;
   clear: (type: string) => void;
   toggleLike: (item: CartItem) => void;
@@ -48,8 +45,8 @@ export function useCart() {
 
 interface CartProviderProps {
   children: ReactNode;
-  initialCartItems: ApiCartItem[];
-  initialLikedItems: ApiCartItem[];
+  initialCartItems: CartItem[];
+  initialLikedItems: CartItem[];
 }
 
 export function CartProvider({
@@ -96,14 +93,18 @@ export function CartProvider({
         case "plus":
           setCartItems((prev) =>
             prev.map((item) =>
-              item.id === itemId ? { ...item, num: item.num + 1 } : item
+              item.id === itemId
+                ? { ...item, num: item.num + 1, isUpdated: true }
+                : item
             )
           );
           break;
         case "minus":
           setCartItems((prev) =>
             prev.map((item) =>
-              item.id === itemId ? { ...item, num: item.num - 1 } : item
+              item.id === itemId
+                ? { ...item, num: item.num - 1, isUpdated: true }
+                : item
             )
           );
           break;
@@ -111,6 +112,16 @@ export function CartProvider({
     },
     [cartItems]
   );
+
+  const updateAllQuantities = useCallback(async () => {
+    const isUpdated = cartItems.filter((item) => item.isUpdated);
+
+    console.log("isUpdated : ", isUpdated);
+
+    const results = await updateCartItems(isUpdated);
+
+    console.log("result : ", results);
+  }, [cartItems]);
 
   const removeItem = useCallback(async (itemId: number) => {
     const isSuccess = await deleteCartItem(itemId);
@@ -181,6 +192,7 @@ export function CartProvider({
     toggleChecked,
     toggleAllChecked,
     updateQuantity,
+    updateAllQuantities,
     removeItem,
     clear,
     toggleLike,

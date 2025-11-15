@@ -21,6 +21,7 @@ export async function GET() {
         )`
     )
     .eq('user_id', tempUid)
+    .order('id', { ascending: false })
 
     const typedRawCartItems: RawCartItem[] | null = rawCartItems as RawCartItem[] | null;
 
@@ -37,6 +38,7 @@ export async function GET() {
         return {
             id: item.product_id,
             checked: true,
+            isUpdated:false,
             title: item.products.name,
             brand: item.products.brand,
             image: item.products.image.length !==0 ?item.products.image : "images/review/product3.jpg" ,//추후 이미지 준비중인 상품 이미지 넣는 자리
@@ -63,7 +65,7 @@ export async function DELETE(request: NextRequest) {
     .eq('product_id', productId)
     
     if(error){
-        return NextResponse.json({ error: 'Failed to deleting cart item: ' + error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to delete cart item: ' + error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true })
