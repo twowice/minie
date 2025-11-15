@@ -22,3 +22,8 @@ interface RawCartItem {
         discount_amount: number;
   }
 }
+
+interface CartItemInsertPayload{
+    product_id: number;
+    product_num: number;
+}
