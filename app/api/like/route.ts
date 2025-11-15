@@ -36,7 +36,7 @@ export async function GET() {
     const transformedCartItems: CartItem[] = typedRawCartItems.map((item: RawCartItem) => {
         return {
             id: item.product_id,
-            checked: false,
+            checked: true,
             title: item.products.name,
             brand: item.products.brand,
             image: item.products.image.length !==0 ?item.products.image : "images/review/product3.jpg" ,//추후 이미지 준비중인 상품 이미지 넣는 자리

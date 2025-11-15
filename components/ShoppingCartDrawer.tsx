@@ -73,6 +73,7 @@ export default function ShoppingCartDrawer({
               value={currentTabsValue}
               onValueChange={(e) => setCurrentTabsValue(e.value)}
               display="flex"
+              w={"100%"}
               flexDirection="column"
               flex="1"
               overflow="hidden"
@@ -83,28 +84,39 @@ export default function ShoppingCartDrawer({
                 alignItems="center"
                 color={"black"}
                 px="40px"
+                w={"100%"}
                 height={"49px"}
               >
-                <Tabs.List borderBottom={"none"}>
+                <Tabs.List borderBottom={"none"} display={"flex"} w="100%">
                   <Tabs.Trigger
                     value="cart"
                     color="#B2B2B2"
+                    flex={1}
                     borderBottom={"1px solid #B2B2B2"}
                     bottom={"-1px"}
                     _selected={{ color: "#FA6D6D", bottom: "0px" }}
                   >
-                    <Drawer.Title w="80px" fontSize="16px" fontWeight="medium">
+                    <Drawer.Title
+                      w={"100%"}
+                      fontSize="16px"
+                      fontWeight="medium"
+                    >
                       장바구니
                     </Drawer.Title>
                   </Tabs.Trigger>
                   <Tabs.Trigger
                     value="like"
                     color="#B2B2B2"
+                    flex={1}
                     borderBottom={"1px solid #B2B2B2"}
                     bottom={"-1px"}
                     _selected={{ color: "#FA6D6D", bottom: "0px" }}
                   >
-                    <Drawer.Title w="80px" fontSize="16px" fontWeight="medium">
+                    <Drawer.Title
+                      w={"100%"}
+                      fontSize="16px"
+                      fontWeight="medium"
+                    >
                       좋아요
                     </Drawer.Title>
                   </Tabs.Trigger>
@@ -116,13 +128,6 @@ export default function ShoppingCartDrawer({
                     bottom={"-1px"}
                   />
                 </Tabs.List>
-                <Button
-                  fontSize={"12px"}
-                  fontWeight="medium"
-                  onClick={() => clear(currentTabsValue)}
-                >
-                  전체 삭제
-                </Button>
               </Drawer.Header>
 
               <Drawer.Body
@@ -173,7 +178,7 @@ export default function ShoppingCartDrawer({
                 <Box flex="1" overflowY="auto">
                   <Tabs.Content value="cart" style={{ height: "100%" }}>
                     {cartItems.length === 0 && (
-                      <Box color={"black"}>
+                      <Box color={"black"} px={"40px"}>
                         장바구니에 담긴 상품이 없습니다.
                       </Box>
                     )}
@@ -193,7 +198,9 @@ export default function ShoppingCartDrawer({
                   </Tabs.Content>
                   <Tabs.Content value="like" style={{ height: "100%" }}>
                     {likedItems.length === 0 && (
-                      <Box color={"black"}>좋아요에 담긴 상품이 없습니다.</Box>
+                      <Box color={"black"} px={"40px"}>
+                        좋아요에 담긴 상품이 없습니다.
+                      </Box>
                     )}
                     {likedItems.map((item) => (
                       <LikedItem
@@ -209,10 +216,20 @@ export default function ShoppingCartDrawer({
               </Drawer.Body>
             </Tabs.Root>
 
-            <Drawer.Footer px="40px" flexShrink={0}>
+            <Drawer.Footer px="40px" flexShrink={0} display={"flex"}>
+              <Button
+                flex={1}
+                color={"black"}
+                bg={"white"}
+                fontWeight={"medium"}
+                border={"1px solid #CCCCCC"}
+                onClick={() => clear(currentTabsValue)}
+              >
+                전체 삭제
+              </Button>
               {currentTabsValue === "cart" && (
                 <Button
-                  w={"100%"}
+                  flex={1}
                   color={"white"}
                   bg={"#FA6D6D"}
                   fontWeight={"medium"}
@@ -222,7 +239,7 @@ export default function ShoppingCartDrawer({
               )}
               {currentTabsValue === "like" && (
                 <Button
-                  w={"100%"}
+                  flex={1}
                   color={"white"}
                   bg={"#FA6D6D"}
                   fontWeight={"medium"}
