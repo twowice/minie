@@ -7,7 +7,11 @@ import {
   deleteCartItem,
   updateCartItems,
 } from "@/lib/minie/cartAPI";
-import { addLikedItem, deleteLikedItem } from "@/lib/minie/likeAPI";
+import {
+  addLikedItem,
+  deleteAllLikedItem,
+  deleteLikedItem,
+} from "@/lib/minie/likeAPI";
 import {
   useContext,
   createContext,
@@ -138,7 +142,7 @@ export function CartProvider({
         clearCart();
         break;
       case "like":
-        setLikedItems([]);
+        clearLikedItem();
         break;
       default:
         console.warn(
@@ -151,6 +155,11 @@ export function CartProvider({
   const clearCart = async () => {
     const isSuccess = await deleteAllCartItems();
     isSuccess ? setCartItems([]) : console.log("delete All Cart Item failed");
+  };
+
+  const clearLikedItem = async () => {
+    const isSuccess = await deleteAllLikedItem();
+    isSuccess ? setLikedItems([]) : console.log("delete All Cart Item failed");
   };
 
   const toggleLike = useCallback(
