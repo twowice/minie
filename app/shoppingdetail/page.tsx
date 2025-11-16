@@ -1,6 +1,5 @@
 "use client";
 import TypeBadge from "@/components/Badge";
-import ProductQna from "@/components/ProductQna";
 import RatingStar from "@/components/RatingStar";
 import {
   Accordion,
@@ -30,15 +29,30 @@ import { FaMinus, FaPlus, FaRegHeart } from "react-icons/fa6";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 
 export default function ShoppingDetail() {
+  const comments = [
+    { userid: "A", rating: 5, content: "좋아요" },
+    { userid: "B", rating: 4, content: "괜찮아요" },
+    { userid: "C", rating: 3, content: "보통이에요" },
+  ];
+
   const [items, setItems] = useState([]);
-  const [rating, setRating] = useState(5.0);
+  const [selectItems, setSelectItems] = useState(null);
+  const [rating, setRating] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [review, setReview] = useState(0);
+  const [like, setLike] = useState(false);
 
   useEffect(() => {
     fetch("/data/items.json")
       .then((res) => res.json())
-      .then((data) => setItems(data));
+      .then((data) => {
+        setItems(data);
+        setSelectItems(data[19]);
+      });
+    if (comments.length > 0) {
+      const total = comments.reduce((acc, comment) => acc + comment.rating, 0);
+      setRating((total / comments.length).toFixed(1));
+    }
   }, []);
 
   const increase = () => setQuantity((prev) => prev + 1);
@@ -138,8 +152,9 @@ export default function ShoppingDetail() {
                 bgColor={"white"}
                 p={2}
                 borderRadius="50%"
+                onClick={() => setLike((prev) => !prev)}
               >
-                <FaRegHeart color="#cccccc" size={18} />
+                <FaRegHeart color={like ? "#FA6D6D" : "#cccccc"} size={18} />
               </Button>
             </Flex>
             <Text
@@ -168,17 +183,21 @@ export default function ShoppingDetail() {
               borderBottom={"1px solid #cccccc"}
               paddingBottom={"20px"}
             >
-              <TypeBadge typeName={"antiaging"} />
-              <TypeBadge typeName={"entire"} />
-              <TypeBadge typeName={"dry"} />
-              <TypeBadge typeName={"cream"} />
+              {selectItems && (
+                <>
+                  <TypeBadge typeName={selectItems.skincare} />
+                  <TypeBadge typeName={selectItems.type} />
+                  <TypeBadge typeName={selectItems.mytype} />
+                  <TypeBadge typeName={selectItems.use} />
+                </>
+              )}
             </Flex>
             <Flex
               justifyContent={"space-between"}
               p={"8px 16px"}
               color={"black"}
               background={"rgba(204,204,204,0.5)"}
-              border={"1px solidrgb(204,204,204)"}
+              border={"1px solid rgb(204,204,204)"}
               borderRadius={"5px"}
               alignItems={"center"}
             >
@@ -352,7 +371,7 @@ export default function ShoppingDetail() {
             src={"/images/test/image.png"}
             w={"100%"}
             alt=""
-            p={"20px 0"}
+            p={"40px 0 20px 0 "}
           />
         </Tabs.Content>
         <Tabs.Content value="payInfo">
@@ -362,7 +381,7 @@ export default function ShoppingDetail() {
               fontWeight={"700"}
               color={"black"}
               textAlign={"left"}
-              p={"20px 0 16px 0"}
+              p={"20px 0 20px 0"}
             >
               상품정보 제공고시
             </Text>
@@ -598,13 +617,18 @@ export default function ShoppingDetail() {
               alignItems={"center"}
               borderBottom={"1px solid #cccccc"}
             >
-              <Text fontSize={"24px"}>상품 리뷰</Text>
+              <Text fontSize={"24px"} fontWeight={"700"}>
+                상품 리뷰
+              </Text>
               <Text fontSize={"16px"}>
-                <strong>{length}</strong> 개의 리뷰
+                <strong>{reviews.length}</strong> 개의 리뷰
               </Text>
             </HStack>
           </Box>
-          <RatingStar rating={{ 5: 14, 4: 8, 3: 3, 2: 1, 1: 2 }} />
+          <RatingStar
+            rating={{ 5: 14, 4: 8, 3: 3, 2: 1, 1: 2 }}
+            reviews={review}
+          />
           <Flex
             p={"8px 0"}
             alignItems={"center"}
@@ -612,10 +636,13 @@ export default function ShoppingDetail() {
             fontSize={"12px"}
           >
             <NativeSelect.Root size={"xs"} w={"60px"} variant={"plain"}>
-              <NativeSelect.Field padding={"2px 4px"} h={"24px"}>
-                <option value="최신 순" defaultChecked>
-                  최신 순
-                </option>
+              <NativeSelect.Field
+                padding={"2px 4px"}
+                h={"24px"}
+                color={"black"}
+                defaultValue={"최신 순"}
+              >
+                <option value="최신 순">최신 순</option>
                 <option
                   value="별점순"
                   // onChange={() => setReview().sort((a, b) => a - b)}
@@ -728,18 +755,20 @@ export default function ShoppingDetail() {
           </Flex>
         </Tabs.Content>
         <Tabs.Content value="QnA">
-          <Box p={"20px 0"}>
+          <Box>
             <HStack
-              pb={"20px"}
+              p={"20px 0"}
               color={"black"}
               justifyContent={"space-between"}
               alignItems={"center"}
               borderBottom={"1px solid #cccccc"}
             >
-              <Text fontSize={"24px"}>상품 문의</Text>
+              <Text fontSize={"24px"} fontWeight={"700"}>
+                상품 문의
+              </Text>
               <Flex gap={"16px"} alignItems={"center"}>
                 <Text fontSize={"16px"}>
-                  <strong>{reviews.length}</strong> 개의 리뷰
+                  <strong>{reviews.length}</strong> 개의 문의
                 </Text>
                 <Button
                   bgColor={"white"}

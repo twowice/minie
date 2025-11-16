@@ -15,7 +15,6 @@ export default function RatingStats({ rating = {} }: RatingStatsProps) {
   }
 
   const totalCount = ratingEntries.reduce((acc, [, count]) => acc + count, 0);
-
   return (
     <Flex
       w="100%"
