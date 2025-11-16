@@ -28,7 +28,7 @@ export default function ProductQna() {
       commentdate: "2025.10.23",
     },
     {
-      value: "info",
+      value: "productdetail",
       title: "상품상세문의",
       subtitle: "기존 제품과의 차이",
       status: "답변 대기중",
@@ -43,7 +43,13 @@ export default function ProductQna() {
   ];
 
   return (
-    <Accordion.Root variant={"outline"} mt={"10px"} multiple w={"100%"} p={0}>
+    <Accordion.Root
+      variant={"outline"}
+      mt={"10px"}
+      collapsible
+      w={"100%"}
+      p={0}
+    >
       {review.map((item, index) => (
         <Accordion.Item key={index} value={item.value} p={"16px 32px"}>
           <Accordion.ItemTrigger
