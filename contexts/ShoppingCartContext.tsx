@@ -7,7 +7,11 @@ import {
   deleteCartItem,
   updateCartItems,
 } from "@/lib/minie/cartAPI";
-import { addLikedItem, deleteLikedItem } from "@/lib/minie/likeAPI";
+import {
+  addLikedItem,
+  deleteAllLikedItem,
+  deleteLikedItem,
+} from "@/lib/minie/likeAPI";
 import {
   addLikedItem,
   deleteAllLikedItem,
