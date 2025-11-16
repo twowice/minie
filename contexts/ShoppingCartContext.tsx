@@ -13,11 +13,6 @@ import {
   deleteLikedItem,
 } from "@/lib/minie/likeAPI";
 import {
-  addLikedItem,
-  deleteAllLikedItem,
-  deleteLikedItem,
-} from "@/lib/minie/likeAPI";
-import {
   useContext,
   createContext,
   ReactNode,
