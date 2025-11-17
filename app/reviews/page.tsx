@@ -1,76 +1,51 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Spinner, Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeSelectIndicator, createListCollection, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { Spinner, Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeSelectIndicator, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import ContentDialog from "@/components/ContentDialog";
 
 export default function Page() {
-    /* FETCH DATA */
-    const [reviews, setReviews] = useState<any[]>([]);
+    /* 필터 & 정렬 */
+    const [sortType, setSortType] = useState<"latest" | "rating">("latest");
+    const [photoFilter, setPhotoFilter] = useState(false);
+    const [normalFilter, setNormalFilter] = useState(false);
+    /* 데이터 & 평균 점수 및 그래프 */
     const [loading, setLoading] = useState(true);
+    const [reviews, setReviews] = useState<any[]>([]);
     const [reviewTotalData, setReviewTotal] = useState<{ totalCount: number; rating: number; distribution: Record<number, number> }>
-        ({
-            totalCount: 0,
-            rating: 0,
-            distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-        });
+        ({ totalCount: 0, rating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } });
+    /* 페이지네이션 */
     const [page, setPage] = useState(1);
     const pageSize = 5;
 
-    useEffect(() => {
-        const fetchReviews = async () => {
-            try {
-                const res = await fetch(`http://localhost:3000/api/reviews?page=${page}&pageSize=${pageSize}`);
-                const result = await res.json();
+    const fetchReviews = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`http://localhost:3000/api/reviews?page=${page}&pageSize=${pageSize}&sort=${sortType}&photo=${photoFilter}&normal=${normalFilter}`);
+            const result = await res.json();
 
-                if (res.ok && result.data) {
-                    setReviews(result.data);
-                    setReviewTotal({
-                        totalCount: result.totalCount,
-                        rating: result.rating,
-                        distribution: result.distribution
-                    })
-                } else {
-                    console.error("리뷰 불러오기 실패:", result.message || result.error);
-                }
-            } catch (e) {
-                console.error("서버 연결 실패:", e);
-            } finally {
-                setLoading(false);
+            if (res.ok && result.data) {
+                setReviews(result.data);
+                setReviewTotal({
+                    totalCount: result.totalCount,
+                    rating: result.rating,
+                    distribution: result.distribution
+                });
             }
-        };
-        fetchReviews();
-    }, [page]);
+        }
+        catch (e) { console.error("서버 연결 실패:", e); }
+        finally { setLoading(false); }
+    };
 
-    /* rating */
+    useEffect(() => { fetchReviews(); }, [page, sortType, photoFilter, normalFilter]);
+
+    /* 전체 평균 점수 계산 */
     const fullStars = Math.floor(reviewTotalData.rating);
     const hasHalfStar = reviewTotalData.rating * 10 % 10 >= 5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
-    // const fullStars2 = Math.floor(reviewTotalData.rating);
-    // const hasHalfStar2 = reviewTotalData.rating * 10 % 10 >= 5;
-    // const emptyStars2 = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
-    /* SORT */
-    const [sortType, setSortType] = useState<"latest" | "rating">("latest");
-    const [photoFilter, setPhotoFilter] = useState(false);
-    const [normalFilter, setNormalFilter] = useState(false);
-    const sortedReviews = useMemo(() => {
-        console.log(reviews);
-        return [...reviews]
-            .filter((review) => {
-                if (photoFilter && !normalFilter) return review.image_url;
-                if (!photoFilter && normalFilter) return !review.image_url;
-                return true;
-            })
-            .sort((a, b) => {
-                if (sortType === "latest") {
-                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                } else return b.rating - a.rating;
-            });
-    }, [reviews, sortType, photoFilter, normalFilter]);
-
+    /* 로딩 */
     if (loading) {
         return (
             <VStack colorPalette="pink">
@@ -93,7 +68,7 @@ export default function Page() {
                 {" "}개의 리뷰
             </Text>
 
-            {/* 점수 통계 */}
+            {/* 전체 평균 점수 */}
             <HStack h="42px" py="5px" paddingTop="10px">
                 <Text fontSize="16px" color="black" paddingRight="10px">
                     <Text as="span" fontSize="32px" fontWeight="bold" color="black">
@@ -111,35 +86,35 @@ export default function Page() {
                             </Text>
                         ))}
 
-                    <Box
-                        width="32px"
-                        height="32px"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        position="relative"
-                    >
-                        <Text key="half" color="gray.300" fontSize="32px">
-                            ★
-                        </Text>
-                        {hasHalfStar && (
-                            <Text
-                                fontSize="32px"
-                                color="yellow.400"
-                                userSelect="none"
-                                lineHeight="1"
-                                position="absolute"
-                                top="0"
-                                left="0"
-                                width={hasHalfStar ? "50%" : "100%"}
-                                overflow="hidden"
-                                clipPath={hasHalfStar ? "inset(0 0 0 0)" : "none"}
-                            >
+                    {hasHalfStar && (
+                        <Box
+                            key="half-star"
+                            width="32px"
+                            height="32px"
+                            position="relative"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                        >
+                            <Text color="gray.300" fontSize="32px">
                                 ★
                             </Text>
 
-                        )}
-                    </Box>
+                            <Text
+                                color="yellow.400"
+                                fontSize="32px"
+                                position="absolute"
+                                top="0"
+                                left="0"
+                                width="50%"
+                                overflow="hidden"
+                                lineHeight="1"
+                            >
+                                ★
+                            </Text>
+                        </Box>
+                    )}
+
                     {Array(emptyStars)
                         .fill(0)
                         .map((_, i) => (
@@ -150,6 +125,7 @@ export default function Page() {
                 </HStack>
             </HStack>
 
+            {/* 5,4,3,2,1점 별 통계 그래프 */}
             <Flex gap="20px" alignItems="flex-end" h="176px" borderBottom="1px solid #D8D8D8" py="15px">
                 {Object.entries(reviewTotalData.distribution)
                     .sort((a, b) => Number(b[0]) - Number(a[0]))
@@ -179,7 +155,7 @@ export default function Page() {
                 }
             </Flex>
 
-            {/* 게시판 필터 */}
+            { /* 필터 & 정렬 */}
             <Flex
                 justifyContent="space-between"
                 alignItems="center"
@@ -227,9 +203,9 @@ export default function Page() {
                 </Flex>
             </Flex>
 
-            {/* 게시판 컨텐츠 */}
+            {/* 게시판 바디 */}
             <VStack mt="20px" align="stretch">
-                {sortedReviews.map((review) => (
+                {reviews.map((review) => (
                     <Dialog.Root key={review.id}>
                         <Flex key={review.id} borderBottom="1px solid #E3E3E3" p="16px" gap="30px" borderRadius="5px">
                             <VStack align="center" w="80px">
@@ -300,7 +276,7 @@ export default function Page() {
                                                             <Text key={`empty-${i}`} color="gray.300" fontSize="19px">
                                                                 ★
                                                             </Text>
-                                                    ))}
+                                                        ))}
                                                 </>
                                             );
                                         })()}
@@ -311,8 +287,9 @@ export default function Page() {
                                     {review.products.name}
                                 </Text>
 
+                                {/* 리뷰 상세 보기 */}
                                 <ContentDialog
-                                    reviewProductName={review.products.name}
+                                    reviewImage={review.image_url}
                                     content={review.content}
                                     productName={review.products.name}
                                     productImage={review.products.image}
@@ -320,12 +297,13 @@ export default function Page() {
                                     userId={review.user_id}
                                     productId={review.product_id}
                                     id={review.id}
+                                    onUpdate={fetchReviews}
                                 />
 
+                                {/* 리뷰 이미지 크게 보기 */}
                                 {review.image_url && (
                                     <Dialog.Trigger asChild>
                                         <Box position="relative" display="inline-block" w="100px" h="100px">
-                                            {/* 리뷰 이미지 */}
                                             <Image
                                                 src={review.image_url}
                                                 alt={review.image_url}
@@ -358,7 +336,7 @@ export default function Page() {
                                 )}
                             </VStack>
                         </Flex>
-
+                        
                         <Portal>
                             <Dialog.Backdrop />
                             <Dialog.Positioner>
@@ -368,8 +346,8 @@ export default function Page() {
                                     </Dialog.Header>
                                     <Dialog.Body>
                                         <Image
-                                            src={review.products.image}
-                                            alt={review.products.name}
+                                            src={review.image_url}
+                                            alt={review.image_url}
                                             w="100%"
                                             borderRadius="10px"
                                             objectFit="cover"
@@ -384,6 +362,8 @@ export default function Page() {
                     </Dialog.Root>
                 ))}
             </VStack>
+
+            {/* 페이지네이션 */}
             <Flex justify="center" mt="20px">
                 <Pagination.Root count={Math.ceil(reviewTotalData.totalCount)} pageSize={5} page={page} defaultPage={1} m={'0 auto'} w={'100%'} textAlign={'center'} p={'4'}>
                     <ButtonGroup variant="ghost" size="sm">
