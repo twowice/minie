@@ -15,6 +15,9 @@ import { useState } from "react" // ID/PW를 기억하기 위한 상태 관리 H
 import { useRouter } from "next/navigation" // 로그인 성공 시 다른 곳으로 이동하기 위한 HOOK
 import { auth } from "@/firebase/firebaseConfig" // 파이어베이스가 제공하는 인증 문지기
 import { signInWithEmailAndPassword } from "firebase/auth"; // 파이어베이스가 제공하는 로그인 함수
+import { getUserByFirebaseUid } from "@/lib/minie/authAPI";
+
+import { signInWithGoogle } from "@/lib/minie/authAPI"; // 구글로 로그인 하기 위해 내가 만든 비동기 로그인 함수
 
 export default function LoginPage(){
 
@@ -23,17 +26,41 @@ export default function LoginPage(){
   const [error, setError] = useState(""); // 에러 메세지 출력을 위한 상태
   const router = useRouter(); // 라우터 변수
 
-  // 이메일 로그인 비동기 함수
-  const handleEmailLogin = async () => {  
-    try{
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/");
-     }catch(err: any) {
-      setError(err.message);
+
+
+// EMAIL/PW 로그인 비동기 함수
+const handleEmailLogin = async () => {  
+  try{
+    // 1. Firebase 로그인
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
+    
+    // 2. Supabase에서 사용자 이름 가져오기
+    const { data: userData } = await getUserByFirebaseUid(firebaseUser.uid);
+    
+    // 3. 환영 메시지
+    alert(`환영합니다 ${userData?.name || "사용자"}님!`);
+    
+    // 4. 홈으로 이동
+    router.push("/");
+  } catch(err: any) {
+    setError(err.message);
+  }
+};
+
+
+  // Google login 비동기 함수
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+      router.push('/');
+    }catch(err: any){
+      console.error("Google 로그인 오류", error);
+      setError("Google 로그인에 실패했습니다.");
     }
   };
 
-
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   return(
     // body 전체 영역
     <Box 
@@ -160,6 +187,7 @@ export default function LoginPage(){
               color="rgba(0, 0, 0, 0.8)"
               height="48px"
               fontWeight="bold"
+              onClick={handleGoogleLogin}
             >
               <Box position="absolute" left="16px">  {/* 아이콘 왼쪽 고정 */}
                 <FcGoogle style={{ width: '24px', height: '24px' }} />

@@ -1,14 +1,23 @@
 // authSupabase.ts에서 연결한 URL과 PUBLIC KEY를 가져오기 위한 import
 import { authSupabase } from "@/lib/authSupabase";
 
+// google login을 위한 import
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "@/firebase/firebaseConfig";
+
+
+
+
 // supabase(DB)에 저장할 정보들
-export const createUser = async (userDate: {
+export const createUser = async (userData: {
   firebase_uid: string;
   email: string;
   name: string;
   phone: string;
   birth_date: { year: string; month: string; day: string };
   gender?: string;
+  profile_image?: string | null; 
+  
 }) => {
   // data = 결과, error = 오류를 반환해주는 supabase 변수
   const { data, error } = await authSupabase
@@ -16,13 +25,13 @@ export const createUser = async (userDate: {
     .from('users') // supabase의 users 테이블로 이동
     .insert([
       {
-        firebase_uid: userDate.firebase_uid, // 내가 web에서 입력받은 firebase_uid 값을 supabase users table에 있는 firebase_uid에 추가할게
-        email: userDate.email,
-        name: userDate.name,
-        phone: userDate.phone,
-        birth_date: userDate.birth_date,
-        gender: userDate.gender || null,
-        profile_image: null
+        firebase_uid: userData.firebase_uid, // 내가 web에서 입력받은 firebase_uid 값을 supabase users table에 있는 firebase_uid에 추가할게
+        email: userData.email,
+        name: userData.name,
+        phone: userData.phone,
+        birth_date: userData.birth_date,
+        gender: userData.gender || null,
+        profile_image: userData.profile_image || null
       }
     ])
     .select() // 방금 추가한거 다시 가져와
@@ -38,9 +47,6 @@ export const createUser = async (userDate: {
   return data;
 }
 
-
-
-
 // 이메일로 사용자 조회 (중복 확인용)
 export const getUserByEmail = async (email: string) => {
   const { data, error } = await authSupabase
@@ -53,9 +59,6 @@ export const getUserByEmail = async (email: string) => {
 }
 
 
-
-
-
 // Firebase UID로 사용자 조회
 export const getUserByFirebaseUid = async (firebaseUid: string) => {
   const { data, error } = await authSupabase
@@ -65,4 +68,38 @@ export const getUserByFirebaseUid = async (firebaseUid: string) => {
     .single();
 
   return { data, error };
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------
+// Google login 함수
+export const signInWithGoogle = async () => {
+  // new GoogleAuthProvider()란 구글 로그인 정보를 담은 객체를 새로 생성해줌.
+  const provider = new GoogleAuthProvider();
+
+  try{
+    // 구글 popup으로 로그인
+    const result = await signInWithPopup(auth, provider);
+    // .user 안에는 uid, email, displayName, photoURL등 사용자의 정보가 담겨있다
+    const firebaseUser = result.user;
+
+    // supabase에 이미 있는 사용자인지 확인.
+    const { data: existingUser } = await getUserByFirebaseUid(firebaseUser.uid);
+
+    if(!existingUser){
+      await createUser({
+        firebase_uid: firebaseUser.uid,
+        email: firebaseUser.email || "",
+        name: firebaseUser.displayName || "구글 사용자",
+        phone: "", // 구글은 전화번호 안 줌
+        birth_date: { year: "", month: "", day: ""}, // 구글은 생년월일 안 줌
+        profile_image: firebaseUser.photoURL
+      });
+      alert("환영합니다 " + (firebaseUser.displayName || "구글 사용자") + "님!");
+    } 
+
+    return firebaseUser;
+  }catch(error){
+    console.error("Google 로그인 오류", error);
+    throw error;
+  }
 }
