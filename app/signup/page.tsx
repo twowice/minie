@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation"
 import { auth } from "@/firebase/firebaseConfig" // 인증 문지기
 import { createUserWithEmailAndPassword } from "firebase/auth" // 회원가입 시켜주는 firebase 함수
 
+import { createUser, getUserByEmail } from "@/lib/minie/authAPI"
+
 
 // =====================================================================================================================================================================================
 export default function SignupPage() {
@@ -83,47 +85,62 @@ export default function SignupPage() {
 };
 
 
-  // 회원가입 비동기 함수
-  const handleSignUP = async () => {
-    
-    // 이메일이 중복 확인을 눌렀는지
-    if (!isEmailChecked) {
-      setError((prev) => ({ ...prev, email: "이메일 중복확인을 먼저 해주세요." }));
-      return;
-    } 
+// 회원가입 비동기 함수
+const handleSignUP = async () => {
+  
+  // 이메일이 중복 확인을 눌렀는지
+  if (!isEmailChecked) {
+    setError((prev) => ({ ...prev, email: "이메일 중복확인을 먼저 해주세요." }));
+    return;
+  } 
 
-    // 이메일 정규 표현식이 false라면
-    if(!validateEmail(email)){
-      setError( (prev) => ({...prev, email: "유효한 이메일 형식이 아닙니다."}));
-      return;
-    }
+  // 이메일 정규 표현식이 false라면
+  if(!validateEmail(email)){
+    setError( (prev) => ({...prev, email: "유효한 이메일 형식이 아닙니다."}));
+    return;
+  }
 
-    // 비밀번호 규격을 맞추지 못했다면 
-    if(!validatePassword(password)){
-      setError( (prev) => ({...prev, password: "영문+숫자+특수문자가 포함된 8~12자리로 입력해주세요."}))
-      return;
-    }
+  // 비밀번호 규격을 맞추지 못했다면 
+  if(!validatePassword(password)){
+    setError( (prev) => ({...prev, password: "영문+숫자+특수문자가 포함된 8~12자리로 입력해주세요."}))
+    return;
+  }
 
-    // 비밀번호와 비밀번호 확인이 일치하지 않으면
-    if(password !== confirmPassword){
-      setError( (prev) => ({...prev, confirmPassword: "비밀번호가 일치하지 않습니다."}));
-      return; // 종료
-    }
+  // 비밀번호와 비밀번호 확인이 일치하지 않으면
+  if(password !== confirmPassword){
+    setError( (prev) => ({...prev, confirmPassword: "비밀번호가 일치하지 않습니다."}));
+    return;
+  }
 
-    // 전화번호가 '-'을 제외한 11자리 숫자가 아닐 경우
-    if(!validatePhone(phone)){
-      setError( (prev) => ({...prev, phone: "전화번호는 '-'을 제외한 11자리의 숫자를 입력해주세요."}));
-      return;
-    }
+  // 전화번호가 '-'을 제외한 11자리 숫자가 아닐 경우
+  if(!validatePhone(phone)){
+    setError( (prev) => ({...prev, phone: "전화번호는 '-'을 제외한 11자리의 숫자를 입력해주세요."}));
+    return;
+  }
 
-    try{
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/login");
+  try{
+    // 1. Firebase 회원가입
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
 
-      }catch(err: any){
-        setError(err.message);
-      }
-    };
+    // authAPI.ts에서 만든 createUser 함수
+    await createUser({
+      // firebaseUser에 저장된 uid 값을 supabase에 등록된 firebase_uid 컬럼에도 넘겨주기 위한 데이터 삽입
+      firebase_uid: firebaseUser.uid,
+      email: email,
+      name: name,
+      phone: phone,
+      birth_date: birthdate
+    });
+
+    alert("회원가입이 완료되었습니다!");
+    router.push("/login");
+
+  } catch(err: any) {
+    console.error("회원가입 오류:", err);
+    alert("회원가입 중 오류가 발생했습니다.");
+  }
+};
 
 
 // =====================================================================================================================================================================================
