@@ -1,6 +1,12 @@
 "use client";
 
-import { CartItem as ApiCartItem } from "@/app/api/cart/cart";
+import { CartItem } from "@/app/api/cart/cart";
+import {
+  addCartItems,
+  deleteAllCartItems,
+  deleteCartItem,
+  updateCartItems,
+} from "@/lib/minie/cartAPI";
 import {
   useContext,
   createContext,
@@ -10,11 +16,6 @@ import {
   useMemo,
 } from "react";
 
-// 'checked' 속성을 포함하는 내부적인 CartItem 타입을 정의
-export interface CartItem extends ApiCartItem {
-  checked: boolean;
-}
-
 // Context가 제공할 데이터와 함수의 타입을 정의
 interface CartContextDataType {
   cartItems: CartItem[];
@@ -22,6 +23,7 @@ interface CartContextDataType {
   toggleChecked: (id: number, type: "cart" | "like") => void;
   toggleAllChecked: (type: "cart" | "like") => void;
   updateQuantity: (itemId: number, type: "plus" | "minus") => void;
+  updateAllQuantities: () => void;
   removeItem: (itemId: number) => void;
   clear: (type: string) => void;
   toggleLike: (item: CartItem) => void;
@@ -43,8 +45,8 @@ export function useCart() {
 
 interface CartProviderProps {
   children: ReactNode;
-  initialCartItems: ApiCartItem[];
-  initialLikedItems: ApiCartItem[];
+  initialCartItems: CartItem[];
+  initialLikedItems: CartItem[];
 }
 
 export function CartProvider({
@@ -91,14 +93,18 @@ export function CartProvider({
         case "plus":
           setCartItems((prev) =>
             prev.map((item) =>
-              item.id === itemId ? { ...item, num: item.num + 1 } : item
+              item.id === itemId
+                ? { ...item, num: item.num + 1, isUpdated: true }
+                : item
             )
           );
           break;
         case "minus":
           setCartItems((prev) =>
             prev.map((item) =>
-              item.id === itemId ? { ...item, num: item.num - 1 } : item
+              item.id === itemId
+                ? { ...item, num: item.num - 1, isUpdated: true }
+                : item
             )
           );
           break;
@@ -107,19 +113,29 @@ export function CartProvider({
     [cartItems]
   );
 
-  const removeItem = useCallback(
-    async (itemId: number) => {
-      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-    },
-    [cartItems]
-  );
+  const updateAllQuantities = useCallback(async () => {
+    const isUpdated = cartItems.filter((item) => item.isUpdated);
+
+    console.log("isUpdated : ", isUpdated);
+
+    const results = await updateCartItems(isUpdated);
+
+    console.log("result : ", results);
+  }, [cartItems]);
+
+  const removeItem = useCallback(async (itemId: number) => {
+    const isSuccess = await deleteCartItem(itemId);
+
+    isSuccess
+      ? setCartItems((prev) => prev.filter((item) => item.id !== itemId))
+      : console.log("delete Cart Item failed : ", itemId);
+  }, []);
 
   const clear = useCallback(async (type: string) => {
     switch (type) {
       case "cart":
-        setCartItems([]);
+        clearCart();
         break;
-
       case "like":
         setLikedItems([]);
         break;
@@ -130,6 +146,11 @@ export function CartProvider({
         break;
     }
   }, []);
+
+  const clearCart = async () => {
+    const response = await deleteAllCartItems();
+    response ? setCartItems([]) : console.log("delete All Cart Item failed");
+  };
 
   const toggleLike = useCallback(
     (item: CartItem) => {
@@ -146,6 +167,18 @@ export function CartProvider({
     const itemsToAdd = likedItems.filter((item) => item.checked);
     const cartItemIds = new Set(cartItems.map((i) => i.id));
     const newItems = itemsToAdd.filter((item) => !cartItemIds.has(item.id));
+    const payload = newItems.map((item) => ({
+      product_id: item.id,
+      product_num: item.num,
+    }));
+
+    const isSuccess = await addCartItems(payload);
+
+    if (!isSuccess) {
+      console.log("delete Cart Item failed : ", payload);
+      return;
+    }
+
     setCartItems((prev) => [
       ...newItems.map((i) => ({ ...i, checked: false })),
       ...prev,
@@ -159,6 +192,7 @@ export function CartProvider({
     toggleChecked,
     toggleAllChecked,
     updateQuantity,
+    updateAllQuantities,
     removeItem,
     clear,
     toggleLike,
