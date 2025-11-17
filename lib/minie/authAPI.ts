@@ -5,6 +5,8 @@ import { authSupabase } from "@/lib/authSupabase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
 
+// 프로필 이미지 업데이트를 위한 improt
+import { supabaseStorage } from "@/lib/authSupabase";
 
 
 
@@ -103,3 +105,39 @@ export const signInWithGoogle = async () => {
     throw error;
   }
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------
+// 프로필 이미지 업로드 함수
+export const uploadProfileImage = async (file: File, userId: string) => {
+  try {
+    // 파일 확장자 추출
+    const fileExt = file.name.split('.').pop();
+    // 고유한 파일명 생성 (userId + 현재시간)
+    const fileName = `${userId}-${Date.now()}.${fileExt}`;
+    
+    // Supabase Storage에 업로드
+    const { data, error } = await supabaseStorage
+      .from('profile-images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error('이미지 업로드 오류:', error);
+      throw error;
+    }
+
+    // 공개 URL 생성
+    const { data: publicUrlData } = supabaseStorage
+      .from('profile-images')
+      .getPublicUrl(fileName);
+
+    return publicUrlData.publicUrl;
+  } catch (error) {
+    console.error('프로필 이미지 업로드 실패:', error);
+    throw error;
+  }
+};
