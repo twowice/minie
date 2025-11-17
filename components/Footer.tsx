@@ -66,7 +66,7 @@ export default function Footer() {
                     color={"rgba(0, 0, 0, 0.64)"}
                     _hover={{ color: "black" }}
                   >
-                    Miniéweb@Minie@.net
+                    Miniéweb@Minie.net
                   </Link>
                 </Box>
               </Box>
