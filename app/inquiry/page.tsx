@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toaster } from "@/components/ui/toaster"
 import {
     Container,
     Text,
@@ -20,6 +21,54 @@ import {
 export default function Page() {
     const [photo, setPhoto] = useState<File | null>(null);
     const [photoURL, setPhotoURL] = useState<string | null>(null);
+    const [category, setCategory] = useState("");
+    const [content, setContent] = useState("");
+    const [email, setEmail] = useState("");
+    const [domain, setDomain] = useState("");
+
+    /* REQUEST */
+    const handleSend = async () => {
+
+        const fullEmail = `${email}@${domain}`;
+        const formData = new FormData();
+        formData.append("category", category);
+        formData.append("content", content);
+        formData.append("email", fullEmail);
+
+        if (photo) {
+            formData.append("file", photo);
+        }
+
+        console.log("📌 FormData 내용:");
+        for (const [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+
+
+        try {
+            const res = await fetch("/api/inquiry", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await res.json();
+            console.log("서버 응답:", result);
+
+            if (result.message === "이메일 요청 성공") {
+                toaster.create({
+                    type: "success",
+                    title: "문의가 성공적으로 전송되었습니다!",
+                });
+            }
+        } catch (e) {
+            console.error("에러:", e);
+            toaster.create({
+                type: "error",
+                title: "문의 전송 실패!",
+            });
+        }
+    }
+
 
     return (
         <Container maxW="7xl" px={{ base: 4, sm: 6, lg: 8 }}>
@@ -34,7 +83,7 @@ export default function Page() {
                         문의 유형
                     </Text>
                     <NativeSelect.Root w={{ base: "100%", md: "200px" }} h="36px" padding="5px 0px" border="1px solid lightgray" borderRadius="4px" variant="plain">
-                        <NativeSelect.Field fontSize="14px" color="#898989" fontWeight="light" defaultValue="" h="24px">
+                        <NativeSelect.Field fontSize="14px" color="#898989" fontWeight="light" h="24px" value={category} onChange={(e) => setCategory(e.target.value)}>
                             <option value="" style={{ backgroundColor: "#F3F3F3" }}>카테고리를 선택해주세요</option>
                             <option value="온라인 몰" style={{ backgroundColor: "#F3F3F3" }}>온라인 몰</option>
                             <option value="오프라인 몰" style={{ backgroundColor: "#F3F3F3" }}>오프라인 몰</option>
@@ -61,10 +110,12 @@ export default function Page() {
                             _placeholder={{ color: "#898989" }}
                             resize="none"
                             color="#000000"
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
                         />
 
                         <Text fontSize="14px" fontWeight="light" color="#898989">
-                            이미지파일 (JPG, PNG, GIF) 총 3장을 첨부할 수 있어요.
+                            이미지파일 (JPG, PNG, GIF) 1장을 첨부할 수 있어요.
                         </Text>
 
                         {/* 파일 업로드 input */}
@@ -135,9 +186,9 @@ export default function Page() {
                         답변 받으실 이메일
                     </Text>
                     <HStack w="full" gap={2}>
-                        <Input w="full" borderColor="lightgray" color="#000000" placeholder="이메일을 입력해주세요." />
+                        <Input w="full" h="36px" borderColor="lightgray" color="#000000" placeholder="이메일을 입력해주세요." value={email} onChange={(e) => setEmail(e.target.value)} />
                         <NativeSelect.Root w={{ base: "100%", md: "200px" }} h="36px" padding="5px 0px" border="1px solid lightgray" borderRadius="4px" variant="plain">
-                            <NativeSelect.Field fontSize="14px" color="#898989" fontWeight="light" defaultValue="" h="24px">
+                            <NativeSelect.Field fontSize="14px" color="#898989" fontWeight="light" h="24px" value={domain} onChange={(e) => setDomain(e.target.value)}>
                                 <option value="" style={{ backgroundColor: "#F3F3F3" }}>직접입력</option>
                                 <option value="gmail.com" style={{ backgroundColor: "#F3F3F3" }}>gmail.com</option>
                                 <option value="naver.com" style={{ backgroundColor: "#F3F3F3" }}>naver.com</option>
@@ -146,6 +197,9 @@ export default function Page() {
                             <NativeSelectIndicator />
                         </NativeSelect.Root>
                     </HStack>
+                </Flex>
+                <Flex w="100%" justify="flex-end" mt={4} >
+                    <Button w={{ base: "100%", sm: "300px" }} h="40px" bg="#FA6D6D" borderRadius="4px" fontSize="16px" color="#FFFFFF" _hover={{ bg: "#ff8e8eff" }} onClick={handleSend}>등록</Button>
                 </Flex>
             </VStack>
         </Container>
