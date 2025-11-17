@@ -1,6 +1,5 @@
 import { CartItem } from "@/app/api/cart/cart"
 
-
 export async function getLikedItems(): Promise<CartItem[]> {
   try {
     const response = await fetch("http://localhost:3000/api/like", {
@@ -20,10 +19,61 @@ export async function getLikedItems(): Promise<CartItem[]> {
   }
 }
 
-export async function unlike() {
-  
+export async function addLikedItem(id: number): Promise<boolean> {
+  try{
+    const response = await fetch("http://localhost:3000/api/like", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({product_id: id})
+    })
+
+    if(!response.ok){
+      const errorData = await response.json()
+      console.error("Failed to insert liked item:", response.status, errorData)
+      return false
+    }
+    return true
+  }catch(error){
+    console.error("Error during liked item adding")
+    return false
+  }
 }
 
-export async function unlikeAll() {
-  
+export async function deleteLikedItem(id: number): Promise<boolean> {
+  try{
+    const response = await fetch("http://localhost:3000/api/like", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({product_id: id})
+    })
+
+    if(!response.ok){
+      const errorData = await response.json()
+      console.error("Failed to delete liked item:", response.status, errorData)
+      return false
+    }
+    return true
+  }catch(error){
+    console.error("Error during liked item deleting")
+    return false
+  }
+}
+
+export async function deleteAllLikedItem(): Promise<boolean>{
+  try{
+    const response = await fetch("http://localhost:3000/api/like/delete_all", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    })
+
+    if(!response.ok){
+      const errorData = await response.json()
+      console.error("Failed to delete all liked item:", response.status, errorData)
+      return false
+    }
+    return true
+  }catch(error){
+    console.error("Error during all liked item deleting")
+    return false
+  }
 }

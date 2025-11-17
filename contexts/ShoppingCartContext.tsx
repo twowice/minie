@@ -8,6 +8,11 @@ import {
   updateCartItems,
 } from "@/lib/minie/cartAPI";
 import {
+  addLikedItem,
+  deleteAllLikedItem,
+  deleteLikedItem,
+} from "@/lib/minie/likeAPI";
+import {
   useContext,
   createContext,
   ReactNode,
@@ -137,7 +142,7 @@ export function CartProvider({
         clearCart();
         break;
       case "like":
-        setLikedItems([]);
+        clearLikedItem();
         break;
       default:
         console.warn(
@@ -148,16 +153,27 @@ export function CartProvider({
   }, []);
 
   const clearCart = async () => {
-    const response = await deleteAllCartItems();
-    response ? setCartItems([]) : console.log("delete All Cart Item failed");
+    const isSuccess = await deleteAllCartItems();
+    isSuccess ? setCartItems([]) : console.log("delete All Cart Item failed");
+  };
+
+  const clearLikedItem = async () => {
+    const isSuccess = await deleteAllLikedItem();
+    isSuccess ? setLikedItems([]) : console.log("delete All Cart Item failed");
   };
 
   const toggleLike = useCallback(
-    (item: CartItem) => {
+    async (item: CartItem) => {
       if (isLiked(item.id)) {
-        setLikedItems((prev) => prev.filter((i) => i.id !== item.id));
+        const isSuccess = await deleteLikedItem(item.id);
+        isSuccess
+          ? setLikedItems((prev) => prev.filter((i) => i.id !== item.id))
+          : console.log("delete(unlike) Liked Item failed");
       } else {
-        setLikedItems((prev) => [{ ...item, checked: false }, ...prev]);
+        const isSuccess = await addLikedItem(item.id);
+        isSuccess
+          ? setLikedItems((prev) => [{ ...item, checked: false }, ...prev])
+          : console.log("add(like) Liked Item failed");
       }
     },
     [likedItems]
