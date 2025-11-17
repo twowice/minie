@@ -9,7 +9,7 @@ export default function ShoppingItem({ item }) {
    const [isLike, setIsLike] = useState(false);
 
    return (
-      <Link href={`/shoppingdetail/${item.id}`} passHref>
+      <Link href={`/shoppingdetail/`} passHref>
          <VStack
             w={'100%'}
             minW={0}
@@ -37,7 +37,9 @@ export default function ShoppingItem({ item }) {
                            bgColor={'transparent'}
                            cursor={'pointer'}
                            aria-label="장바구니"
-                           onClick={() => {
+                           onClick={e => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               setIsCartActivity(prev => !prev);
                            }}
                            _hover={{ opacity: 0.5 }}
@@ -54,7 +56,9 @@ export default function ShoppingItem({ item }) {
                            width={'24px'}
                            cursor={'pointer'}
                            aria-label="좋아요"
-                           onClick={() => {
+                           onClick={e => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               setIsLike(prev => !prev);
                            }}
                            _hover={{ opacity: 0.5 }}
