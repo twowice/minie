@@ -1,7 +1,7 @@
 "use client";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import ShoppingCartDrawer from "./ShoppingCartDrawer";
 import {
   Box,
@@ -20,6 +20,24 @@ import { HamburgerIcon } from "@chakra-ui/icons";
 export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setHeaderHeight(entry.target.clientHeight);
+      }
+    });
+
+    if (headerRef.current) {
+      resizeObserver.observe(headerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const navLinks = [
     { href: "/shoppingdetail", label: "쇼핑상세" }, // 이 링크를 추가합니다.
@@ -44,7 +62,7 @@ export default function Header() {
   ];
 
   return (
-    <Box as="header" flexShrink={0} bg="white">
+    <Box as="header" ref={headerRef} flexShrink={0} bg="white">
       <Container maxW="7xl" px={{ base: 4, sm: 6, lg: 8 }}>
         {/* Top bar */}
         <Flex
@@ -127,7 +145,7 @@ export default function Header() {
             >
               <HamburgerIcon />
             </IconButton>
-            <ShoppingCartDrawer />
+            <ShoppingCartDrawer headerHeight={headerHeight} />
           </HStack>
         </Flex>
 
