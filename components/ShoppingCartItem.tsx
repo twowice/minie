@@ -105,7 +105,7 @@ export default function ShoppingCartItem({
               textDecoration={"line-through"}
               color={"#808080"}
             >
-              {item.price * item.num}
+              {numberFormatter.format(item.price * item.num)}
             </Box>
             <Box fontSize={"12px"} color={"#808080"}>
               원
