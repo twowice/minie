@@ -245,7 +245,7 @@ export default function contentDialog({ id, content, reviewImage, productName, p
                                 <Textarea
                                     placeholder="꿀팁 가득, 상세한 리뷰를 작성해 보세요!(500자 이내)"
                                     size="sm"
-                                    resize="vertical"
+                                    resize="none"
                                     w="100%"
                                     minH="150px"
                                     flex="1"

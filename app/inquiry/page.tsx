@@ -111,7 +111,7 @@ export default function Page() {
                             resize="none"
                             color="#000000"
                             value={content}
-                            onChange={(e) => setContent(e.target.value)}
+                            onChange={(e) => { if(e.target.value.length <= 2000) setContent(e.target.value)}}
                         />
 
                         <Text fontSize="14px" fontWeight="light" color="#898989">
@@ -189,10 +189,15 @@ export default function Page() {
                         <Input w="full" h="36px" borderColor="lightgray" color="#000000" placeholder="이메일을 입력해주세요." value={email} onChange={(e) => setEmail(e.target.value)} />
                         <NativeSelect.Root w={{ base: "100%", md: "200px" }} h="36px" padding="5px 0px" border="1px solid lightgray" borderRadius="4px" variant="plain">
                             <NativeSelect.Field fontSize="14px" color="#898989" fontWeight="light" h="24px" value={domain} onChange={(e) => setDomain(e.target.value)}>
-                                <option value="" style={{ backgroundColor: "#F3F3F3" }}>직접입력</option>
-                                <option value="gmail.com" style={{ backgroundColor: "#F3F3F3" }}>gmail.com</option>
+                                <option value="" style={{ backgroundColor: "#F3F3F3" }}>직접선택</option>
                                 <option value="naver.com" style={{ backgroundColor: "#F3F3F3" }}>naver.com</option>
                                 <option value="hanmail.net" style={{ backgroundColor: "#F3F3F3" }}>hanmail.net</option>
+                                <option value="daum.net" style={{ backgroundColor: "#F3F3F3" }}>daum.net</option>
+                                <option value="kakao.com" style={{ backgroundColor: "#F3F3F3" }}>kakao.com</option>
+                                <option value="outlook.com" style={{ backgroundColor: "#F3F3F3" }}>outlook.com</option>
+                                <option value="hotmail.com" style={{ backgroundColor: "#F3F3F3" }}>hotmail.com</option>
+                                <option value="yahoo.com" style={{ backgroundColor: "#F3F3F3" }}>yahoo.com</option>
+                                <option value="icloud.com" style={{ backgroundColor: "#F3F3F3" }}>icloud.com</option>
                             </NativeSelect.Field>
                             <NativeSelectIndicator />
                         </NativeSelect.Root>
