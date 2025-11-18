@@ -40,13 +40,13 @@ export async function POST(req: Request) {
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: "rhkdgur120@naver.com",
+            to: process.env.EMAIL_USER,
             subject: `[1:1 문의] ${category}`,
             html: `
                 <h2>📩새로운 문의가 도착했습니다</h2>
                 <p><strong>카테고리:</strong> ${category}</p>
                 <p><strong>내용:</strong><br>${content}</p>
-                <p><strong>문의자 이메일:</strong> ${email}</p>
+                <p><strong>사용자 이메일:</strong> ${email}</p>
             `,
             attachments,
         };

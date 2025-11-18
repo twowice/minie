@@ -2,7 +2,6 @@
 
 import { Text, Portal, CloseButton, Dialog, Button, Image, Flex, VStack, HStack, Box, Textarea } from "@chakra-ui/react";
 import { useState, useRef } from "react";
-import PhotoUploader from "../components/PhotoUploader";
 
 interface contentDialogProps {
     content: string;
@@ -315,10 +314,6 @@ export default function contentDialog({ id, content, reviewImage, productName, p
                                         +
                                     </Button>
                                 )}
-                                {/* <PhotoUploader
-                                    initialPhotoURL={reviewImage || null}
-                                    onChange={(file) => setPhoto(file)}
-                                /> */}
                                 <Text color="#adadadff" fontSize="12px">
                                     사진은 10MB이하의 PNG, GIF, JPG 파일만 등록 가능합니다.
                                 </Text>
