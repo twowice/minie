@@ -8,8 +8,10 @@ import {
    Dialog,
    Flex,
    HStack,
+   IconButton,
    NativeSelect,
    NativeSelectIndicator,
+   Tag,
    Text,
    useDisclosure,
 } from '@chakra-ui/react';
@@ -17,7 +19,8 @@ import { useEffect, useState } from 'react';
 import { MdFilterListAlt } from 'react-icons/md';
 import Segment from './ui/Segment';
 import items from '@/data/items.json';
-import { FaS, FaSlack } from 'react-icons/fa6';
+import { RiResetLeftFill } from 'react-icons/ri';
+import { FaS } from 'react-icons/fa6';
 
 export default function FilterBar({ onDataFiltered, category }) {
    // --- 상단 버튼 필터 State ---
@@ -182,6 +185,29 @@ export default function FilterBar({ onDataFiltered, category }) {
       onClose();
       setDialog(false);
    };
+   const handleReset = () => {
+      setFilterBoth(true)
+      setFilterMale(false)
+      setFilterFemale(false)
+      setFilterPrice([])
+      setFilterSkincare([])
+      setFilterUse([])
+      setFilterType([])
+      setFilterStyle([])
+   };
+
+   const removeFilterTag = (type, value) => {
+      if (type === 'gender') {
+         if (value === 'both') setFilterBoth(false)
+         if (value === 'male') setFilterMale(false)
+         if (value === 'female') setFilterFemale(false)
+      }
+   if (type === 'price') {setFilterPrice(prev => prev.filter(p => p !== value))}
+   if (type === 'skincare') {setFilterSkincare(prev => prev.filter(s => s !== value))}
+   if (type === 'use') {setFilterUse(prev => prev.filter(u=> u !== value))}
+   if (type === 'type') {setFilterType(prev => prev.filter(t => t !== value))}
+   if (type === 'style') {setFilterStyle(prev => prev.filter(st => st !== value))}
+   }
 
    const togglePrice = price => {
       setFilterPrice(prev => (prev.includes(price) ? prev.filter(p => p !== price) : [...prev, price]));
@@ -280,6 +306,35 @@ export default function FilterBar({ onDataFiltered, category }) {
                      <Dialog.Title>필터</Dialog.Title>
                   </Dialog.Header>
                   <Dialog.Body>
+                     <Flex
+                        mb={'16px'}
+                        justifyContent={'space-between'}
+                        bgColor={'rgba(204,204,204,0.3)'}
+                        p={'4px'}
+                        gap={4}
+                        flex={1}
+                     >
+                        <Tag.Root>
+                           <Tag.Label>남녀 무관</Tag.Label>
+                           <Tag.EndElement>
+                              <Tag.CloseTrigger
+                                 onClick={() => {
+                                    onClose();
+                                 }}
+                              />
+                           </Tag.EndElement>
+                        </Tag.Root>
+                        <IconButton
+                           size={'sm'}
+                           variant={'ghost'}
+                           onClick={handleReset}
+                           color={'black'}
+                           _hover={{ color: 'white' }}
+                           aria-label='필터 초기화'
+                        >
+                           <RiResetLeftFill />
+                        </IconButton>
+                     </Flex>
                      <Flex flexDirection={'column'} gap={'16px'} alignItems={'flex-start'}>
                         <Flex direction={'column'} gap={'8px'} w={'full'}>
                            <Text fontWeight={'500'} fontSize={'16px'}>
@@ -301,7 +356,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                               >
                                  <Checkbox.HiddenInput />
                                  <Checkbox.Control />
-                                 <Checkbox.Label>남녀무관</Checkbox.Label>
+                                 <Checkbox.Label>남녀 무관</Checkbox.Label>
                               </Checkbox.Root>
                               <Checkbox.Root
                                  variant={'solid'}
@@ -359,7 +414,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                                  colorPalette={'red'}
                                  checked={filterPrice.includes(15000)}
                                  onCheckedChange={() => togglePrice(15000)}
-                              >
+                                 >
                                  <Checkbox.HiddenInput />
                                  <Checkbox.Control />
                                  <Checkbox.Label>15,000원 이하</Checkbox.Label>
@@ -368,6 +423,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                                  w={'full'}
                                  variant={'solid'}
                                  colorPalette={'red'}
+                                 checked={filterPrice.includes(20000)}
                                  onCheckedChange={() => togglePrice(20000)}
                               >
                                  <Checkbox.HiddenInput />
