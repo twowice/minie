@@ -14,6 +14,7 @@
     "@chakra-ui/react": "^3.29.0",
     "@emotion/react": "^11.14.0",
     "@supabase/supabase-js": "^2.81.1",
+    "@tosspayments/payment-widget-sdk": "^0.12.1",
     "firebase": "^12.5.0",
     "framer-motion": "^12.23.24",
     "next": "16.0.1",

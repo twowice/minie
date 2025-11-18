@@ -4,19 +4,26 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { loadPaymentWidget } from "@tosspayments/payment-widget-sdk";
 import type { PaymentWidgetInstance } from "@tosspayments/payment-widget-sdk";
 import { nanoid } from "nanoid";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function PaymentPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // 🚨🚨🚨 이 useEffect 블록을 제거하거나 주석 처리합니다! 🚨🚨🚨
+  // useEffect(() => {
+  //   if (!searchParams.get("someRequiredParam")) {
+  //     router.push("/error-page"); // 이 코드가 현재 샘플 동작을 방해하고 있습니다.
+  //   }
+  // }, [router, searchParams]); // searchParams를 의존성에 추가하는 게 올바릅니다!
 
   const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
-  const paymentMethodsWidgetRef = useRef<any>(null); // 서브 위젯은 any로 처리 (이전 대화 기반)
-  const agreementWidgetRef = useRef<any>(null); // 서브 위젯은 any로 처리
+  const paymentMethodsWidgetRef = useRef<any>(null);
+  const agreementWidgetRef = useRef<any>(null);
 
-  // 📌 1. 위젯 준비 상태 관리 (state 추가)
   const [isPaymentWidgetLoaded, setIsPaymentWidgetLoaded] = useState(false);
 
-  const clientKey = "test_gck_FWZQmPGXq0w4Lg9R4g75wGZ1rxzP";
+  const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
   const customerKey = nanoid();
   const amount = 50000;
 
@@ -34,19 +41,17 @@ export default function PaymentPage() {
           { value: amount },
           { variantKey: "DEFAULT" }
         );
-        paymentMethodsWidgetRef.current = paymentMethodsWidget; // 필요하다면
+        paymentMethodsWidgetRef.current = paymentMethodsWidget;
 
         const agreementWidget = paymentWidget.renderAgreement(
           "#agreement-root",
           { variantKey: "DEFAULT" }
         );
-        agreementWidgetRef.current = agreementWidget; // 필요하다면
+        agreementWidgetRef.current = agreementWidget;
 
-        // 📌 2. 모든 렌더링 완료 후 상태 변경
         setIsPaymentWidgetLoaded(true);
       } catch (error) {
         console.error("결제위젯 초기화 오류:", error);
-        // 초기화 실패 시에도 버튼을 활성화하지 않음
       }
     }
 
@@ -58,7 +63,6 @@ export default function PaymentPage() {
       const paymentWidget = paymentWidgetRef.current;
 
       if (!paymentWidget) {
-        // 이미 버튼이 비활성화 되어있겠지만, 혹시 모를 상황 대비
         console.error("결제위젯이 아직 로드되지 않았습니다.");
         alert("결제 시스템을 로드 중입니다. 잠시 후 다시 시도해주세요.");
         return;
@@ -101,7 +105,6 @@ export default function PaymentPage() {
 
       <button
         onClick={handlePayment}
-        // 📌 3. 위젯 준비 상태에 따라 버튼 활성화/비활성화
         disabled={!isPaymentWidgetLoaded}
         style={{
           width: "100%",
@@ -111,8 +114,8 @@ export default function PaymentPage() {
           border: "none",
           borderRadius: "5px",
           fontSize: "18px",
-          cursor: isPaymentWidgetLoaded ? "pointer" : "not-allowed", // 커서 스타일도 변경
-          opacity: isPaymentWidgetLoaded ? 1 : 0.6, // 비활성화 시 흐리게
+          cursor: isPaymentWidgetLoaded ? "pointer" : "not-allowed",
+          opacity: isPaymentWidgetLoaded ? 1 : 0.6,
         }}
       >
         {isPaymentWidgetLoaded

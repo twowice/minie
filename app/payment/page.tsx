@@ -77,7 +77,22 @@ export default function PaymentPage() {
     );
   };
 
-  const handlePay = () => {};
+  const handlePay = () => {
+    switch (paymentType) {
+      case "toss_pay":
+        router.push("/payment/tosspayment");
+        break;
+      case "kakao_pay":
+        break;
+      default:
+        // toaster.create({
+        //   description: "존재하지 않는 결제 수단입니다\n결제수단을 확인해주세요",
+        //   type: "error",
+        //   closable: true,ㄴ
+        // });
+        break;
+    }
+  };
 
   return (
     <Container
@@ -250,7 +265,10 @@ export default function PaymentPage() {
               whiteSpace={"pre-wrap"}
               textAlign={"start"}
             >
-              {paymentType === "toss_pay" ? tossPayInfoText : kakaoPayInfoText}
+              {paymentType &&
+                (paymentType === "toss_pay"
+                  ? tossPayInfoText
+                  : kakaoPayInfoText)}
             </Box>
           </HStack>
           <HStack paddingTop={"24px"} justifyContent={"end"}>
@@ -274,7 +292,7 @@ export default function PaymentPage() {
               bg={"#FA6D6D"}
               fontWeight={"medium"}
               disabled={!paymentType}
-              onClick={() => handlePay}
+              onClick={handlePay}
             >
               결제하기
             </Button>
