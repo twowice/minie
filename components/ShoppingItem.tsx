@@ -14,7 +14,7 @@ export default function ShoppingItem({ item }) {
 
    //좋아요/장바구니
    const isItemLike = isLiked(item.id);
-   const isItemInCart = isItemCart(item.id);
+   const isItemCart = isItemCart(item.id);
 
    //toggle
    const handleCartClick = e => {
@@ -62,7 +62,7 @@ export default function ShoppingItem({ item }) {
                            onClick={handleCartClick}
                            _hover={{ opacity: 0.5 }}
                         >
-                           {isItemInCart ? (
+                           {isItemCart ? (
                               <MdOutlineShoppingCart color="#fa6d6d" />
                            ) : (
                               <MdOutlineShoppingCart color="#898989" />
