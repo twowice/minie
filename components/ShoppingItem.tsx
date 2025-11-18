@@ -2,10 +2,12 @@ import { Box, Button, Flex, VStack, Image, Text, HStack, AspectRatio } from '@ch
 import TypeBadge from './Badge';
 import { MdFavoriteBorder, MdOutlineShoppingCart } from 'react-icons/md';
 // import { useEffect, useState } from 'react';
+import { getDiscountRate } from '@/utils/calculator/discountRateCalculator';
 import Link from 'next/link';
 import { useCart } from '@/contexts/ShoppingCartContext';
 
 export default function ShoppingItem({ item }) {
+   console.log('Item Data:', item);
    // const [isCartActivity, setIsCartActivity] = useState(false);
    // const [isLike, setIsLike] = useState(false);
 
@@ -84,9 +86,40 @@ export default function ShoppingItem({ item }) {
                </Box>
             </AspectRatio>
             <Box color={'black'} h={'100%'} p={'8px'} w={'100%'}>
-               <Text fontSize={'24px'} fontWeight={'700'}>
-                  {item.price.toLocaleString()}원
-               </Text>
+               <Flex
+                  display={'flex'}
+                  flexDirection={'row'}
+                  alignItems={'center'}
+                  justifyContent={'space-between'}
+                  gap={'4px'}
+               >
+                  {item.discount_amount > 0 && (
+                     <Text fontSize={'24px'} fontWeight={'700'}>
+                        {item.price * (100 - getDiscountRate(item.price, item.discount_amount)) / 100}원
+                     </Text>
+                  )}
+                  {item.discount_amount === 0 && (
+                     <Text fontSize={'24px'} fontWeight={'700'}>
+                        {item.price}원
+                     </Text>
+                  )}
+
+                  {item.discount_amount > 0 && (
+                     <Flex alignContent={'center'} gap={'8px'}>
+                        <Text fontWeight={'medium'} color={'#FA6D6D'} fontSize={'16px'}>
+                           {getDiscountRate(item.price, item.discount_amount)}%
+                        </Text>
+                        <Flex gap={'4px'}>
+                           <Text fontSize={'16px'} textDecoration={'line-through'} color={'#808080'}>
+                              {item.price.toLocaleString()}
+                           </Text>
+                           <Text fontSize={'16px'} color={'#808080'}>
+                              원
+                           </Text>
+                        </Flex>
+                     </Flex>
+                  )}
+               </Flex>
                <Flex justifyContent={'space-between'} alignItems={'center'} mb={'8px'}>
                   <Text fontSize={'20px'} fontWeight={'500'}>
                      {item.brand}

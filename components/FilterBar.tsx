@@ -15,18 +15,18 @@ import {
    Text,
    useDisclosure,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MdFilterListAlt } from 'react-icons/md';
 import Segment from './ui/Segment';
-import items from '@/data/items.json';
+// import items from '@/data/items.json'; //더미데이터
 import { RiResetLeftFill } from 'react-icons/ri';
 
 const priceLabels = {
    10000: '10,000원 이하',
    15000: '15,000원 이하',
-   30000: '30,000원 이하',
+   20000: '20,000원 이하',
 };
-export default function FilterBar({ onDataFiltered, category }) {
+export default function FilterBar({ onDataFiltered, category, list = [] }) {
    // --- 상단 버튼 필터 State ---
    const [male, setMale] = useState(false);
    const [female, setFemale] = useState(false);
@@ -58,8 +58,13 @@ export default function FilterBar({ onDataFiltered, category }) {
    const [filterStyle, setFilterStyle] = useState([]);
 
    // --- 최종 데이터 ---
-   const [data, setData] = useState(items);
+   // const [data, setData] = useState(list);
    const [sortOrder, setSortOrder] = useState('낮은 가격 순');
+
+   const categoryItems = useMemo(() => {
+      if (!list) return [];
+      return list.filter(item => item.category === category);
+   }, [list, category]);
 
    //초기화
    useEffect(() => {
@@ -90,12 +95,13 @@ export default function FilterBar({ onDataFiltered, category }) {
 
       //다이얼로그 닫기
       setDialog(false);
-      onClose();
-   }, [category, onClose]);
+      // onClose();
+   }, [category]);
 
    //동작
    useEffect(() => {
-      let selected = items.filter(item => item.category === category);
+      const items = list.filter(item => item.category === category)
+      let selected = [...items];
 
       selected = selected.filter(p => {
          if (female && !male && !p.gender.includes('여성')) return false;
@@ -115,19 +121,19 @@ export default function FilterBar({ onDataFiltered, category }) {
          selected.sort((a, b) => b.price - a.price);
       }
 
-      setData(selected);
+      // setData(selected);
       onDataFiltered(selected);
-   }, [male, female, myType, price, sortOrder, skincare, use, type, style, onDataFiltered, category]);
+   }, [male, female, myType, price, sortOrder, skincare, use, type, style, list, category]);
 
    const filteredData = () => {
-      let checked = items.filter(item => item.category === category);
+      let checked = [...categoryItems];
 
       if (myType) {
          checked = checked.filter(p => p.mytype === '마이타입');
       }
 
       const genderFilter = [];
-      if (filterBoth || (filterMale && filterFemale)) {
+      if (filterBoth || (!filterMale && !filterFemale)) {
          genderFilter.push('남성', '여성');
       } else if (filterMale) {
          genderFilter.push('남성');
@@ -136,7 +142,7 @@ export default function FilterBar({ onDataFiltered, category }) {
       }
 
       if (genderFilter.length > 0) {
-         checked = checked.filter(item => item.gender.some(g => genderFilter.includes(g)));
+         checked = checked.filter(item => genderFilter.some(g => item.gender.includes(g)));
       }
 
       if (filterPrice.length > 0) {
@@ -295,7 +301,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                </Button>
             </Box>
             <Box display={'flex'} gap={'16px'} fontSize={'12px'} alignItems={'center'} color={'rgba(0,0,0,0.4)'}>
-               <Text>총 {data.length}개</Text>
+               <Text>총 {categoryItems.length}개</Text>
                <NativeSelect.Root
                   size={'xs'}
                   w={'90px'}
@@ -453,7 +459,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                                  <Tag.EndElement>
                                     <Tag.CloseTrigger
                                        onClick={() => {
-                                          removeFilterTag('use', item);
+                                          removeFilterTag('type', item);
                                        }}
                                     />
                                  </Tag.EndElement>
