@@ -16,6 +16,7 @@ import { useMemo, useState } from "react";
 import { MdOutlineArrowForwardIos } from "react-icons/md";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import { useRouter } from "next/navigation";
+import { toaster } from "@/components/ui/toaster";
 
 const kakaoPayInfoText = `<minié 블랙프라이데이 x 카카오페이머니>
 25.11.01(토) ~ 25.01.07(수)
@@ -43,18 +44,11 @@ const tossPayInfoText = `<minié 블랙프라이데이 x 토스페이>
 export default function PaymentPage() {
   const router = useRouter();
   const [paymentType, setPaymentType] = useState<string | null>(null);
-  const { cartItems, totalPrice } = useCart();
+  const { cartItems, totalPrice, totalDiscountAmount, totalCostPrice } =
+    useCart();
   const checkedCartItems = useMemo(
     () => cartItems.filter((item) => item.checked),
     [cartItems]
-  );
-  const totalCostPrice = useMemo(
-    () => checkedCartItems.reduce((sum, item) => sum + item.price, 0),
-    [checkedCartItems]
-  );
-  const totalDiscountAmount = useMemo(
-    () => checkedCartItems.reduce((sum, item) => sum + item.discountAmount, 0),
-    [checkedCartItems]
   );
   const isEmpty = useMemo(
     () => checkedCartItems.length === 0,
@@ -80,16 +74,16 @@ export default function PaymentPage() {
   const handlePay = () => {
     switch (paymentType) {
       case "toss_pay":
-        router.push("/payment/tosspayment");
+        router.replace("/payment/tosspayment");
         break;
       case "kakao_pay":
         break;
       default:
-        // toaster.create({
-        //   description: "존재하지 않는 결제 수단입니다\n결제수단을 확인해주세요",
-        //   type: "error",
-        //   closable: true,ㄴ
-        // });
+        toaster.create({
+          description: "존재하지 않는 결제 수단입니다\n결제수단을 확인해주세요",
+          type: "error",
+          closable: true,
+        });
         break;
     }
   };
@@ -104,7 +98,6 @@ export default function PaymentPage() {
       gap={"10px"}
       color={"black"}
       px={{ base: 4, sm: 6, lg: 8 }}
-      border={"1px soild #"}
     >
       <Box
         display={"flex"}

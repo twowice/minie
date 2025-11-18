@@ -26,6 +26,8 @@ interface CartContextDataType {
   cartItems: CartItem[];
   likedItems: CartItem[];
   totalPrice: number;
+  totalDiscountAmount: number; //추가
+  totalCostPrice: number; //추가 할인가격 미 적용 총 가격
   toggleChecked: (id: number, type: "cart" | "like") => void;
   toggleAllChecked: (type: "cart" | "like") => void;
   updateQuantity: (itemId: number, type: "plus" | "minus") => void;
@@ -83,6 +85,21 @@ export function CartProvider({
         0
       ),
     [cartItems]
+  );
+
+  const totalDiscountAmount = useMemo(
+    () =>
+      cartItems.reduce(
+        (sum, item) =>
+          sum + (item.checked ? item.discountAmount * item.num : 0),
+        0
+      ),
+    [cartItems]
+  );
+
+  const totalCostPrice = useMemo(
+    () => totalPrice + totalDiscountAmount,
+    [totalPrice]
   );
 
   const likedItemIds = useMemo(
@@ -253,6 +270,8 @@ export function CartProvider({
     cartItems,
     likedItems,
     totalPrice,
+    totalDiscountAmount,
+    totalCostPrice,
     toggleChecked,
     toggleAllChecked,
     updateQuantity,

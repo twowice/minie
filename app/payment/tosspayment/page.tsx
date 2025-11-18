@@ -4,31 +4,45 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { loadPaymentWidget } from "@tosspayments/payment-widget-sdk";
 import type { PaymentWidgetInstance } from "@tosspayments/payment-widget-sdk";
 import { nanoid } from "nanoid";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useCart } from "@/contexts/ShoppingCartContext";
+import { Box, Button, Container } from "@chakra-ui/react";
+import { numberFormatter } from "@/utils/formatter/numberFomatter";
+import { useRouter } from "next/navigation";
+import { addNewOrder } from "@/lib/minie/orderAPI";
 
 export default function PaymentPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const { cartItems, totalPrice, totalDiscountAmount } = useCart();
+  const checkedCartItems = cartItems.filter((item) => item.checked);
 
-  // 🚨🚨🚨 이 useEffect 블록을 제거하거나 주석 처리합니다! 🚨🚨🚨
-  // useEffect(() => {
-  //   if (!searchParams.get("someRequiredParam")) {
-  //     router.push("/error-page"); // 이 코드가 현재 샘플 동작을 방해하고 있습니다.
-  //   }
-  // }, [router, searchParams]); // searchParams를 의존성에 추가하는 게 올바릅니다!
+  // 주문 상품이 없는 경우 (예외 처리: 빈 장바구니 결제 방지)
+  useEffect(() => {
+    if (checkedCartItems.length === 0) {
+      alert("선택된 상품이 없습니다. 장바구니로 이동합니다.");
+      router.replace("/cart");
+    }
+  }, [checkedCartItems.length, router]);
+
+  if (checkedCartItems.length === 0) {
+    return null; // 빈 장바구니일 때 아무것도 렌더링하지 않음
+  }
 
   const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
   const paymentMethodsWidgetRef = useRef<any>(null);
   const agreementWidgetRef = useRef<any>(null);
 
   const [isPaymentWidgetLoaded, setIsPaymentWidgetLoaded] = useState(false);
+  const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
-  const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
-  const customerKey = nanoid();
-  const amount = 50000;
+  const clientKey = process.env.NEXT_PUBLIC_TOSS_TEST_KEY as string;
+  const customerKey = "1"; // user_id로 추후에 대체
 
-  const orderId = nanoid();
-  const orderName = "Minié 주문 상품";
+  const orderId = nanoid(); //주문번호
+  const orderName = `Minié ${checkedCartItems[0].title}${
+    checkedCartItems.length === 1
+      ? ""
+      : ` 외 ${checkedCartItems.length - 1}개의 상품`
+  }`;
 
   useEffect(() => {
     async function initializePaymentWidget() {
@@ -38,7 +52,7 @@ export default function PaymentPage() {
 
         const paymentMethodsWidget = paymentWidget.renderPaymentMethods(
           "#payment-methods-root",
-          { value: amount },
+          { value: totalPrice },
           { variantKey: "DEFAULT" }
         );
         paymentMethodsWidgetRef.current = paymentMethodsWidget;
@@ -55,36 +69,79 @@ export default function PaymentPage() {
       }
     }
 
-    initializePaymentWidget();
-  }, [clientKey, customerKey, amount]);
+    if (clientKey) {
+      initializePaymentWidget();
+    } else {
+      console.error(
+        "클라이언트 키(NEXT_PUBLIC_TOSS_TEST_KEY)가 설정되지 않았습니다."
+      );
+    }
+  }, [clientKey, customerKey, totalPrice]);
 
   const handlePayment = useCallback(async () => {
-    try {
-      const paymentWidget = paymentWidgetRef.current;
+    if (!isPaymentWidgetLoaded || isProcessingOrder) {
+      alert("결제 시스템 로드 중이거나 주문 생성 중입니다.");
+      return;
+    }
 
+    setIsProcessingOrder(true);
+
+    try {
+      const isOrderAdded = await addNewOrder(
+        orderId,
+        orderName,
+        "토스페이",
+        totalPrice,
+        totalDiscountAmount,
+        checkedCartItems
+      );
+
+      if (!isOrderAdded) {
+        throw new Error("주문 정보 저장에 실패했습니다.");
+      }
+
+      const paymentWidget = paymentWidgetRef.current;
       if (!paymentWidget) {
-        console.error("결제위젯이 아직 로드되지 않았습니다.");
-        alert("결제 시스템을 로드 중입니다. 잠시 후 다시 시도해주세요.");
-        return;
+        throw new Error("결제위젯이 초기화되지 않았습니다.");
       }
 
       await paymentWidget.requestPayment({
         orderId: orderId,
         orderName: orderName,
-        successUrl: `${window.location.origin}/api/payments/confirm`,
-        failUrl: `${window.location.origin}/fail`,
+        successUrl: `${window.location.origin}/api/payment/tosspayment`,
+        failUrl: `${window.location.origin}/payment/fail`,
       });
-    } catch (error) {
-      console.error("결제 요청 오류:", error);
-      alert("결제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } catch (error: any) {
+      console.error("결제 처리 중 오류 발생:", error.message);
+      alert(
+        `결제 중 오류가 발생했습니다: ${error.message}. 잠시 후 다시 시도해주세요.`
+      );
+      //  이 단계에서 주문 정보 저장 실패 또는 토스페이먼츠 요청 실패 시 결제 전 데이터 삭제
+    } finally {
+      setIsProcessingOrder(false);
     }
-  }, [orderId, orderName]);
+  }, [
+    orderId,
+    orderName,
+    totalPrice,
+    totalDiscountAmount,
+    checkedCartItems,
+    isPaymentWidgetLoaded,
+    isProcessingOrder,
+  ]); // 의존성 배열 업데이트
 
   return (
-    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <h1>주문/결제</h1>
-
-      <div
+    <Container
+      bg={"white"}
+      display={"flex"}
+      flexDirection={"column"}
+      maxW="7xl"
+      py={"24px"}
+      gap={"10px"}
+      color={"black"}
+      px={{ base: 4, sm: 6, lg: 8 }}
+    >
+      <Box
         id="payment-methods-root"
         style={{
           border: "1px solid #eee",
@@ -92,8 +149,8 @@ export default function PaymentPage() {
           borderRadius: "5px",
           marginBottom: "20px",
         }}
-      ></div>
-      <div
+      ></Box>
+      <Box
         id="agreement-root"
         style={{
           border: "1px solid #eee",
@@ -101,11 +158,11 @@ export default function PaymentPage() {
           borderRadius: "5px",
           marginBottom: "20px",
         }}
-      ></div>
+      ></Box>
 
-      <button
+      <Button
         onClick={handlePayment}
-        disabled={!isPaymentWidgetLoaded}
+        disabled={!isPaymentWidgetLoaded || isProcessingOrder}
         style={{
           width: "100%",
           padding: "15px",
@@ -114,14 +171,19 @@ export default function PaymentPage() {
           border: "none",
           borderRadius: "5px",
           fontSize: "18px",
-          cursor: isPaymentWidgetLoaded ? "pointer" : "not-allowed",
-          opacity: isPaymentWidgetLoaded ? 1 : 0.6,
+          cursor:
+            isPaymentWidgetLoaded && !isProcessingOrder
+              ? "pointer"
+              : "not-allowed",
+          opacity: isPaymentWidgetLoaded && !isProcessingOrder ? 1 : 0.6,
         }}
       >
-        {isPaymentWidgetLoaded
-          ? `${amount.toLocaleString()}원 결제하기`
+        {isProcessingOrder // ✅ 주문 처리 상태에 따른 버튼 텍스트 변경
+          ? "주문 생성 중..."
+          : isPaymentWidgetLoaded
+          ? `${numberFormatter.format(totalPrice)}원 결제하기`
           : "결제 시스템 로드 중..."}
-      </button>
-    </div>
+      </Button>
+    </Container>
   );
 }

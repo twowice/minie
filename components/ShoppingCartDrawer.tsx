@@ -1,13 +1,5 @@
 "use client";
-import {
-  Drawer,
-  Portal,
-  Button,
-  Tabs,
-  Box,
-  Checkbox,
-  Toaster,
-} from "@chakra-ui/react";
+import { Drawer, Portal, Button, Tabs, Box, Checkbox } from "@chakra-ui/react";
 import { useState, useMemo, useEffect } from "react";
 import ShoppingCartItem from "./ShoppingCartItem";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
