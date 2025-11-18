@@ -1,4 +1,4 @@
-import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
+import { Box, Checkbox, Flex, IconButton, Image } from "@chakra-ui/react";
 import { CartItem } from "@/app/api/cart/cart";
 
 import HeartFilledIcon from "./ui/HeartIcon";
@@ -21,6 +21,7 @@ export default function LikedItem({
 }) {
   return (
     <Box
+      background={"white"}
       display={"flex"}
       flexDirection={"row"}
       alignItems={"center"}
@@ -28,6 +29,9 @@ export default function LikedItem({
       color={"black"}
       borderBottom={"1px solid #CCCCCC"}
       py={"10px"}
+      mx={"40px"}
+      px={0}
+      h={"146px"}
     >
       <Checkbox.Root
         variant={"outline"}
@@ -39,15 +43,16 @@ export default function LikedItem({
         <Checkbox.HiddenInput />
         <Checkbox.Control />
       </Checkbox.Root>
-      <Image src={item.image} w={130} h={130} fit={"contain"} />
-      <Box
-        flexGrow={1}
-        display={"flex"}
+      <Image src={item.image} w={"120px"} h={"120px"} fit={"contain"} />
+      <Flex
+        flex={1}
         flexDirection={"column"}
         justifyContent={"space-between"}
+        h={"100%"}
       >
         <Box
           display={"flex"}
+          flex={1}
           justifyContent={"space-between"}
           alignItems={"start"}
         >
@@ -115,7 +120,7 @@ export default function LikedItem({
             </Box>
           </Box>
         </Box>
-      </Box>
+      </Flex>
     </Box>
   );
 }

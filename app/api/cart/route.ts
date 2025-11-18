@@ -21,6 +21,7 @@ export async function GET() {
         )`
     )
     .eq('user_id', tempUid)
+    .order('id', { ascending: false })
 
     const typedRawCartItems: RawCartItem[] | null = rawCartItems as RawCartItem[] | null;
 
@@ -36,7 +37,8 @@ export async function GET() {
     const transformedCartItems: CartItem[] = typedRawCartItems.map((item: RawCartItem) => {
         return {
             id: item.product_id,
-            checked: false,
+            checked: true,
+            isUpdated:false,
             title: item.products.name,
             brand: item.products.brand,
             image: item.products.image.length !==0 ?item.products.image : "images/review/product3.jpg" ,//추후 이미지 준비중인 상품 이미지 넣는 자리
@@ -63,7 +65,7 @@ export async function DELETE(request: NextRequest) {
     .eq('product_id', productId)
     
     if(error){
-        return NextResponse.json({ error: 'Failed to deleting cart item: ' + error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to delete cart item: ' + error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true })
@@ -73,11 +75,17 @@ export async function POST(request: NextRequest) {
     const tempUid = 1
     /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
 
-    const {product_id:id, product_num:num} = await request.json()
+    const itemsToInsert: { product_id: number; product_num: number }[] = await request.json()
+    const dataToInsert = itemsToInsert.map(item => ({
+        user_id: tempUid,
+        product_id: item.product_id,
+        product_num: item.product_num
+    }))
+
 
     const {error} = await supabase
     .from('carts')
-    .insert({user_id:tempUid, product_id:id, product_num:num})
+    .insert(dataToInsert)
 
     if(error){
         return NextResponse.json({error: error.message }, { status: 400 });
