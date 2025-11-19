@@ -3,6 +3,11 @@ import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import ShoppingCartDrawer from "./ShoppingCartDrawer";
+
+// 2025-11-19 session 관리를 위해 추가 (박영준)
+import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserContext";
+
 import {
   Box,
   Container,
@@ -14,6 +19,7 @@ import {
   Heading,
   IconButton,
   Collapsible,
+  Button,  // 2025-11-19(박영준)
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 
@@ -22,6 +28,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const router = useRouter();  // 2025-11-19(박영준)
+  const { user, logout } = useUser();  // 2025-11-19(박영준)
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
@@ -50,6 +58,7 @@ export default function Header() {
     { href: "/haircare", label: "헤어케어" },
   ];
 
+/* 기존 Header
   const topBarLinks = [
     { href: "/login", label: "로그인" },
     { href: "/signup", label: "회원가입" }, // 2025월 11월 10일 수정 (박영준)
@@ -60,6 +69,35 @@ export default function Header() {
     { href: "/payment", label: "결제" },
     { href: "/inquiry", label: "1:1문의" },
   ];
+*/
+
+ // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 시작 (박영준)
+  const topBarLinks = user
+    ? [
+        // 로그인 상태일 때
+        { href: "/orders", label: "주문조회" },
+        { href: "/mypage", label: "마이페이지" },
+        { href: "/support", label: "고객센터" },
+        { href: "/reviews", label: "리뷰" },
+        { href: "/payment", label: "결제" },
+        { href: "/inquiry", label: "1:1문의" },
+      ]
+    : [
+        // 로그아웃 상태일 때
+        { href: "/login", label: "로그인" },
+        { href: "/signup", label: "회원가입" },
+        { href: "/orders", label: "주문조회" },
+        { href: "/mypage", label: "마이페이지" },
+        { href: "/support", label: "고객센터" },
+        { href: "/reviews", label: "리뷰" },
+        { href: "/payment", label: "결제" },
+        { href: "/inquiry", label: "1:1문의" },
+      ];
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
+ // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 끝 (박영준)
 
   return (
     <Box as="header" ref={headerRef} flexShrink={0} bg="white">
@@ -74,6 +112,31 @@ export default function Header() {
           fontSize="xs"
           color="gray.600"
         >
+          {/* 로그인 상태면 사용자 정보 + 로그아웃 버튼 먼저 표시 2025-11-19 시작 (박영준)*/}
+          {user && (
+            <>
+              <Text color="black" fontWeight="medium">
+                {user.name}님
+              </Text>
+              <Text color="black">|</Text>
+              <Button
+                variant="ghost"
+                size="xs"
+                color="black"
+                onClick={handleLogout}
+                _hover={{ bg: "transparent", color: "gray.600" }}
+                _focus={{ boxShadow: "none", outline: "none" }}
+                p={0}
+                h="auto"
+                fontWeight="normal"
+              >
+                로그아웃
+              </Button>
+              <Text color="black">|</Text>
+            </>
+          )}
+          {/* 로그인 상태면 사용자 정보 + 로그아웃 버튼 먼저 표시 2025-11-19 끝 (박영준)*/}
+
           {topBarLinks.map((link, index) => (
             <HStack key={link.href}>
               {" "}
@@ -157,6 +220,27 @@ export default function Header() {
             {" "}
             {/* Wrap content */}
             <Box display={{ lg: "none" }} borderTopWidth="1px" py={4}>
+              
+              {/* 모바일에서도 로그인 상태 표시 시작 2025-11-19 (박영준) */}
+              {user && (
+                <Box mb={4} pb={4} borderBottomWidth="1px">
+                  <Flex justify="space-between" align="center">
+                    <Text color="black" fontWeight="medium">
+                      {user.name}님
+                    </Text>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleLogout}
+                      colorScheme="gray"
+                    >
+                      로그아웃
+                    </Button>
+                  </Flex>
+                </Box>
+              )}
+              {/* 모바일에서도 로그인 상태 표시 끝 2025-11-19 (박영준) */}
+
               <VStack
                 as="nav"
                 gap={3}

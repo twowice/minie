@@ -1,11 +1,13 @@
 "use client";
 
-import { Container, Text, Flex, Box, VStack, HStack } from "@chakra-ui/react";
+import { Container, Text, Flex, Box, VStack, HStack, Image } from "@chakra-ui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUser } from "@/context/UserContext";  // 2025-11-19(박영준)
 
 export default function Page({ children } : { children: React.ReactNode }) {
     const pathname = usePathname();
+    const { user } = useUser();  // 2025-11-19(박영준)
     const isActive = (path: string) => pathname === path;
 
     return (
@@ -40,9 +42,36 @@ export default function Page({ children } : { children: React.ReactNode }) {
                 <Box flex="1">
                     <VStack align="stretch">
                         <HStack backgroundColor="#FA6D6D" height="60px" gap="8px" paddingLeft="13px">
-                            {/* 추후 로컬스토리지에서 로그인한 사용자의 이름과 사진을 가져옴 */}
-                            <img width="25px" height="25px" src="/images/review/profile1.png"></img>
-                            <Text marginLeft="8px" fontSize="16px">최광혁님 환영합니다.</Text>
+                             {/* 프로필 이미지 또는 기본 아이콘 2025-11-19(박영준)*/}
+                            {user?.profile_image ? (
+                                <img 
+                                    width="25px" 
+                                    height="25px" 
+                                    style={{ borderRadius: "50%", objectFit: "cover" }}
+                                    src={user.profile_image}
+                                    alt="프로필"
+                                    referrerPolicy="no-referrer"
+                                />
+                            ) : (
+                                // 기본 사용자 아이콘
+                                <Box 
+                                    width="25px" 
+                                    height="25px" 
+                                    borderRadius="50%"
+                                    bg="white"
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                >
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="8" r="4" fill="#FA6D6D"/>
+                                        <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" fill="#FA6D6D"/>
+                                    </svg>
+                                </Box>
+                            )}
+                            <Text marginLeft="8px" fontSize="16px">
+                                {user?.name || "게스트"}님 환영합니다.
+                            </Text>
                         </HStack>
                         <Box height="10px" />
                         {children}
