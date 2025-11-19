@@ -7,42 +7,49 @@ import { nanoid } from "nanoid";
 import { useCart } from "@/contexts/ShoppingCartContext";
 import { Box, Button, Container } from "@chakra-ui/react";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { addNewOrder, deleteOrder } from "@/lib/minie/orderAPI";
 
 export default function PaymentPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const productsIds = new Set(
+    searchParams
+      .get("products")
+      ?.split("-")
+      .map((id) => Number(id))
+  );
   const { cartItems, totalPrice, totalDiscountAmount } = useCart();
-  const checkedCartItems = cartItems.filter((item) => item.checked);
-
-  // 주문 상품이 없는 경우 (예외 처리: 빈 장바구니 결제 방지)
-  useEffect(() => {
-    if (checkedCartItems.length === 0) {
-      alert("선택된 상품이 없습니다. 장바구니로 이동합니다.");
-      router.replace("/mypage/cart");
-    }
-  }, [checkedCartItems.length, router]);
-
-  if (checkedCartItems.length === 0) {
-    return null; // 빈 장바구니일 때 아무것도 렌더링하지 않음
-  }
-
+  const checkedCartItems = cartItems.filter((item) => productsIds.has(item.id));
   const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
   const paymentMethodsWidgetRef = useRef<any>(null);
   const agreementWidgetRef = useRef<any>(null);
 
   const [isPaymentWidgetLoaded, setIsPaymentWidgetLoaded] = useState(false);
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const clientKey = process.env.NEXT_PUBLIC_TOSS_TEST_KEY as string;
   const customerKey = "1" + "minie"; // user_id로 추후에 대체
 
   const orderId = nanoid(); //주문번호
-  const orderName = `${checkedCartItems[0].title}${
-    checkedCartItems.length === 1
-      ? ""
-      : ` 외 ${checkedCartItems.length - 1}개의 상품`
-  }`;
+  const orderName =
+    checkedCartItems && checkedCartItems.length !== 0
+      ? `${checkedCartItems[0].title}${
+          checkedCartItems.length === 1
+            ? ""
+            : ` 외 ${checkedCartItems.length - 1}개의 상품`
+        }`
+      : "";
+
+  useEffect(() => {
+    if (!checkedCartItems || checkedCartItems.length === 0) {
+      alert("선택된 상품이 없어 메인 페이지로 돌아갑니다.");
+      router.replace("/");
+    } else {
+      setIsLoading(false);
+    }
+  }, [checkedCartItems.length, router]);
 
   useEffect(() => {
     async function initializePaymentWidget() {

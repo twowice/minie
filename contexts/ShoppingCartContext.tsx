@@ -119,7 +119,9 @@ export function CartProvider({
 
   const refreshCart = async () => {
     try {
-      const updatedCartItems = await getCartItems();
+      const updatedCartItems = (await getCartItems()).map((item) =>
+        cartItemIds.has(item.id) ? { ...item, checked: false } : item
+      );
       setCartItems(updatedCartItems);
     } catch (error) {
       console.error(

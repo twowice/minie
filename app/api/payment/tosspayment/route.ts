@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         console.log("결제 승인 성공:", json);
 
         //결제전->주문완료 상태 변화
-        const isUpdateSuccess = await updateOrderStatus(orderId, '토스페이')
+        const isUpdateSuccess = await updateOrderStatus(orderId, json.easyPay.provider)
 
         if(!isUpdateSuccess){
             console.error("결제 후 주문 데이터 업데이트 과정에서 문제 발생 ", orderId)

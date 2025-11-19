@@ -69,7 +69,8 @@ export default function PaymentPage() {
   const handlePay = () => {
     switch (paymentType) {
       case "toss_pay":
-        router.replace("/payment/tosspayment");
+        const productsIds = checkedCartItems.map((item) => item.id).join("-");
+        router.replace(`/payment/tosspayment?products=${productsIds}`);
         break;
       case "kakao_pay":
         break;
