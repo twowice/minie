@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Box, Button, Container, Stack } from "@chakra-ui/react";
+import { Box, Text, Container, Stack, Flex } from "@chakra-ui/react";
 import { MdOutlineArrowForwardIos } from "react-icons/md";
 import { getOrderExcludeOrderDetail } from "../../lib/minie/orderAPI";
 import { Order } from "../api/order/order";
@@ -155,10 +155,71 @@ export default function OrderFinishPage() {
         <Box
           fontSize={{ base: "12px", md: "12px", lg: "16px" }}
           color={"#666666"}
+          marginBottom={"34px"}
         >
           마이페이지 → 마이쇼핑→ 주문조회 메뉴에서 주문 내역을 조회하실 수
           있습니다
         </Box>
+        <Stack w={"100%"} fontWeight={"medium"} fontSize={"14px"} gap={0}>
+          <Flex flex={1} borderY={"1px solid #C6C6C6"} py={"8px"}>
+            <Box textAlign={"center"} w={{ base: "200px" }}>
+              결제수단
+            </Box>
+            <Text fontWeight={"normal"} fontSize={"16px"} color="#C4C4C4">
+              |
+            </Text>
+            <Box textAlign={"center"} flex={1}>
+              {order.paymentType}
+            </Box>
+          </Flex>
+          <Flex flex={1} borderBottom={"1px solid #C6C6C6"} py={"8px"}>
+            <Box textAlign={"center"} w={{ base: "200px" }}>
+              결제 시간
+            </Box>
+            <Text fontWeight={"normal"} fontSize={"16px"} color="#C4C4C4">
+              |
+            </Text>
+            <Box textAlign={"center"} flex={1}>
+              {order.createdAt}
+            </Box>
+          </Flex>
+          <Flex flex={1} borderBottom={"1px solid #C6C6C6"} py={"8px"}>
+            <Box textAlign={"center"} w={{ base: "200px" }}>
+              총 판매 금액
+            </Box>
+            <Text fontWeight={"normal"} fontSize={"16px"} color="#C4C4C4">
+              |
+            </Text>
+            <Box textAlign={"center"} flex={1}>
+              {numberFormatter.format(
+                order.totalPrice + order.totalDiscountAmount
+              )}{" "}
+              원
+            </Box>
+          </Flex>
+          <Flex flex={1} borderBottom={"1px solid #C6C6C6"} py={"8px"}>
+            <Box textAlign={"center"} w={{ base: "200px" }}>
+              총 할인 금액
+            </Box>
+            <Text fontWeight={"normal"} fontSize={"16px"} color="#C4C4C4">
+              |
+            </Text>
+            <Box textAlign={"center"} flex={1}>
+              {numberFormatter.format(order.totalDiscountAmount)} 원
+            </Box>
+          </Flex>
+          <Flex flex={1} borderBottom={"1px solid #C6C6C6"} py={"8px"}>
+            <Box textAlign={"center"} w={{ base: "200px" }}>
+              총 결제 금액
+            </Box>
+            <Text fontWeight={"normal"} fontSize={"16px"} color="#C4C4C4">
+              |
+            </Text>
+            <Box textAlign={"center"} flex={1}>
+              {numberFormatter.format(order.totalPrice)} 원
+            </Box>
+          </Flex>
+        </Stack>
       </Stack>
     </Container>
   );
