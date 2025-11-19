@@ -31,7 +31,7 @@ export default function LikedItem({
       py={"10px"}
       mx={"40px"}
       px={0}
-      h={"146px"}
+      h={"152px"}
     >
       <Checkbox.Root
         variant={"outline"}
@@ -43,7 +43,7 @@ export default function LikedItem({
         <Checkbox.HiddenInput />
         <Checkbox.Control />
       </Checkbox.Root>
-      <Image src={item.image} w={"120px"} h={"120px"} fit={"contain"} />
+      <Image src={item.image} w={"130px"} h={"130px"} fit={"contain"} />
       <Flex
         flex={1}
         flexDirection={"column"}

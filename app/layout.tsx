@@ -10,7 +10,10 @@ import { CartProvider } from "@/contexts/ShoppingCartContext";
 import { CartItem } from "./api/cart/cart";
 import { getCartItems } from "@/lib/minie/cartAPI";
 import { getLikedItems } from "@/lib/minie/likeAPI";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
+
+// 2025-11-19 session 관리를 위해 추가 (박영준)
+import { UserProvider } from "@/context/UserContext";
 
 export const metadata: Metadata = {
   title: "Minié",
@@ -47,24 +50,26 @@ export default async function RootLayout({
       <body className={croissantOne.className}>
         <Provider>
           <Toaster />
-          <CartProvider
-            initialCartItems={initialCartItems}
-            initialLikedItems={initialLikedItems}
-          >
-            <Box
-              display="flex"
-              flexDirection="column"
-              minH="100vh"
-              bg="white"
-              fontSmooth="antialiased"
+          <UserProvider> {/* 2025-11-19 ession 관리를 위해 수정 (박영준) */}
+            <CartProvider
+              initialCartItems={initialCartItems}
+              initialLikedItems={initialLikedItems}
             >
-              <Header />
-              <Box as="main" display="flex" flexDirection="column" flex="1">
-                {children}
+              <Box
+                display="flex"
+                flexDirection="column"
+                minH="100vh"
+                bg="white"
+                fontSmooth="antialiased"
+              >
+                <Header />
+                <Box as="main" display="flex" flexDirection="column" flex="1">
+                  {children}
+                </Box>
+                <Footer />
               </Box>
-              <Footer />
-            </Box>
-          </CartProvider>
+            </CartProvider>
+          </UserProvider>
         </Provider>
       </body>
     </html>

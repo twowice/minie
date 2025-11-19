@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toaster } from "@/components/ui/toaster"
+import PhotoUploader from "../../components/PhotoUploader";
 import {
     Container,
     Text,
@@ -9,9 +10,6 @@ import {
     VStack,
     Textarea,
     Button,
-    CloseButton,
-    Box,
-    Image,
     Input,
     NativeSelect,
     NativeSelectIndicator,
@@ -34,10 +32,7 @@ export default function Page() {
         formData.append("category", category);
         formData.append("content", content);
         formData.append("email", fullEmail);
-
-        if (photo) {
-            formData.append("file", photo);
-        }
+        if (photo) formData.append("file", photo);
 
         console.log("📌 FormData 내용:");
         for (const [key, value] of formData.entries()) {
@@ -111,72 +106,17 @@ export default function Page() {
                             resize="none"
                             color="#000000"
                             value={content}
-                            onChange={(e) => { if(e.target.value.length <= 2000) setContent(e.target.value)}}
+                            onChange={(e) => { if (e.target.value.length <= 2000) setContent(e.target.value) }}
                         />
 
                         <Text fontSize="14px" fontWeight="light" color="#898989">
                             이미지파일 (JPG, PNG, GIF) 1장을 첨부할 수 있어요.
                         </Text>
 
-                        {/* 파일 업로드 input */}
-                        <input
-                            id="photo-upload"
-                            type="file"
-                            accept="image/*"
-                            style={{ display: "none" }}
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                setPhoto(file);
-                                setPhotoURL(URL.createObjectURL(file));
-                            }}
+                        <PhotoUploader
+                            initialPhotoURL={photoURL || null}
+                            onChange={(file) => setPhoto(file)}
                         />
-
-                        {/* 업로드 버튼 / 이미지 미리보기 */}
-                        <Box>
-                            {!photoURL ? (
-                                <Button
-                                    w="80px"
-                                    h="80px"
-                                    border="1px solid #B5B5B5"
-                                    borderRadius="3px"
-                                    fontSize="16px"
-                                    color="#B5B5B5"
-                                    _hover={{ bg: "#f1f1f1" }}
-                                    onClick={() => document.getElementById('photo-upload')?.click()}
-                                >
-                                    +
-                                </Button>
-                            ) : (
-                                <Box position="relative" w="80px" h="80px">
-                                    <Image
-                                        src={photoURL}
-                                        alt="리뷰 사진"
-                                        boxSize="80px"
-                                        borderRadius="3px"
-                                        objectFit="cover"
-                                        cursor="pointer"
-                                        onClick={() => document.getElementById('photo-upload')?.click()}
-                                    />
-                                    <CloseButton
-                                        w="18px"
-                                        h="18px"
-                                        minW="18px"
-                                        minH="18px"
-                                        size="sm"
-                                        position="absolute"
-                                        top="0"
-                                        right="0"
-                                        bg="red"
-                                        borderRadius="full"
-                                        onClick={() => {
-                                            setPhoto(null);
-                                            setPhotoURL(null);
-                                        }}
-                                    />
-                                </Box>
-                            )}
-                        </Box>
                     </VStack>
                 </Flex>
 
@@ -187,6 +127,7 @@ export default function Page() {
                     </Text>
                     <HStack w="full" gap={2}>
                         <Input w="full" h="36px" borderColor="lightgray" color="#000000" placeholder="이메일을 입력해주세요." value={email} onChange={(e) => setEmail(e.target.value)} />
+                        <Text color="black">@</Text>
                         <NativeSelect.Root w={{ base: "100%", md: "200px" }} h="36px" padding="5px 0px" border="1px solid lightgray" borderRadius="4px" variant="plain">
                             <NativeSelect.Field fontSize="14px" color="#898989" fontWeight="light" h="24px" value={domain} onChange={(e) => setDomain(e.target.value)}>
                                 <option value="" style={{ backgroundColor: "#F3F3F3" }}>직접선택</option>

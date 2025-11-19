@@ -51,6 +51,10 @@ export default function PhotoUploader({ initialPhotoURL = null, onChange }: Phot
           <CloseButton
             size="sm"
             position="absolute"
+            w="18px"
+            h="18px"
+            minW="18px"
+            minH="18px"
             top="0"
             right="0"
             bg="red"
