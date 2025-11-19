@@ -1,4 +1,4 @@
-import { updateOrderStatus } from '@/lib/minie/orderAPI';
+import { deleteOrder, updateOrderStatus } from '@/lib/minie/orderAPI';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -34,8 +34,9 @@ export async function GET(request: NextRequest) {
 
         if (!response.ok) {
             console.error("토스페이먼츠 승인 실패:", json);
+            deleteOrder(orderId)
             const errorMessage = json.message || 'Payment confirmation failed with unknown reason';
-            return NextResponse.redirect(new URL(`/fail?message=${errorMessage}&orderId=${orderId}`, request.nextUrl.origin));
+            return NextResponse.redirect(new URL(`payment/fail?message=${errorMessage}&orderId=${orderId}`, request.nextUrl.origin));
         }
 
         console.log("결제 승인 성공:", json);
@@ -44,14 +45,15 @@ export async function GET(request: NextRequest) {
 
         if(!isUpdateSuccess){
             console.error("결제 후 주문 데이터 업데이트 과정에서 문제 발생 ", orderId)
-            return NextResponse.redirect(new URL(`/fail?message=Internal server error during updating order status`, request.nextUrl.origin))
+            deleteOrder(orderId)
+            return NextResponse.redirect(new URL(`payment/fail?message=Internal server error during updating order status`, request.nextUrl.origin))
         }
         
         return NextResponse.redirect(new URL(`/orderfinish?orderId=${orderId}`, request.nextUrl.origin));
 
     } catch (error) {
-        
+        deleteOrder(orderId)
         console.error("결제 승인 중 예외 발생:", error);
-        return NextResponse.redirect(new URL(`/fail?message=Internal server error during payment confirmation`, request.nextUrl.origin));
+        return NextResponse.redirect(new URL(`payment/fail?message=Internal server error during payment confirmation`, request.nextUrl.origin));
     }
 }

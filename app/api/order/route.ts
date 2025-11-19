@@ -53,7 +53,7 @@ export async function POST(request: Request) {
             throw new Error(`Failed to create order details: ${orderDetailsError.message}`);
         }
 
-        return NextResponse.json({ message: 'Order created successfully', orderNumber: order_id }, { status: 201 });
+        return NextResponse.json({success: true})
 
     } catch (error) {
         console.error("API /api/orders POST Error:", error);
@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest){
         const { error: updateError } = await supabase
             .from('orders')
             .update({
-                status: '주문 완료',
+                status: '주문완료',
                 payment_type: paymentType,
             })
             .eq('order_number', orderId);
@@ -77,6 +77,8 @@ export async function PATCH(request: NextRequest){
             console.error("Error pathing order details:", updateError);
             throw new Error(`Failed to update order details: ${updateError}`);
        }
+
+       return NextResponse.json({success: true})
     }catch(error){
         console.error("API /api/orders PATCH Error:", error);
         return NextResponse.json({ message: error || 'Internal server error' }, { status: 500 });
@@ -84,5 +86,22 @@ export async function PATCH(request: NextRequest){
 }
 
 export async function DELETE(request: NextRequest) {
-    
+    try{
+        const {order_id: orderId} = await request.json()
+
+        const {error} = await supabase
+        .from('orders')
+        .delete()
+        .eq('order_number', orderId)
+
+        if(error){
+            console.error("Error pathing order details:", error);
+            throw new Error(`Failed to update order details: ${error}`);
+        }
+        
+        return NextResponse.json({success: true})
+    }catch(error){
+        console.error("API /api/orders Delete Error:", error);
+        return NextResponse.json({ message: error || 'Internal server error' }, { status: 500 });
+    }
 }

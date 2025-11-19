@@ -8,7 +8,7 @@ import { useCart } from "@/contexts/ShoppingCartContext";
 import { Box, Button, Container } from "@chakra-ui/react";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import { useRouter } from "next/navigation";
-import { addNewOrder } from "@/lib/minie/orderAPI";
+import { addNewOrder, deleteOrder } from "@/lib/minie/orderAPI";
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function PaymentPage() {
   useEffect(() => {
     if (checkedCartItems.length === 0) {
       alert("선택된 상품이 없습니다. 장바구니로 이동합니다.");
-      router.replace("/cart");
+      router.replace("/mypage/cart");
     }
   }, [checkedCartItems.length, router]);
 
@@ -35,7 +35,7 @@ export default function PaymentPage() {
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
   const clientKey = process.env.NEXT_PUBLIC_TOSS_TEST_KEY as string;
-  const customerKey = "1"; // user_id로 추후에 대체
+  const customerKey = "1" + "minie"; // user_id로 추후에 대체
 
   const orderId = nanoid(); //주문번호
   const orderName = `Minié ${checkedCartItems[0].title}${
@@ -117,6 +117,7 @@ export default function PaymentPage() {
         `결제 중 오류가 발생했습니다: ${error.message}. 잠시 후 다시 시도해주세요.`
       );
       //  이 단계에서 주문 정보 저장 실패 또는 토스페이먼츠 요청 실패 시 결제 전 데이터 삭제
+      deleteOrder(orderId);
     } finally {
       setIsProcessingOrder(false);
     }
@@ -128,7 +129,7 @@ export default function PaymentPage() {
     checkedCartItems,
     isPaymentWidgetLoaded,
     isProcessingOrder,
-  ]); // 의존성 배열 업데이트
+  ]);
 
   return (
     <Container
@@ -178,7 +179,7 @@ export default function PaymentPage() {
           opacity: isPaymentWidgetLoaded && !isProcessingOrder ? 1 : 0.6,
         }}
       >
-        {isProcessingOrder // ✅ 주문 처리 상태에 따른 버튼 텍스트 변경
+        {isProcessingOrder
           ? "주문 생성 중..."
           : isPaymentWidgetLoaded
           ? `${numberFormatter.format(totalPrice)}원 결제하기`
