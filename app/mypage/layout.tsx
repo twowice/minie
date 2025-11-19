@@ -50,6 +50,7 @@ export default function Page({ children } : { children: React.ReactNode }) {
                                     style={{ borderRadius: "50%", objectFit: "cover" }}
                                     src={user.profile_image}
                                     alt="프로필"
+                                    referrerPolicy="no-referrer"
                                 />
                             ) : (
                                 // 기본 사용자 아이콘
