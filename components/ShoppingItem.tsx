@@ -52,7 +52,7 @@ export default function ShoppingItem({ item }) {
                      top={0}
                   >
                      <Box minW={'100px'}>
-                        <TypeBadge typeName={item.type} />
+                        <TypeBadge typeName={item.skin_type} />
                      </Box>
                      <Flex alignItems={'center'} gap={'8px'}>
                         <Button
@@ -95,7 +95,7 @@ export default function ShoppingItem({ item }) {
                >
                   {item.discount_amount > 0 && (
                      <Text fontSize={'24px'} fontWeight={'700'}>
-                        {item.price * (100 - getDiscountRate(item.price, item.discount_amount)) / 100}원
+                        {(item.price * (100 - getDiscountRate(item.price, item.discount_amount))) / 100}원
                      </Text>
                   )}
                   {item.discount_amount === 0 && (

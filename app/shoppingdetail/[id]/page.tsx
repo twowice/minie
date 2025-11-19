@@ -29,10 +29,10 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AiFillMinusCircle, AiFillPlusCircle } from 'react-icons/ai';
-import { FaMinus, FaPlus, FaRegHeart } from 'react-icons/fa6';
+import { FaRegHeart } from 'react-icons/fa6';
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from 'react-icons/io';
 
-export default function ShoppingDetail({ item }) {
+export default function ShoppingDetail() {
    const router = useRouter();
    const params = useParams();
    const id = params.id;
@@ -50,8 +50,6 @@ export default function ShoppingDetail({ item }) {
       { userid: 'C', rating: 3, content: '보통이에요' },
    ];
 
-   const [items, setItems] = useState([]);
-   const [selectItems, setSelectItems] = useState(null);
    const [rating, setRating] = useState(0);
    const [quantity, setQuantity] = useState(1);
    const [review, setReview] = useState(0);
@@ -438,61 +436,63 @@ export default function ShoppingDetail({ item }) {
                      color={'black'}
                   >
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            제품명
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            {product.name}
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            내용물의 용량 또는 중량
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            {product.volume || '200ml(상세참조)'}
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            제품 주요 사양
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            {product.skin_type || '모든 피부용'} / {product.gender}
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            제조번호 및 사용기간
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            별도 표기 / {product.created_at?.split('T')[0]} 이후 제조
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            사용방법
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
-                           {product.usage || `사용 전 가볍게 흔들어 준 후, 눈을 감고 얼굴 전체에 고르게 분사하여 흡수 시켜줍니다. 
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                           {product.usage ||
+                              `사용 전 가볍게 흔들어 준 후, 눈을 감고 얼굴 전체에 고르게 분사하여 흡수 시켜줍니다. 
                            피부에 건조함이 느껴질 때 수시로 뿌려줍니다.`}
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Box p={'20px'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Box p={'10px 20px'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            <Text fontWeight={'700'}>식품의약품안전처 심사 필 유무</Text>
                            <Text fontWeight={'700'}>(기능성 화장품)</Text>
                         </Box>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            해당없음
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            화장품법에 따라 기재해야 하는 모든 성분
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
-                           {product.ingredient || `정제수, 글리세린, 스쿠알란, 카프릴릭/카프릭트라이글리세라이드,
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                           {product.ingredient ||
+                              `정제수, 글리세린, 스쿠알란, 카프릴릭/카프릭트라이글리세라이드,
                            하이드로제네이티드폴리(C6-14올레핀), 다이글리세린, 하이드로제네이티드폴리데센,
                            나이아신아마이드, 메틸프로판다이올, 펜틸렌글라이콜,
                            암모늄아크릴로일다이메틸타우레이트/브이피코폴리머, 1,2-헥산다이올, 판테놀,
@@ -510,11 +510,16 @@ export default function ShoppingDetail({ item }) {
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            사용할 때 주의사항
                         </Text>
-                        <Box p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
-                           ※사용 전에 반드시 사용법 및 사용할 때의 주의사항을 숙지 하신 후 사용하십시오.1) 화장품 사용 시 또는 사용 후 직사광선에 의하여 사용부위가 붉은 반점, 부어오름 또는 가려움증 등의 이상 증상이나 부작용이 있는 경우에는 전문의 등과 상담할 것2) 상처가 있는 부위 등에는 사용을 자제할 것3) 보관 및 취급 시 주의사항가) 어린이의 손이 닿지 않는 곳에 보관할 것나) 직사광선을 피해서 보관할 것 <Text>※사용 전에 반드시 사용법 및 사용할 때의 주의사항을 숙지 하신 후 사용하십시오.</Text>
+                        <Box p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                           ※사용 전에 반드시 사용법 및 사용할 때의 주의사항을 숙지 하신 후 사용하십시오.1) 화장품 사용
+                           시 또는 사용 후 직사광선에 의하여 사용부위가 붉은 반점, 부어오름 또는 가려움증 등의 이상
+                           증상이나 부작용이 있는 경우에는 전문의 등과 상담할 것2) 상처가 있는 부위 등에는 사용을 자제할
+                           것3) 보관 및 취급 시 주의사항가) 어린이의 손이 닿지 않는 곳에 보관할 것나) 직사광선을 피해서
+                           보관할 것{' '}
+                           <Text>※사용 전에 반드시 사용법 및 사용할 때의 주의사항을 숙지 하신 후 사용하십시오.</Text>
                            <Text>
                               1) 화장품 사용 시 또는 사용 후 직사광선에 의하여 사용부위가 붉은 반점, 부어오름 또는
                               가려움증 등의 이상 증상이나 부작용이 있는 경우에는 전문의 등과 상담할 것
@@ -526,42 +531,42 @@ export default function ShoppingDetail({ item }) {
                         </Box>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            제조국
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            대한민국
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            화장품제조업자
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            코스맥스(주)
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            화장품책임판매업자
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            동국제약주식회사
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            품질보증기준
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            본 상품에 이상이 있을 경우, 공정거래위원회 고시 ‘소비자분쟁해결기준’에 의해 보상해드립니다
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'}>
-                        <Text p={'20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
+                        <Text p={'10px 20px'} fontWeight={'700'} bgColor={'rgba(204,204,204,0.8)'} w={'300px'}>
                            소비자 상담실
                         </Text>
-                        <Text p={'20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
+                        <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            000-000-0000(수신자부담)
                         </Text>
                      </Flex>
@@ -636,51 +641,66 @@ export default function ShoppingDetail({ item }) {
                   </Flex>
                </Flex>
                <Flex gap={'20px'} p={'20px 0'} direction={'column'}>
-                  <Flex pb={'20px'} borderBottom={'1px solid rgba(204,204,204,0.8)'} w={'100%'} gap={'30px'}>
-                     <Box>
-                        <Avatar.Root size={'2xl'} mb={'10px'}>
-                           <Avatar.Fallback name="따가운 볼" />
-                           <Avatar.Image src={'/images/test/피카츄.jpeg'} alt="피카츄" />
-                        </Avatar.Root>
-                        <Text fontWeight={'500'} color={'black'} fontSize={'12px'}>
-                           따가운 볼
-                        </Text>
-                     </Box>
-                     <Flex direction={'column'} textAlign={'left'} fontSize={'12px'} color={'#5C5C5C'} gap={'10px'}>
-                        <Text fontWeight={'500'}>2025.10.23</Text>
-                        <Text color={'#A8A8A8'}>타임 리페어 인테시브 크림</Text>
+                  <Flex
+                     pb={'20px'}
+                     borderBottom={'1px solid rgba(204,204,204,0.8)'}
+                     w={'100%'}
+                     justifyContent={'space-between'}
+                  >
+                     <Flex gap={'30px'}>
                         <Box>
-                           <Text>아이가 아주 만족해하며 잘 쓰고있어요.</Text>
-                           <Text>피부에 밀착력이 좋고 커버가 잘된다고 해요♡</Text>
-                        </Box>
-                        <Image src={'/images/test/image36.png'} w={'100px'} h={'100px'} alt="" />
-                     </Flex>
-                  </Flex>
-                  <Flex w={'100%'} gap={'30px'}>
-                     <Box>
-                        <Avatar.Root size={'2xl'} mb={'10px'}>
-                           <Avatar.Fallback name="불타는 스킨" />
-                           <Avatar.Image src={'/images/test/파이리.jpeg'} alt="파이리" />
-                        </Avatar.Root>
-                        <Text fontWeight={'500'} color={'black'} fontSize={'12px'}>
-                           불타는 스킨
-                        </Text>
-                     </Box>
-                     <Flex direction={'column'} textAlign={'left'} fontSize={'12px'} color={'#5C5C5C'} gap={'10px'}>
-                        <Text fontWeight={'500'}>2025.10.23</Text>
-                        <Text color={'#A8A8A8'}>타임 리페어 인테시브 크림</Text>
-                        <Box>
-                           <Text>
-                              악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던 느낌에
-                              얇고 가볍게 올라가서 좋았어욤
+                           <Avatar.Root size={'2xl'} mb={'10px'}>
+                              <Avatar.Fallback name="따가운 볼" />
+                              <Avatar.Image src={'/images/test/피카츄.jpeg'} alt="피카츄" />
+                           </Avatar.Root>
+                           <Text fontWeight={'500'} color={'black'} fontSize={'12px'}>
+                              따가운 볼
                            </Text>
                         </Box>
+                        <Flex direction={'column'} textAlign={'left'} fontSize={'12px'} color={'#5C5C5C'} gap={'10px'}>
+                           <Text fontWeight={'500'}>2025.10.23</Text>
+                           <Text color={'#A8A8A8'}>타임 리페어 인테시브 크림</Text>
+                           <Box>
+                              <Text>아이가 아주 만족해하며 잘 쓰고있어요.</Text>
+                              <Text>피부에 밀착력이 좋고 커버가 잘된다고 해요♡</Text>
+                           </Box>
+                           <Image src={'/images/test/image36.png'} w={'100px'} h={'100px'} alt="" />
+                        </Flex>
                      </Flex>
+                     <Button border={'1px solid #cccccc'} w={'100px'} p={'0'} fontSize={'12px'} h={'30px'}>
+                        답변
+                     </Button>
+                  </Flex>
+                  <Flex w={'100%'} justifyContent={'space-between'}>
+                     <Flex gap={'30px'}>
+                        <Box>
+                           <Avatar.Root size={'2xl'} mb={'10px'}>
+                              <Avatar.Fallback name="불타는 스킨" />
+                              <Avatar.Image src={'/images/test/파이리.jpeg'} alt="파이리" />
+                           </Avatar.Root>
+                           <Text fontWeight={'500'} color={'black'} fontSize={'12px'}>
+                              불타는 스킨
+                           </Text>
+                        </Box>
+                        <Flex direction={'column'} textAlign={'left'} fontSize={'12px'} color={'#5C5C5C'} gap={'10px'}>
+                           <Text fontWeight={'500'}>2025.10.23</Text>
+                           <Text color={'#A8A8A8'}>타임 리페어 인테시브 크림</Text>
+                           <Box>
+                              <Text>
+                                 악건성이라 그냥 기름 뜨는 쿠션 말고 보습감 있는 촉촉한 쿠션 좋아하는데 제가 원하던
+                                 느낌에 얇고 가볍게 올라가서 좋았어욤
+                              </Text>
+                           </Box>
+                        </Flex>
+                     </Flex>
+                     <Button border={'1px solid #cccccc'} w={'100px'} p={'0'} fontSize={'12px'} h={'30px'}>
+                        답변
+                     </Button>
                   </Flex>
                </Flex>
             </Tabs.Content>
             <Tabs.Content value="QnA">
-               <Box>
+               <Box mb={'32px'}>
                   <HStack
                      p={'20px 0'}
                      color={'black'}
@@ -725,11 +745,18 @@ export default function ShoppingDetail({ item }) {
                            p={'16px 32px'}
                            borderBottom={'1px solid #cccccc'}
                         >
+                           <Flex justifyContent={'flex-end'}>
+                              <Button border={'1px solid #cccccc'} w={'100px'} p={'0'} fontSize={'12px'} h={'30px'}>
+                                 답변
+                              </Button>
+                           </Flex>
                            <Accordion.ItemTrigger justifyContent={'space-between'} w={'100%'} borderRadius={0}>
-                              <Flex direction={'column'} gap={'8px'}>
-                                 <Text color={'#5c5c5c'} fontSize={'16px'}>
-                                    {item.title}
-                                 </Text>
+                              <Flex direction={'column'} gap={'8px'} w={'100%'}>
+                                 <Flex justifyContent={'space-between'}>
+                                    <Text color={'#5c5c5c'} fontSize={'16px'}>
+                                       {item.title}
+                                    </Text>
+                                 </Flex>
                                  <Text color={'black'} fontSize={'20px'}>
                                     {item.subtitle}
                                  </Text>
