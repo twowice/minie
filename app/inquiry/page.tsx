@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toaster } from "@/components/ui/toaster"
+import { useRouter } from "next/navigation";
 import PhotoUploader from "../../components/PhotoUploader";
 import {
     Container,
@@ -54,6 +55,7 @@ export default function Page() {
                     type: "success",
                     title: "문의가 성공적으로 전송되었습니다!",
                 });
+                router.push("/inquiry/notice");
             }
         } catch (e) {
             console.error("에러:", e);
@@ -62,6 +64,11 @@ export default function Page() {
                 title: "문의 전송 실패!",
             });
         }
+    }
+
+    const router = useRouter();
+    const handleCancle = () => {
+        router.push("/inquiry/notice");
     }
 
 
@@ -80,9 +87,11 @@ export default function Page() {
                     <NativeSelect.Root w={{ base: "100%", md: "200px" }} h="36px" padding="5px 0px" border="1px solid lightgray" borderRadius="4px" variant="plain">
                         <NativeSelect.Field fontSize="14px" color="#898989" fontWeight="light" h="24px" value={category} onChange={(e) => setCategory(e.target.value)}>
                             <option value="" style={{ backgroundColor: "#F3F3F3" }}>카테고리를 선택해주세요</option>
-                            <option value="온라인 몰" style={{ backgroundColor: "#F3F3F3" }}>온라인 몰</option>
-                            <option value="오프라인 몰" style={{ backgroundColor: "#F3F3F3" }}>오프라인 몰</option>
-                            <option value="신고 / 제보" style={{ backgroundColor: "#F3F3F3" }}>신고 / 제보</option>
+                            <option value="상품문의" style={{ backgroundColor: "#F3F3F3" }}>상품문의</option>
+                            <option value="배송문의" style={{ backgroundColor: "#F3F3F3" }}>배송문의</option>
+                            <option value="환불/교환문의" style={{ backgroundColor: "#F3F3F3" }}>환불/교환문의</option>
+                            <option value="계정문의" style={{ backgroundColor: "#F3F3F3" }}>계정문의</option>
+                            <option value="기타" style={{ backgroundColor: "#F3F3F3" }}>기타</option>
                         </NativeSelect.Field>
                         <NativeSelectIndicator />
                     </NativeSelect.Root>
@@ -144,7 +153,8 @@ export default function Page() {
                         </NativeSelect.Root>
                     </HStack>
                 </Flex>
-                <Flex w="100%" justify="flex-end" mt={4} >
+                <Flex w="100%" justify="flex-end" mt={4} gap="16px" >
+                    <Button w={{ base: "100%", sm: "300px" }} h="40px" bg="#ffffff" border="1px solid #c5c5c5ff" borderRadius="4px" fontSize="16px" color="#000000" _hover={{ bg: "#ecececff" }} onClick={handleCancle}>취소</Button>
                     <Button w={{ base: "100%", sm: "300px" }} h="40px" bg="#FA6D6D" borderRadius="4px" fontSize="16px" color="#FFFFFF" _hover={{ bg: "#ff8e8eff" }} onClick={handleSend}>등록</Button>
                 </Flex>
             </VStack>

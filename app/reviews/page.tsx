@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Spinner, Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeSelectIndicator, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination, Container } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import { toaster } from "@/components/ui/toaster"
-import ContentDialog from "@/components/ContentDialog";
+import ReviewDialog from "@/components/ReviewDialog";
 
 export default function Page() {
     /* 필터 & 정렬 */
@@ -321,7 +321,7 @@ export default function Page() {
                                     </Text>
 
                                     {/* 리뷰 상세 보기 */}
-                                    <ContentDialog
+                                    <ReviewDialog
                                         reviewImage={review.image_url}
                                         content={review.content}
                                         productName={review.products.name}
