@@ -36,12 +36,12 @@ export async function addNewOrder(
     
 }
 
-export async function updateOrderStatus(orderId: string, paymentType: string) : Promise<boolean> {
+export async function updateOrderStatus(orderId: string, paymentType: string, status: string) : Promise<boolean> {
     try{
         const response = await fetch("http://localhost:3000/api/order", {
             method: "PATCH",
             headers:{"Content-Type": "application/json"},
-            body: JSON.stringify({order_id: orderId, payment_type:paymentType})
+            body: JSON.stringify({order_id: orderId, payment_type:paymentType, order_status: status})
         })
 
         if (!response.ok) {

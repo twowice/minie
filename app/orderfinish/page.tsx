@@ -2,9 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Box, Text, Container, Stack, Flex } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Container,
+  Stack,
+  Flex,
+  HStack,
+  Button,
+} from "@chakra-ui/react";
 import { MdOutlineArrowForwardIos } from "react-icons/md";
-import { getOrderExcludeOrderDetail } from "../../lib/minie/orderAPI";
+import {
+  getOrderExcludeOrderDetail,
+  updateOrderStatus,
+} from "../../lib/minie/orderAPI";
 import { Order } from "../api/order/order";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import Lottie from "lottie-react";
@@ -32,13 +43,11 @@ export default function OrderFinishPage() {
       try {
         setIsLoading(true); // 로딩 시작
         const fetchedOrder = await getOrderExcludeOrderDetail(orderId);
-        if (fetchedOrder) {
+        if (fetchedOrder && fetchedOrder.status !== "주문취소") {
           setOrder(fetchedOrder);
           refreshCart();
         } else {
-          setError("주문 정보를 불러오지 못했습니다.");
-          alert("주문 정보를 찾을 수 없습니다.");
-          router.replace("/");
+          throw Error("이미 주문이 취소되거나 존재하지 않는 주문입니다.");
         }
       } catch (err: any) {
         console.error("주문 정보를 불러오는 중 오류 발생:", err);
@@ -74,6 +83,22 @@ export default function OrderFinishPage() {
       </Container>
     );
   }
+
+  const handleCancel = async () => {
+    const isSuccess = await updateOrderStatus(
+      orderId,
+      order?.paymentType ? order.paymentType : "취소 에러",
+      "주문취소"
+    );
+
+    if (isSuccess) {
+      router.replace("/mypage");
+    } else {
+      alert(
+        "주문 취소에 실패했습니다.\n해당 오류가 반복될 시 1:1 문의를 통해 문의해주시길 바랍니다."
+      );
+    }
+  };
 
   if (error || !order) {
     return (
@@ -160,7 +185,13 @@ export default function OrderFinishPage() {
           마이페이지 → 마이쇼핑→ 주문조회 메뉴에서 주문 내역을 조회하실 수
           있습니다
         </Box>
-        <Stack w={"100%"} fontWeight={"medium"} fontSize={"14px"} gap={0}>
+        <Stack
+          w={"100%"}
+          fontWeight={"medium"}
+          fontSize={"14px"}
+          gap={0}
+          marginBottom={"44px"}
+        >
           <Flex flex={1} borderY={"1px solid #C6C6C6"} py={"8px"}>
             <Box textAlign={"center"} w={{ base: "200px" }}>
               결제수단
@@ -220,6 +251,31 @@ export default function OrderFinishPage() {
             </Box>
           </Flex>
         </Stack>
+        <HStack w="100%" justifyContent={"end"} textAlign={"center"}>
+          <Button
+            flex={1}
+            maxW="300px"
+            color={"black"}
+            bg={"white"}
+            fontWeight={"medium"}
+            border={"1px solid #CCCCCC"}
+            onClick={handleCancel}
+          >
+            주문 취소
+          </Button>
+          <Button
+            flex={1}
+            maxW="300px"
+            color={"white"}
+            bg={"#FA6D6D"}
+            fontWeight={"medium"}
+            onClick={() => {
+              router.replace("/");
+            }}
+          >
+            홈으로
+          </Button>
+        </HStack>
       </Stack>
     </Container>
   );

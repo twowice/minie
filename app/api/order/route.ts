@@ -109,12 +109,12 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: NextRequest){
     try{
-        const {order_id: orderId, payment_type: paymentType} = await request.json() 
+        const {order_id: orderId, payment_type: paymentType, order_status: status} = await request.json() 
 
         const { error: updateError } = await supabase
             .from('orders')
             .update({
-                status: '주문완료',
+                status: status,
                 payment_type: paymentType,
                 created_at:new Date().toISOString()
             })
