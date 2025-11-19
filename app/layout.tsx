@@ -31,30 +31,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let initialCartItems: CartItem[] = [];
-  let initialLikedItems: CartItem[] = [];
-
-  try {
-    [initialCartItems, initialLikedItems] = await Promise.all([
-      getCartItems(),
-      getLikedItems(),
-    ]);
-  } catch (error) {
-    console.error("Error during parallel data fetch:", error);
-    initialCartItems = [];
-    initialLikedItems = [];
-  }
-
   return (
     <html lang="ko">
       <body className={croissantOne.className}>
         <Provider>
           <Toaster />
-          <UserProvider> {/* 2025-11-19 ession 관리를 위해 수정 (박영준) */}
-            <CartProvider
-              initialCartItems={initialCartItems}
-              initialLikedItems={initialLikedItems}
-            >
+          <UserProvider>
+            <CartProvider>
+              {" "}
+              {/* 2025-11-19 ession 관리를 위해 수정 (박영준) */}
               <Box
                 display="flex"
                 flexDirection="column"

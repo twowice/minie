@@ -3,7 +3,7 @@ import { CartItem, RawCartItem } from "../cart/cart"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET() {
-    const tempUid = 1
+    const tempUid = 23
     /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
 
     const {data: rawCartItems, error} = await supabase

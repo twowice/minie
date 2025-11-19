@@ -1,5 +1,6 @@
 import { CartItem } from "@/app/api/cart/cart"
 import { Order, OrderDetail } from "@/app/api/order/order"
+import { fetchWithAuth } from "./authAPI"
 
 export async function addNewOrder(
     orderId: string,
@@ -10,7 +11,7 @@ export async function addNewOrder(
     checkedCartItems : CartItem[],
 ): Promise<boolean> {
     try{
-        const response = await fetch("http://localhost:3000/api/order", {
+        const response = await fetchWithAuth("http://localhost:3000/api/order", {
             method: "POST",
             headers:{"Content-Type": "application/json"},
             body: JSON.stringify({
@@ -38,7 +39,7 @@ export async function addNewOrder(
 
 export async function updateOrderStatus(orderId: string, paymentType: string, status: string) : Promise<boolean> {
     try{
-        const response = await fetch("http://localhost:3000/api/order", {
+        const response = await fetchWithAuth("http://localhost:3000/api/order", {
             method: "PATCH",
             headers:{"Content-Type": "application/json"},
             body: JSON.stringify({order_id: orderId, payment_type:paymentType, order_status: status})
@@ -59,7 +60,7 @@ export async function updateOrderStatus(orderId: string, paymentType: string, st
 
 export async function deleteOrder(orderId: string) : Promise<boolean> {
     try{
-        const response = await fetch("http://localhost:3000/api/order", {
+        const response = await fetchWithAuth("http://localhost:3000/api/order", {
             method: "DELETE",
             headers:{"Content-Type": "application/json"},
             body: JSON.stringify({order_id: orderId})
@@ -80,7 +81,7 @@ export async function deleteOrder(orderId: string) : Promise<boolean> {
 
 export async function getOrderExcludeOrderDetail(orderId: string) : Promise<Order | null>{
     try{
-        const response = await fetch(`http://localhost:3000/api/order?order-id=${orderId}`, {
+        const response = await fetchWithAuth(`http://localhost:3000/api/order?order-id=${orderId}`, {
             method:"GET"
         })
 
@@ -100,7 +101,7 @@ export async function getOrderExcludeOrderDetail(orderId: string) : Promise<Orde
 
 export async function getOrderDetails(orderId: string): Promise<OrderDetail[]>{
     try{
-        const response = await fetch(`http://localhost:3000/api/order/order_detail?order-id=${orderId}`, {
+        const response = await fetchWithAuth(`http://localhost:3000/api/order/order_detail?order-id=${orderId}`, {
             method:"GET"
         })
 

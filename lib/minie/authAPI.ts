@@ -9,6 +9,66 @@ import { auth } from "@/firebase/firebaseConfig";
 import { supabaseStorage } from "@/lib/authSupabase";
 
 
+/* 
+  Bearer 토큰을 불러오는 함수를 자동으로 헤더에 추가해주는 헬퍼 함수입니다.
+  토큰을 불러오는데에 실패하면 null을 반환하기에 해당 함수를 사용하실 경우 null 체크해야 합니다.
+  각각 인증 정보가 필요한 api에 request에 "Authorization": `Bearer ${token}`를 추가해주는 헬퍼 함수를 작성하시거나 각 api 수정을 하시면 됩니다.
+  인증이 필요한 api 통신의 fetch를 아래의 fetchWithAuth로 변경하시면 됩니다.
+  예시 cartAPI.ts, likeAPI.ts, orderAPI.ts
+  */
+
+export async function fetchWithAuth(path: string, options: RequestInit = {}): Promise<Response> {
+  const token = await getFirebaseIdToken();
+
+  if (!token) {
+    throw new Error("Authentication required: No Firebase ID Token found.");
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+    ...(options.headers || {}),
+  };
+
+  const fullUrl = new URL(path, window.location.origin).toString();
+
+  return fetch(fullUrl, { ...options, headers })
+}
+
+let authReadyPromise: Promise<void> | null = null;
+
+// Firebase 인증 상태가 완전히 로드될 때까지 기다리는 함수
+async function waitForFirebaseAuth(): Promise<void> {
+  if (authReadyPromise) {
+    return authReadyPromise
+  }
+
+  authReadyPromise = new Promise((resolve) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      unsubscribe()
+      resolve();
+    });
+  });
+  return authReadyPromise;
+}
+
+
+/**
+ * 현재 로그인된 사용자의 Firebase ID Token (accessToken)을 가져옵니다.
+ * 이 함수는 Firebase 인증 상태가 준비될 때까지 기다립니다.
+ */
+async function getFirebaseIdToken(): Promise<string | null> {
+  await waitForFirebaseAuth()
+
+  const user = auth.currentUser
+  if (user) {
+    const token = await user.getIdToken()
+    console.log("token:", )
+    return token;
+  }
+  return null
+}
+
 
 // supabase(DB)에 저장할 정보들
 export const createUser = async (userData: {

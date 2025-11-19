@@ -1,6 +1,7 @@
 "use client";
 
 import { CartItem } from "@/app/api/cart/cart";
+import { useUser } from "@/context/UserContext";
 import {
   addCartItems,
   deleteAllCartItems,
@@ -12,6 +13,7 @@ import {
   addLikedItem,
   deleteAllLikedItem,
   deleteLikedItem,
+  getLikedItems,
 } from "@/lib/minie/likeAPI";
 import {
   useContext,
@@ -20,6 +22,7 @@ import {
   useState,
   useCallback,
   useMemo,
+  useEffect,
 } from "react";
 
 // Context가 제공할 데이터와 함수의 타입을 정의
@@ -29,6 +32,7 @@ interface CartContextDataType {
   totalPrice: number;
   totalDiscountAmount: number; //추가
   totalCostPrice: number; //추가 할인가격 미 적용 총 가격
+  init: () => void; //추가 작동 방식 변경 -> layout에서의 초기화가 아닌 userProvider에서 로그인 시 초기화 될 예정
   refreshCart: () => void; //추가 장바구니 상품 구매 이후 장바구니에서 해당 아이템들을 삭제 후 장바구니를 갱신하기 위함
   toggleChecked: (id: number, type: "cart" | "like") => void;
   toggleAllChecked: (type: "cart" | "like") => void;
@@ -57,8 +61,6 @@ export function useCart() {
 
 interface CartProviderProps {
   children: ReactNode;
-  initialCartItems: CartItem[];
-  initialLikedItems: CartItem[];
 }
 // 초기설정
 const initializeState = (items: CartItem[]): CartItem[] => {
@@ -70,13 +72,30 @@ const initializeState = (items: CartItem[]): CartItem[] => {
 };
 //
 
-export function CartProvider({
-  children,
-  initialCartItems,
-  initialLikedItems,
-}: CartProviderProps) {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
-  const [likedItems, setLikedItems] = useState<CartItem[]>(initialLikedItems);
+export function CartProvider({ children }: CartProviderProps) {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [likedItems, setLikedItems] = useState<CartItem[]>([]);
+  const { user, loading: userLoading } = useUser();
+
+  const init = async () => {
+    let initialCartItems: CartItem[] = [];
+    let initialLikedItems: CartItem[] = [];
+
+    try {
+      [initialCartItems, initialLikedItems] = await Promise.all([
+        getCartItems(),
+        getLikedItems(),
+      ]);
+      setCartItems(initialCartItems);
+      setLikedItems(initialLikedItems);
+    } catch (error) {
+      console.error("Error during parallel data fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    init();
+  }, [user]);
 
   const likedItemIds = useMemo(
     () => new Set(likedItems.map((item) => item.id)),
@@ -278,6 +297,7 @@ export function CartProvider({
     totalPrice,
     totalDiscountAmount,
     totalCostPrice,
+    init,
     refreshCart,
     toggleChecked,
     toggleAllChecked,

@@ -1,15 +1,16 @@
 import { CartItem } from "@/app/api/cart/cart"
+import { fetchWithAuth } from "./authAPI"
 
 export async function getLikedItems(): Promise<CartItem[]> {
   try {
-    const response = await fetch("http://localhost:3000/api/like", {
+    const response = await fetchWithAuth("http://localhost:3000/api/like", {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error("Failed to fetch liked items:", response.status, errorData)
+      console.error("[cartAPI-Client] Failed to fetch liked items:", response.status, errorData)
       return []
     }
     return (await response.json()) as CartItem[]
@@ -21,7 +22,7 @@ export async function getLikedItems(): Promise<CartItem[]> {
 
 export async function addLikedItem(id: number): Promise<boolean> {
   try{
-    const response = await fetch("http://localhost:3000/api/like", {
+    const response = await fetchWithAuth("http://localhost:3000/api/like", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({product_id: id})
@@ -41,7 +42,7 @@ export async function addLikedItem(id: number): Promise<boolean> {
 
 export async function deleteLikedItem(id: number): Promise<boolean> {
   try{
-    const response = await fetch("http://localhost:3000/api/like", {
+    const response = await fetchWithAuth("http://localhost:3000/api/like", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({product_id: id})
@@ -61,7 +62,7 @@ export async function deleteLikedItem(id: number): Promise<boolean> {
 
 export async function deleteAllLikedItem(): Promise<boolean>{
   try{
-    const response = await fetch("http://localhost:3000/api/like/delete_all", {
+    const response = await fetchWithAuth("http://localhost:3000/api/like/delete_all", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     })
