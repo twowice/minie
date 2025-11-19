@@ -1,18 +1,22 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Box, Button, Container } from "@chakra-ui/react";
+import { Box, Button, Container, Stack } from "@chakra-ui/react";
 import { MdOutlineArrowForwardIos } from "react-icons/md";
 import { getOrderExcludeOrderDetail } from "../../lib/minie/orderAPI";
 import { Order } from "../api/order/order";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
+import Lottie from "lottie-react";
+import packing from "../../public/lottie/Box Packing.json";
+import { useCart } from "@/contexts/ShoppingCartContext";
 
 export default function OrderFinishPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order-id");
 
+  const { refreshCart } = useCart();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +34,7 @@ export default function OrderFinishPage() {
         const fetchedOrder = await getOrderExcludeOrderDetail(orderId);
         if (fetchedOrder) {
           setOrder(fetchedOrder);
+          refreshCart();
         } else {
           setError("주문 정보를 불러오지 못했습니다.");
           alert("주문 정보를 찾을 수 없습니다.");
@@ -123,22 +128,38 @@ export default function OrderFinishPage() {
           <Box fontSize={"16px"}>03 주문완료</Box>
         </Box>
       </Box>
-
-      {/* 확인용*/}
-      <Box mt={4}>
-        <Box fontSize={"24px"} fontWeight={"bold"}>
-          !
+      <Stack alignItems={"center"}>
+        <Box
+          bg={"#FA6D6D"}
+          borderRadius={"50px"}
+          px={"70px"}
+          h={"40px"}
+          display={"flex"}
+          alignItems={"center"}
+          justifyContent={"center"}
+          color={"white"}
+          fontWeight={"semibold"}
+          fontSize={{ base: "14px", md: "14px", lg: "20px" }}
+        >
+          주문번호 {order.orderId}
         </Box>
-        <Box fontSize={"18px"} mt={2}>
-          주문 번호: {order.orderId}
+        <Box w={"214px"} marginTop={"64px"}>
+          <Lottie animationData={packing} autoPlay={true} loop={false} />
         </Box>
-        <Box fontSize={"18px"}>
-          결제 금액: {numberFormatter.format(order.totalPrice)}원
+        <Box
+          fontSize={{ base: "16px", md: "16px", lg: "24px" }}
+          fontWeight={"medium"}
+        >
+          {order.orderName}의 상품 주문이 완료됐습니다
         </Box>
-        <Box fontSize={"18px"}>
-          결제 상태: {order.status === "paid" ? "결제 완료" : order.status}
+        <Box
+          fontSize={{ base: "12px", md: "12px", lg: "16px" }}
+          color={"#666666"}
+        >
+          마이페이지 → 마이쇼핑→ 주문조회 메뉴에서 주문 내역을 조회하실 수
+          있습니다
         </Box>
-      </Box>
+      </Stack>
     </Container>
   );
 }

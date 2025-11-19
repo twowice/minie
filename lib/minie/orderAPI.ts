@@ -1,5 +1,5 @@
 import { CartItem } from "@/app/api/cart/cart"
-import { Order } from "@/app/api/order/order"
+import { Order, OrderDetail } from "@/app/api/order/order"
 
 export async function addNewOrder(
     orderId: string,
@@ -98,8 +98,24 @@ export async function getOrderExcludeOrderDetail(orderId: string) : Promise<Orde
     }
 }
 
-async function getOrderDetail() {
-    
+export async function getOrderDetails(orderId: string): Promise<OrderDetail[]>{
+    try{
+        const response = await fetch(`http://localhost:3000/api/order/order_detail?order-id=${orderId}`, {
+            method:"GET"
+        })
+
+        if(!response.ok){
+            console.error(`Failed to get order: ${response.status} ${response.statusText}`);
+            return [];
+        }
+        const order = response.json() 
+
+        return order
+
+    }catch(error){
+        console.error("Error during getting order:", error);
+        return []
+    }
 }
 
 export async function getOrders() {

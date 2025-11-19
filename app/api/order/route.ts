@@ -7,6 +7,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const orderId = searchParams.get('order-id')
 
+    const tempUid = 1
+
     if (!orderId) {
         return NextResponse.json({ message: 'Order ID is required' }, { status: 400 })
     }
@@ -16,6 +18,7 @@ export async function GET(request: NextRequest) {
             .from('orders')
             .select('*')
             .eq('order_number', orderId)
+            .eq('user_id', tempUid)
             .single()
 
         if (error) {
@@ -41,7 +44,7 @@ export async function GET(request: NextRequest) {
         }, { status: 200 });
 
     } catch (error) {
-        console.error("API /api/orders GET Error:", error);
+        console.error("API /api/order GET Error:", error);
         return NextResponse.json({ message: error || 'Internal server error' }, { status: 500 });
     }
 }

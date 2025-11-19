@@ -1,5 +1,7 @@
-import { deleteOrder, updateOrderStatus } from '@/lib/minie/orderAPI';
+import { deleteOrder, getOrderDetails, updateOrderStatus } from '@/lib/minie/orderAPI';
 import { NextRequest, NextResponse } from 'next/server';
+import { OrderDetail } from '../../order/order';
+import { deleteCartItem } from '@/lib/minie/cartAPI';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -41,6 +43,7 @@ export async function GET(request: NextRequest) {
 
         console.log("결제 승인 성공:", json);
 
+        //결제전->주문완료 상태 변화
         const isUpdateSuccess = await updateOrderStatus(orderId, '토스페이')
 
         if(!isUpdateSuccess){
@@ -48,7 +51,24 @@ export async function GET(request: NextRequest) {
             deleteOrder(orderId)
             return NextResponse.redirect(new URL(`payment/fail?message=Internal server error during updating order status`, request.nextUrl.origin))
         }
-        
+
+        //장바구니 비우기 시작
+        const orderDetails : OrderDetail[]= await getOrderDetails(orderId)
+
+       const deletePromises = orderDetails.map(detail => 
+                deleteCartItem(detail.productId)
+        )
+
+        const results = await Promise.all(deletePromises)
+        const allItemsCleared = results.every(result => result === true);
+
+            if (!allItemsCleared) {
+                console.warn(`주의: 주문 ${orderId}의 일부 장바구니 상품 삭제 실패`);
+            } else {
+                console.log(`주문 ${orderId}의 장바구니 상품 모두 삭제 성공`);
+            }
+
+
         return NextResponse.redirect(new URL(`/orderfinish?order-id=${orderId}`, request.nextUrl.origin));
 
     } catch (error) {
