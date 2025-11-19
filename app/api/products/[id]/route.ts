@@ -4,14 +4,15 @@ import { NextResponse } from 'next/server';
 const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
 //조회
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-   const { id } = params;
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+   const { id } = await params;
 
-   const { data: products, error } = await supabaseAdmin.from('products').select('*').eq('id', id);
+   const { data: products, error } = await supabaseAdmin.from('products').select('*').eq('id', id).single();
    if (error || !products) {
+      console.error('Supabase Error:', error);
       return NextResponse.json({ error: '제품을 찾을 수 없습니다' }, { status: 404 });
    }
-   return NextResponse.json({ products });
+   return NextResponse.json(products);
 }
 
 // //삭제

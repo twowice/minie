@@ -158,7 +158,7 @@ export function CartProvider({ children, initialCartItems, initialLikedItems }: 
 
    //장바구니 토글
    const toggleCart = useCallback((item: CartItem) => {
-      if (isItemInCart(item.id)) {
+      if (isItemCart(item.id)) {
          // 이미 장바구니에 있으면 제거
          setCartItems(prev => prev.filter(i => i.id !== item.id));
       } else {
