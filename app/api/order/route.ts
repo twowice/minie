@@ -3,6 +3,49 @@ import { NextResponse } from 'next/server';
 import { supabase } from "@/lib/supabase";
 import { CartItem } from "../cart/cart";
 
+export async function GET(request: NextRequest) {
+    const searchParams = request.nextUrl.searchParams
+    const orderId = searchParams.get('order-id')
+
+    if (!orderId) {
+        return NextResponse.json({ message: 'Order ID is required' }, { status: 400 })
+    }
+
+    try {
+        const { data: order, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('order_number', orderId)
+            .single()
+
+        if (error) {
+            console.error("Error fetching order:", error);
+            if (error.code === 'PGRST116') {
+              return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+            }
+            throw new Error(`Failed to fetch order: ${error.message}`);
+        }
+
+        if (!order) {
+            return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({
+            orderId: order.order_number,
+            orderName: order.order_name,
+            paymentType: order.payment_type,
+            totalPrice: order.total_price,
+            totalDiscountAmount: order.total_discount_amount,
+            status : order.status,
+            createdAt : order.created_at
+        }, { status: 200 });
+
+    } catch (error) {
+        console.error("API /api/orders GET Error:", error);
+        return NextResponse.json({ message: error || 'Internal server error' }, { status: 500 });
+    }
+}
+
 export async function POST(request: Request) {
     try {
         const { order_id, order_name, payment_type, total_price, total_discount_amount, cart_items } = await request.json();
@@ -70,6 +113,7 @@ export async function PATCH(request: NextRequest){
             .update({
                 status: '주문완료',
                 payment_type: paymentType,
+                created_at:new Date().toISOString()
             })
             .eq('order_number', orderId);
 

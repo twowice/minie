@@ -1,4 +1,5 @@
 import { CartItem } from "@/app/api/cart/cart"
+import { Order } from "@/app/api/order/order"
 
 export async function addNewOrder(
     orderId: string,
@@ -76,3 +77,32 @@ export async function deleteOrder(orderId: string) : Promise<boolean> {
         return false
     }
 }
+
+export async function getOrderExcludeOrderDetail(orderId: string) : Promise<Order | null>{
+    try{
+        const response = await fetch(`http://localhost:3000/api/order?order-id=${orderId}`, {
+            method:"GET"
+        })
+
+        if(!response.ok){
+            console.error(`Failed to get order: ${response.status} ${response.statusText}`);
+            return null;
+        }
+        const order = response.json() 
+
+        return order
+
+    }catch(error){
+        console.error("Error during getting order:", error);
+        return null
+    }
+}
+
+async function getOrderDetail() {
+    
+}
+
+export async function getOrders() {
+    
+}
+

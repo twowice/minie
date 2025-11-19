@@ -1,4 +1,4 @@
-import { Box, Checkbox, IconButton, Image } from "@chakra-ui/react";
+import { Box, Checkbox, Flex, IconButton, Image } from "@chakra-ui/react";
 import { CartItem } from "@/app/api/cart/cart";
 
 import HeartFilledIcon from "./ui/HeartIcon";
@@ -36,7 +36,7 @@ export default function ShoppingCartItem({
       color={"black"}
       borderBottom={"1px solid #CCCCCC"}
       py={"10px"}
-      h={"146px"}
+      h={"152px"}
     >
       <Checkbox.Root
         variant={"outline"}
@@ -48,15 +48,17 @@ export default function ShoppingCartItem({
         <Checkbox.HiddenInput />
         <Checkbox.Control />
       </Checkbox.Root>
-      <Image src={item.image} w={"120px"} h={"120px"} fit={"contain"} />
+      <Image src={item.image} w={"130px"} h={"130px"} fit={"contain"} />
       <Box
-        flexGrow={1}
+        flex={1}
         display={"flex"}
         flexDirection={"column"}
         justifyContent={"space-between"}
+        h={"130px"}
       >
         <Box
           display={"flex"}
+          flex={1}
           justifyContent={"space-between"}
           alignItems={"start"}
         >
@@ -68,28 +70,7 @@ export default function ShoppingCartItem({
             <MdClose />
           </IconButton>
         </Box>
-        <Box
-          display={"flex"}
-          flexDirection={"row"}
-          alignItems={"center"}
-          justifyContent={"end"}
-          gap={"4px"}
-        >
-          <IconButton
-            color={item.num === 1 ? "#CCCCCC" : ""}
-            onClick={() => handleNumChanged("minus")}
-            disabled={item.num === 1}
-          >
-            <AiFillMinusCircle />
-          </IconButton>
-          <Box fontWeight={"medium"} fontSize={"16px"}>
-            {item.num}
-          </Box>
-          <IconButton onClick={() => handleNumChanged("plus")}>
-            <AiFillPlusCircle />
-          </IconButton>
-        </Box>
-        {item.isDiscounted && (
+        <Flex flex={1} flexDirection={"column"}>
           <Box
             display={"flex"}
             flexDirection={"row"}
@@ -97,49 +78,72 @@ export default function ShoppingCartItem({
             justifyContent={"end"}
             gap={"4px"}
           >
-            <Box fontWeight={"medium"} color={"#FA6D6D"} fontSize={"12px"}>
-              {getDiscountRate(item.price, item.discountAmount)}%
-            </Box>
-            <Box
-              fontSize={"12px"}
-              textDecoration={"line-through"}
-              color={"#808080"}
-            >
-              {numberFormatter.format(item.price * item.num)}
-            </Box>
-            <Box fontSize={"12px"} color={"#808080"}>
-              원
-            </Box>
-          </Box>
-        )}
-        <Box>
-          <Box
-            display={"flex"}
-            alignItems={"center"}
-            justifyContent={"space-between"}
-          >
             <IconButton
-              onClick={() => {
-                isLiked ? handleLike("unlike") : handleLike("like");
-              }}
+              color={item.num === 1 ? "#CCCCCC" : ""}
+              onClick={() => handleNumChanged("minus")}
+              disabled={item.num === 1}
             >
-              <HeartFilledIcon
-                filledColor={isLiked ? "#FA6D6D" : "none"}
-                strokeColor={isLiked ? "#FA6D6D" : "#CCCCCC"}
-              />
+              <AiFillMinusCircle />
             </IconButton>
-            <Box display={"flex"} gap={"2px"}>
-              <Box fontSize={"16px"} fontWeight={"semibold"}>
-                {numberFormatter.format(
-                  (item.price - item.discountAmount) * item.num
-                )}
+            <Box fontWeight={"medium"} fontSize={"16px"}>
+              {item.num}
+            </Box>
+            <IconButton onClick={() => handleNumChanged("plus")}>
+              <AiFillPlusCircle />
+            </IconButton>
+          </Box>
+          {item.isDiscounted && (
+            <Box
+              display={"flex"}
+              flexDirection={"row"}
+              alignItems={"center"}
+              justifyContent={"end"}
+              gap={"4px"}
+            >
+              <Box fontWeight={"medium"} color={"#FA6D6D"} fontSize={"12px"}>
+                {getDiscountRate(item.price, item.discountAmount)}%
               </Box>
-              <Box fontSize={"16px"} fontWeight={"medium"}>
+              <Box
+                fontSize={"12px"}
+                textDecoration={"line-through"}
+                color={"#808080"}
+              >
+                {numberFormatter.format(item.price * item.num)}
+              </Box>
+              <Box fontSize={"12px"} color={"#808080"}>
                 원
               </Box>
             </Box>
+          )}
+          <Box>
+            <Box
+              display={"flex"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+            >
+              <IconButton
+                onClick={() => {
+                  isLiked ? handleLike("unlike") : handleLike("like");
+                }}
+              >
+                <HeartFilledIcon
+                  filledColor={isLiked ? "#FA6D6D" : "none"}
+                  strokeColor={isLiked ? "#FA6D6D" : "#CCCCCC"}
+                />
+              </IconButton>
+              <Box display={"flex"} gap={"2px"}>
+                <Box fontSize={"16px"} fontWeight={"semibold"}>
+                  {numberFormatter.format(
+                    (item.price - item.discountAmount) * item.num
+                  )}
+                </Box>
+                <Box fontSize={"16px"} fontWeight={"medium"}>
+                  원
+                </Box>
+              </Box>
+            </Box>
           </Box>
-        </Box>
+        </Flex>
       </Box>
     </Box>
   );

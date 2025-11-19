@@ -18,16 +18,11 @@ import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import { useRouter } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
 
-const kakaoPayInfoText = `<minié 블랙프라이데이 x 카카오페이머니>
-25.11.01(토) ~ 25.01.07(수)
-카카오페이머니로 7만원 / 9만원 이상 결제시 3천원 / 5천원 즉시할인 (기간 내 1회)
-기간 내 ID당 1회 적용, 금액대별 1회 적용 아님
-※ 자세한 내용은 이벤트 탭 결제혜택에서 확인 가능합니다
-<카카오페이 유의사항>
-무이자할부는 카카오페이 모바일 결제창에서 선택하실 수 있습니다.
-휴대폰과 카드명의자가 동일해야 결제 가능합니다.
-카카오페이 결제 시, 제휴카드 할인/적립이 적용되지 않습니다.
-카드 영수증 및 현금영수증 확인은 카카오페이 홈페이지에서 확인 가능합니다.(카카오페이 홈 > 설정 > 결제내역)
+const kakaoPayInfoText = `<카카오페이 결제 연동 서비스 오류 안내>
+카카오페이 결제 연동 서비스 문제가 발생해 복구 중에 있습니다.
+토스페이에 카카오페이 이용 방법이 존재합니다. 
+카카오페이 이용을 원하시는 분들께서는 토스페이를 결제수단으로 선택하셔서 토스페이 내부에 존재하는 카카오페이를 선택하실 수 있습니다.
+원활한 쇼핑에 불편을 드려서 죄송합니다.
 카카오페이 고객센터 : 1644-7405`;
 const tossPayInfoText = `<minié 블랙프라이데이 x 토스페이>
 25.11.05(수) ~ 11.26(수)
@@ -284,7 +279,7 @@ export default function PaymentPage() {
               color={"white"}
               bg={"#FA6D6D"}
               fontWeight={"medium"}
-              disabled={!paymentType}
+              disabled={!(paymentType === "toss_pay")}
               onClick={handlePay}
             >
               결제하기

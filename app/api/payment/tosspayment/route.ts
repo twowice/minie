@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.redirect(new URL(`payment/fail?message=Internal server error during updating order status`, request.nextUrl.origin))
         }
         
-        return NextResponse.redirect(new URL(`/orderfinish?orderId=${orderId}`, request.nextUrl.origin));
+        return NextResponse.redirect(new URL(`/orderfinish?order-id=${orderId}`, request.nextUrl.origin));
 
     } catch (error) {
         deleteOrder(orderId)

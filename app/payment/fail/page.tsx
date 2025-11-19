@@ -18,6 +18,7 @@ export default function PayFailPage() {
       px={{ base: 4, sm: 6, lg: 8 }}
     >
       <Box>결제에 실패했습니다</Box>
+      <Box>{message}</Box>
     </Container>
   );
 }

@@ -38,7 +38,7 @@ export default function PaymentPage() {
   const customerKey = "1" + "minie"; // user_id로 추후에 대체
 
   const orderId = nanoid(); //주문번호
-  const orderName = `Minié ${checkedCartItems[0].title}${
+  const orderName = `${checkedCartItems[0].title}${
     checkedCartItems.length === 1
       ? ""
       : ` 외 ${checkedCartItems.length - 1}개의 상품`
