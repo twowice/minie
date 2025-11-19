@@ -19,13 +19,15 @@ import { getUserByFirebaseUid } from "@/lib/minie/authAPI";
 
 import { signInWithGoogle } from "@/lib/minie/authAPI"; // 구글로 로그인 하기 위해 내가 만든 비동기 로그인 함수
 
+import { useUser } from "@/context/UserContext"; // 2025-11-19
+
 export default function LoginPage(){
 
   const [email, setEmail] = useState(""); // 아이디
   const [password, setPassword] = useState(""); // 비밀번호
   const [error, setError] = useState(""); // 에러 메세지 출력을 위한 상태
   const router = useRouter(); // 라우터 변수
-
+  const { setUser } = useUser();  // 2025-11-19
 
 
 // EMAIL/PW 로그인 비동기 함수
@@ -37,25 +39,52 @@ const handleEmailLogin = async () => {
     
     // 2. Supabase에서 사용자 이름 가져오기
     const { data: userData } = await getUserByFirebaseUid(firebaseUser.uid);
+
+
+    // 3. 2025-11-19 Context에 저장 ( 2025-11-19 추가 )
+    if (userData) {
+      setUser(userData);
+    }
     
-    // 3. 환영 메시지
+    // 4. 환영 메시지
     alert(`환영합니다 ${userData?.name || "사용자"}님!`);
     
-    // 4. 홈으로 이동
+    // 5. 홈으로 이동
     router.push("/");
   } catch(err: any) {
     setError(err.message);
   }
 };
 
-
-  // Google login 비동기 함수
+  /* 기존 Google login 비동기 함수
   const handleGoogleLogin = async () => {
     try {
       await signInWithGoogle();
       router.push('/');
     }catch(err: any){
       console.error("Google 로그인 오류", error);
+      setError("Google 로그인에 실패했습니다.");
+    }
+  };
+  */
+
+  // 2025-11-19 Google login 비동기 함수
+  const handleGoogleLogin = async () => {
+    try {
+      const firebaseUser = await signInWithGoogle();  // 수정
+      
+      // Supabase에서 사용자 정보 가져오기
+      const { data: userData } = await getUserByFirebaseUid(firebaseUser.uid);
+      
+      // Context에 저장
+      if (userData) {
+        setUser(userData);
+      }
+      
+      alert(`반갑습니다 ${firebaseUser.displayName || "구글 사용자"}님`);
+      router.push('/');
+    }catch(err: any){
+      console.error("Google 로그인 오류", err);
       setError("Google 로그인에 실패했습니다.");
     }
   };

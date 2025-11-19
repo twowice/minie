@@ -17,6 +17,8 @@ import { createUser, getUserByEmail } from "@/lib/minie/authAPI"
 import { uploadProfileImage } from "@/lib/minie/authAPI"  
 import { Image } from "@chakra-ui/react"  
 
+import { useUser } from "@/context/UserContext"; // 2025-11-19 추가
+
 // =====================================================================================================================================================================================
 export default function SignupPage() {
   
@@ -35,6 +37,7 @@ export default function SignupPage() {
     }
   );
   const router = useRouter();
+  const { setUser } = useUser(); // 2025-11-19 추가
 
   const [profileImage, setProfileImage] = useState<File | null>(null);  // 프로필 이미지
   const [previewUrl, setPreviewUrl] = useState<string>("");  // 프로필 이미지
@@ -169,6 +172,16 @@ const handleSignUP = async () => {
       profileImageUrl = await uploadProfileImage(profileImage, firebaseUser.uid);
     }
 
+    // Supabase에 저장하고 userData 받기 (2025-11-19)
+    const userData = await createUser({
+      firebase_uid: firebaseUser.uid,
+      email: email,
+      name: name,
+      phone: phone,
+      birth_date: birthdate,
+      profile_image: profileImageUrl
+    });
+/*
     await createUser({
       firebase_uid: firebaseUser.uid,
       email: email,
@@ -177,9 +190,12 @@ const handleSignUP = async () => {
       birth_date: birthdate,
       profile_image: profileImageUrl
     });
+*/
+    // 2025-11-19 
+    setUser(userData);
 
     alert("회원가입이 완료되었습니다!");
-    router.push("/login");
+    router.push("/");
 
   } catch(err: any) {
     console.error("회원가입 오류:", err);
