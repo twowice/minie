@@ -140,6 +140,7 @@ const TYPE_MAP = {
   로션: "lotion",
   리퀴드: "liquid",
   밤: "balm",
+  기타: 'etc',
 
   마이타입: "mytype",
 };

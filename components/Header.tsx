@@ -40,7 +40,7 @@ export default function Header() {
   }, []);
 
   const navLinks = [
-    { href: "/shoppingdetail", label: "쇼핑상세" }, // 이 링크를 추가합니다.
+    // { href: "/shoppingdetail", label: "쇼핑상세" }, // 이 링크를 추가합니다. -> 다시 삭제
     { href: "/skincare", label: "스킨케어" },
     { href: "/cleansing", label: "클렌징" },
     { href: "/suncare", label: "선케어" },

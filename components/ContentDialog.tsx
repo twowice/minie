@@ -13,9 +13,13 @@ interface contentDialogProps {
     productId: string;
     id: string;
     onUpdate?: () => void;
+    onSuccess?: () => void;
+    onFail?: () => void;
+    onDelSuccess?: () => void;
+    onDelFail?: () => void;
 }
 
-export default function contentDialog({ id, content, reviewImage, productName, productImage, reviewrating, userId, productId, onUpdate }: contentDialogProps) {
+export default function contentDialog({ id, content, reviewImage, productName, productImage, reviewrating, userId, productId, onUpdate, onSuccess, onFail, onDelSuccess, onDelFail }: contentDialogProps) {
     /* 별점 & 설명 & 리뷰사진 & 닫기 */
     const [rating, setRating] = useState(reviewrating);
     const [contentContent, setcontentContent] = useState(content);
@@ -68,9 +72,10 @@ export default function contentDialog({ id, content, reviewImage, productName, p
 
             if (result.message === "리뷰 수정 성공") {
                 closeBtnRef.current?.click();
+                onSuccess?.();
                 onUpdate?.();
             }
-        } catch (e) { console.error("에러:", e); }
+        } catch (e) { console.error("에러:", e); onFail?.(); }
     }
 
     /* 삭제 */
@@ -85,9 +90,10 @@ export default function contentDialog({ id, content, reviewImage, productName, p
 
             if (result.message === "리뷰 삭제 성공") {
                 closeBtnRef.current?.click();
+                onDelSuccess?.();
                 onUpdate?.();
             }
-        } catch (e) { console.error("에러:", e); }
+        } catch (e) { console.error("에러:", e); onDelFail?.(); }
     }
 
     return (
@@ -238,7 +244,7 @@ export default function contentDialog({ id, content, reviewImage, productName, p
                                 <Textarea
                                     placeholder="꿀팁 가득, 상세한 리뷰를 작성해 보세요!(500자 이내)"
                                     size="sm"
-                                    resize="vertical"
+                                    resize="none"
                                     w="100%"
                                     minH="150px"
                                     flex="1"

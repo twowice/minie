@@ -7,14 +7,14 @@ import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import items from '@/data/items.json';
 import { useState } from 'react';
 
-export default function Shopping() {
+export default function Bodycare() {
    const [filterItem, setFilterItem] = useState(items);
    return (
       <Container maxW={'7xl'} maxH={'100%'}>
-         <FilterBar category="스킨케어" onDataFiltered={setFilterItem} />
+         <FilterBar category="바디케어" onDataFiltered={setFilterItem} />
          <SimpleGrid m={'0 auto'} minChildWidth={'250px'} gap={'8px'} minH={'500px'}>
             {filterItem.map(item => (
-               <ShoppingItem key={item.id} item={item} />
+               <ShoppingItem key={item.id} item={item}  />
             ))}
          </SimpleGrid>
 

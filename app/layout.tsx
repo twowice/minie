@@ -10,6 +10,7 @@ import { CartProvider } from "@/contexts/ShoppingCartContext";
 import { CartItem } from "./api/cart/cart";
 import { getCartItems } from "@/lib/minie/cartAPI";
 import { getLikedItems } from "@/lib/minie/likeAPI";
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: "Minié",
@@ -45,6 +46,7 @@ export default async function RootLayout({
     <html lang="ko">
       <body className={croissantOne.className}>
         <Provider>
+          <Toaster />
           <CartProvider
             initialCartItems={initialCartItems}
             initialLikedItems={initialLikedItems}

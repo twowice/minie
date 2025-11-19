@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Spinner, Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeSelectIndicator, Checkbox, Image, Dialog, Button, CloseButton, ButtonGroup, IconButton, Pagination, Container } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
+import { toaster } from "@/components/ui/toaster"
 import ContentDialog from "@/components/ContentDialog";
 
 export default function Page() {
@@ -48,16 +49,47 @@ export default function Page() {
     /* 로딩 */
     if (loading) {
         return (
-            <VStack colorPalette="pink">
-                <Spinner color="colorPalette.600" />
-                <Text color="colorPalette.600">불러오는 중...</Text>
-            </VStack>
+            <>
+                <VStack colorPalette="pink">
+                    <Spinner color="colorPalette.600" />
+                    <Text color="colorPalette.600">불러오는 중...</Text>
+                </VStack>
+            </>
         );
     }
 
+    /* 토스트 */
+    const showSaveSuccessToast = () => {
+        toaster.create({
+            type: "success",
+            title: "리뷰가 성공적으로 수정되었습니다!",
+        });
+    }
+
+    const showSaveFailToast = () => {
+        toaster.create({
+            type: "error",
+            title: "리뷰 수정 실패!",
+        });
+    }
+
+    const showDelSuccessToast = () => {
+        toaster.create({
+            type: "success",
+            title: "리뷰가 성공적으로 삭제되었습니다!",
+        });
+    }
+
+    const showDelFailToast = () => {
+        toaster.create({
+            type: "error",
+            title: "리뷰 삭제 실패!",
+        });
+    }
+
     return (
-        <Container maxW={"7xl"}>
-            <Box px="40px" py="24px">
+        <Container maxW={"7xl"} px={{ base: 4, sm: 6, lg: 8 }}>
+            <Box py="24px">
                 {/* 헤더 */}
                 <Text fontSize="14px" mb={1} color="black">
                     상품 리뷰
@@ -73,7 +105,7 @@ export default function Page() {
                 <HStack h="42px" py="5px" paddingTop="10px">
                     <Text fontSize="16px" color="black" paddingRight="10px">
                         <Text as="span" fontSize="32px" fontWeight="bold" color="black">
-                            {reviewTotalData.rating.toFixed(1)}
+                            {(reviewTotalData.rating ?? 0).toFixed(1)}
                         </Text>
                         {" "}점
                     </Text>
@@ -299,6 +331,10 @@ export default function Page() {
                                         productId={review.product_id}
                                         id={review.id}
                                         onUpdate={fetchReviews}
+                                        onSuccess={showSaveSuccessToast}
+                                        onFail={showSaveFailToast}
+                                        onDelSuccess={showDelSuccessToast}
+                                        onDelFail={showDelFailToast}
                                     />
 
                                     {/* 리뷰 이미지 크게 보기 */}
