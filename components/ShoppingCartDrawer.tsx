@@ -6,6 +6,7 @@ import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import LikedItem from "./LikedItem";
 import ShoppingCartIconButton from "./ui/ShoppingCartIconButton";
 import { useCart } from "@/contexts/ShoppingCartContext";
+import { useRouter } from "next/navigation";
 
 export default function ShoppingCartDrawer({
   headerHeight,
@@ -14,10 +15,18 @@ export default function ShoppingCartDrawer({
 }) {
   const [isCartActivity, setIsCartActivity] = useState(false);
   const [currentTabsValue, setCurrentTabsValue] = useState("cart");
+  const router = useRouter();
+
+  const zeroTotalPriceToast = () => {};
+  const moveOrder = () => {
+    setIsCartActivity(false);
+    router.push("/payment");
+  };
 
   const {
     cartItems,
     likedItems,
+    totalPrice,
     toggleChecked,
     toggleAllChecked,
     updateQuantity,
@@ -28,13 +37,6 @@ export default function ShoppingCartDrawer({
     addLikedItemsToCart,
     isLiked,
   } = useCart();
-
-  // 계산 로직들은 Context에서 가져온 상태를 기반으로 수행
-  const totalPrice = cartItems.reduce(
-    (sum, item) =>
-      sum + (item.checked ? (item.price - item.discountAmount) * item.num : 0),
-    0
-  );
   const cartItemsIdsAllSet = useMemo(
     () => new Set(cartItems.map((item) => item.id)),
     [cartItems]
@@ -241,6 +243,9 @@ export default function ShoppingCartDrawer({
                   color={"white"}
                   bg={"#FA6D6D"}
                   fontWeight={"medium"}
+                  onClick={() =>
+                    totalPrice > 0 ? moveOrder() : zeroTotalPriceToast()
+                  }
                 >
                   {numberFormatter.format(totalPrice)}원 구매하기
                 </Button>
