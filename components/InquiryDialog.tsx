@@ -2,6 +2,7 @@
 
 import { Text, Portal, CloseButton, Dialog, Button, Image, Flex, VStack, HStack, Box, Textarea, Span, } from "@chakra-ui/react";
 import { useState, useRef } from "react";
+import { fetchWithAuth } from "@/lib/minie/authAPI";
 
 interface inquiryDialogProps {
     id: string;
@@ -34,7 +35,7 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
 
         /* REQUEST */
         try {
-            const res = await fetch(`/api/inquiry/notice`, {
+            const res = await fetchWithAuth(`/api/inquiry/notice`, {
                 method: "POST",
                 body: formData
             });
@@ -53,7 +54,7 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
     /* 삭제 */
     const handleDel = async () => {
         try {
-            const res = await fetch(`/api/inquiry/notice?id=${id}`, {
+            const res = await fetchWithAuth(`/api/inquiry/notice?id=${id}`, {
                 method: "DELETE",
             });
 
