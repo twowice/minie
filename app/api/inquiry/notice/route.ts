@@ -4,10 +4,15 @@ import path from "path";
 
 /* 조회 */
 export async function GET(req: Request) {
-    /* 전체 문의 가져오기 */
-    const { data: allInquiry, error: allError } = await supabase
-        .from("inquiry")
-        .select(`
+  const { searchParams } = new URL(req.url);
+  const months = Number(searchParams.get("months"));
+  const start = searchParams.get("start");
+  const end = searchParams.get("end");
+
+  /* 전체 문의 가져오기 */
+  let query = supabase
+    .from("inquiry")
+    .select(`
         id,
         user_id,
         inquiry_type,
@@ -17,54 +22,68 @@ export async function GET(req: Request) {
         created_at,
         answer
         `)
-        .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false });
 
-    if (allError) return Response.json({ message: "전체 문의 조회 실패", error: allError.message }, { status: 500 });
+  /* 월 버튼 필터링 */
+  let fromDate = null;
+  if (months) {
+    if (!isNaN(months) && months > 0) {
+      const now = new Date();
+      fromDate = new Date(now.setMonth(now.getMonth() - months)).toISOString();
+    }
+  }
 
-    return Response.json({
-        message: "문의 조회 성공",
-        data: allInquiry,
-    });
+  if(start && end) query = query.gte("created_at", start).lte("created_at", end);
+
+  if (fromDate) query = query.gte("created_at", fromDate);
+
+  const { data, error } = await query;
+  if (error) return Response.json({ message: "문의 조회 실패", error: error.message }, { status: 500 });
+
+  return Response.json({
+    message: "문의 조회 성공",
+    data: data,
+  });
 }
 
 /* 업데이트 */
 export async function POST(req: Request) {
-    try {
-        const formData = await req.formData();
-        const id = formData.get("id") as string;
-        const content = formData.get("content") as string;
+  try {
+    const formData = await req.formData();
+    const id = formData.get("id") as string;
+    const content = formData.get("content") as string;
 
-        console.log("=== POST 요청 데이터 ===");
-        console.log("id:", id);
-        console.log("content:", content);
+    console.log("=== POST 요청 데이터 ===");
+    console.log("id:", id);
+    console.log("content:", content);
 
-        /* 예외 처리 */
-        if (!id) {
-            return Response.json(
-                { message: "필수 데이터 누락" },
-                { status: 400 }
-            );
-        }
-
-        let result;
-        const { data, error } = await supabase
-            .from("inquiry")
-            .update({
-                answer: content
-            })
-            .eq("id", id)
-            .select();
-
-        result = data;
-
-        if (error) return Response.json({ message: "답변 저장 실패", error: error.message }, { status: 500 });
-        return Response.json({ message: "답변 저장 성공" })
-    } catch (err: any) {
-        return Response.json(
-            { message: "서버 에러", error: err.message },
-            { status: 500 }
-        );
+    /* 예외 처리 */
+    if (!id) {
+      return Response.json(
+        { message: "필수 데이터 누락" },
+        { status: 400 }
+      );
     }
+
+    let result;
+    const { data, error } = await supabase
+      .from("inquiry")
+      .update({
+        answer: content
+      })
+      .eq("id", id)
+      .select();
+
+    result = data;
+
+    if (error) return Response.json({ message: "답변 저장 실패", error: error.message }, { status: 500 });
+    return Response.json({ message: "답변 저장 성공" })
+  } catch (err: any) {
+    return Response.json(
+      { message: "서버 에러", error: err.message },
+      { status: 500 }
+    );
+  }
 }
 
 /* 삭제 */

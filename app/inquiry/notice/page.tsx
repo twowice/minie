@@ -24,23 +24,74 @@ export default function Page() {
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
   const [inquiry, setInquiry] = useState<any[]>([]);
+  const [activeMonths, setActiveMonths] = useState<number | null>(null);
 
+  useEffect(() => { fetchInquiry(); }, []);
+  useEffect(() => {
+    if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); }
+  }, [startDate, endDate])
+
+  /* 전체 조회 */
   const fetchInquiry = async () => {
+    resetFilters();
     setLoading(true);
     try {
       const res = await fetch(`http://localhost:3000/api/inquiry/notice`);
       const result = await res.json();
 
+      if (res.ok && result.data) { console.log("응답:", result.data); setInquiry(result.data); }
+    }
+    catch (e) { console.error("서버 연결 실패:", e); }
+    finally { setLoading(false); }
+  };
+
+  /* 기간 버튼 - 조회 */
+  const fetchInquiryDate = async (months: number) => {
+    setActiveMonths(months);
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3000/api/inquiry/notice?months=${months}`);
+      const result = await res.json();
+
+      if (res.ok && result.data) { console.log("응답:", result.data); setInquiry(result.data); }
+    }
+    catch (e) { console.error("서버 연결 실패:", e); }
+    finally { setLoading(false); }
+  };
+
+  /* 달력 - 조회 */
+  const fetchInquiryDateCal = async () => {
+    if (!startDate || !endDate) { alert("시작일과 종료일을 선택해주세요."); return; }
+
+    setLoading(true);
+
+    // 시작일
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const startISO = start.toISOString();
+
+    // 종료일
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    const endISO = end.toISOString();
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/inquiry/notice?start=${startISO}&end=${endISO}`);
+      const result = await res.json();
+
       if (res.ok && result.data) {
-        console.log("응답:", result.data)
-        setInquiry(result.data);
+        console.log("응답:", result.data); setInquiry(result.data);
       }
     }
     catch (e) { console.error("서버 연결 실패:", e); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchInquiry(); }, []);
+  const resetFilters = () => {
+    setActiveMonths(null);
+    setStartDate(null);
+    setEndDate(null);
+  }
 
   /* 로딩 */
   if (loading) {
@@ -69,7 +120,6 @@ export default function Page() {
     });
   }
 
-
   const showDelSuccessToast = () => {
     toaster.create({
       type: "success",
@@ -90,17 +140,16 @@ export default function Page() {
         1:1 문의
       </Text>
 
-
       <VStack align="flex-start" w="100%" bg="#f8f8f8ff" p="20px">
         <Flex w="100%" direction={{ base: "column", md: "row" }} align="center" justify="space-between" gap={{ base: 4, md: 0 }}>
           <VStack w="100%" align="flex-start">
             {/* 문의 기간 */}
             <HStack w="100%" flexWrap="wrap" gap={2}>
               <Text color="#000000" minW="80px" fontSize="13px">문의기간</Text>
-              <Button borderRadius="5px" border="1px solid lightgray" h="30px">1개월</Button>
-              <Button borderRadius="5px" border="1px solid lightgray" h="30px">3개월</Button>
-              <Button borderRadius="5px" border="1px solid lightgray" h="30px">5개월</Button>
-              <Button borderRadius="5px" border="1px solid lightgray" h="30px">12개월</Button>
+              <Button onClick={() => fetchInquiryDate(1)} bg={activeMonths === 1 ? "#424242ff" : "transparent"} color={activeMonths === 1 ? "#ffffff" : "#000000"} borderRadius="5px" border="1px solid lightgray" h="30px">1개월</Button>
+              <Button onClick={() => fetchInquiryDate(3)} bg={activeMonths === 3 ? "#424242ff" : "transparent"} color={activeMonths === 3 ? "#ffffff" : "#000000"} borderRadius="5px" border="1px solid lightgray" h="30px">3개월</Button>
+              <Button onClick={() => fetchInquiryDate(5)} bg={activeMonths === 5 ? "#424242ff" : "transparent"} color={activeMonths === 5 ? "#ffffff" : "#000000"} borderRadius="5px" border="1px solid lightgray" h="30px">5개월</Button>
+              <Button onClick={() => fetchInquiryDate(12)} bg={activeMonths === 12 ? "#424242ff" : "transparent"} color={activeMonths === 12 ? "#ffffff" : "#000000"} borderRadius="5px" border="1px solid lightgray" h="30px">12개월</Button>
             </HStack>
 
             {/* 기간 선택 */}
@@ -130,8 +179,9 @@ export default function Page() {
             borderRadius="5px" w={{ base: "100%", md: "auto" }}
             h={{ base: "40px", md: "40px" }}
             mt={{ base: 4, md: 0 }}
-            _hover={{ bg: "#ff8e8e" }} >
-            조회
+            _hover={{ bg: "#ff8e8e" }}
+            onClick={() => fetchInquiry()} >
+            전체 조회
           </Button>
         </Flex>
       </VStack>
@@ -161,7 +211,6 @@ export default function Page() {
                 <Box p={3} borderRadius="5px">
                   <HStack marginBottom="10px">
                     <Text fontWeight="bold" color="#fc6a6aff">답변</Text>
-
                     <InquiryDialog
                       id={item.id}
                       content={item.content}
@@ -183,6 +232,5 @@ export default function Page() {
         ))}
       </Accordion.Root>
     </Container>
-
   )
 }
