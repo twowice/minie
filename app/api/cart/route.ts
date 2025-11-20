@@ -41,7 +41,7 @@ export async function GET() {
             isUpdated:false,
             title: item.products.name,
             brand: item.products.brand,
-            image: item.products.image.length !==0 ?item.products.image : "images/review/product3.jpg" ,//추후 이미지 준비중인 상품 이미지 넣는 자리
+            image: (item.products.image || '').length !== 0 ? item.products.image : "images/review/product3.jpg",
             num: item.product_num,
             price: item.products.price,
             isDiscounted: item.products.is_discounted,
