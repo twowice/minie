@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
     if (!orderId) {
@@ -56,11 +56,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
     try {
         const { order_id, order_name, payment_type, total_price, total_discount_amount, cart_items } = await request.json();
-
         const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
         if (!order_id || !total_price || !cart_items || cart_items.length === 0) {

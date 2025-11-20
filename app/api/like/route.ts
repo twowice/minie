@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
     const {data: rawCartItems, error} = await supabase
@@ -58,7 +58,7 @@ export async function DELETE(request: NextRequest) {
    const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
     const {product_id:productId} = await request.json()
@@ -70,7 +70,8 @@ export async function DELETE(request: NextRequest) {
     .eq('product_id', productId)
     
     if(error){
-        return NextResponse.json({ error: 'Failed to delete liked item: ' + error.message }, { status: 500 });
+        console.log("[server] api/like DELETE Failed to delete liked item: ",error.message  )
+        return NextResponse.json({ error: '[server] api/like DELETE Failed to delete liked item: ' + error.message }, { status: 500 });
     }
 
     return NextResponse.json({success: true})
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
     const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
     const {product_id: productId} = await request.json()

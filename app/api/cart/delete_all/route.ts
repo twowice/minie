@@ -5,7 +5,7 @@ export async function DELETE(request: NextRequest) {
      const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
     const {error} = await supabase

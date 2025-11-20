@@ -6,7 +6,7 @@ export async function GET(request:NextRequest) {
     const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
     const {data: rawCartItems, error} = await supabase
@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest) {
     const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
     const {product_id:productId} = await request.json()
 
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
     const itemsToInsert: { product_id: number; product_num: number }[] = await request.json()
     const dataToInsert = itemsToInsert.map(item => ({
@@ -107,7 +107,7 @@ export async function PATCH(request : NextRequest) {
      const uid = request.headers.get('X-User-ID');
 
     if(uid === null || uid === ""){
-        throw Error("[server]로그인 된 user 정보가 없습니다.")
+       return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
     const {product_id:id, product_num: num} = await request.json()
