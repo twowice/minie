@@ -2,6 +2,7 @@ import { deleteOrder, getOrderDetails, updateOrderStatus } from '@/lib/minie/ord
 import { NextRequest, NextResponse } from 'next/server';
 import { OrderDetail } from '../../order/order';
 import { deleteCartItem } from '@/lib/minie/cartAPI';
+import { error } from 'console';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
         if(!isUpdateSuccess){
             console.error("결제 후 주문 데이터 업데이트 과정에서 문제 발생 ", orderId)
             deleteOrder(orderId)
-            return NextResponse.redirect(new URL(`payment/fail?message=Internal server error during updating order status`, request.nextUrl.origin))
+            //return NextResponse.redirect(new URL(`payment/fail?message=Internal server error during updating order status\norderId:${orderId}`, request.nextUrl.origin))
         }
 
         //장바구니 비우기 시작
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
             }
 
 
-        return NextResponse.redirect(new URL(`/orderfinish?order-id=${orderId}`, request.nextUrl.origin));
+        //return NextResponse.redirect(new URL(`/orderfinish?order-id=${orderId}`, request.nextUrl.origin));
 
     } catch (error) {
         deleteOrder(orderId)

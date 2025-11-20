@@ -52,8 +52,6 @@ export async function GET(request:NextRequest) {
         };
     }).filter(item => item !== null) as CartItem[];
 
-    console.log("[server] api/cart GET return: ", transformedCartItems)
-
    return NextResponse.json(transformedCartItems, { status: 200 });
 }
 
