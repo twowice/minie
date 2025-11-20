@@ -18,12 +18,11 @@ interface User {
   firebase_uid: string;
   email: string;
   name: string;
-  phone: string;
-  birth_date: {
-    year: string;
-    month: string;
-    day: string;
-  };
+  phone: string | null;
+  birth_date: 
+      | string                               // "1995-03-15" 형식 (DB 저장 형식)
+      | { year: string; month: string; day: string }  // 프론트에서 쓰는 형식
+      | null;
   profile_image: string | null;
 }
 
