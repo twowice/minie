@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
+import { NextRequest } from "next/server";
 
 /* 조회 */
 export async function GET(req: Request) {
@@ -10,9 +11,10 @@ export async function GET(req: Request) {
   const sortType = url.searchParams.get("sort") || "latest";
   const photo = url.searchParams.get("photo") === "true";
   const normal = url.searchParams.get("normal") === "true";
+  const productId = url.searchParams.get("product_id");
 
   /* 전체 리뷰 가져오기 */
-  const { data: allReviews, error: allError } = await supabase
+  let query = supabase
     .from("reviews")
     .select(`
       id,
@@ -31,6 +33,8 @@ export async function GET(req: Request) {
         image
       )
     `);
+  if (productId) query = query.eq("product_id", productId);
+  const { data: allReviews, error: allError } = await query;
   if (allError) return Response.json({ message: "전체 리뷰 조회 실패", error: allError.message }, { status: 500 });
 
   /* 필터 & 정렬*/
@@ -68,7 +72,7 @@ export async function GET(req: Request) {
 }
 
 /* 추가 & 수정 */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const id = formData.get("id") as string;
@@ -78,6 +82,10 @@ export async function POST(req: Request) {
     const product_id = formData.get("product_id") as string;
     const image = formData.get("image") as File | null;
     const imageUrl = formData.get("imageUrl") as string;
+    const uid = req.headers.get('X-User-ID');
+    if (uid === null || uid === "") {
+      return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
 
     console.log("=== POST 요청 데이터 ===");
     console.log("id:", id);

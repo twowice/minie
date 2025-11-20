@@ -56,6 +56,16 @@ export default function ShoppingDetail() {
   const [review, setReview] = useState(0);
   const [like, setLike] = useState(false);
 
+  /* 전체 평균 점수 계산 (CKH) */
+  const [reviewSummary, setReviewSummary] = useState({
+    totalCount: 0,
+    rating: 0,
+    distribution: { 1:0, 2:0, 3:0, 4:0, 5:0 }
+  });
+  const fullStars = Math.floor(reviewSummary.rating);
+  const hasHalfStar = reviewSummary.rating * 10 % 10 >= 5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
   //context
   const { isItemCart, toggleCart, toggleLike, isLiked } = useCart();
 
@@ -371,32 +381,62 @@ export default function ShoppingDetail() {
             고객 리뷰
           </Text>
 
-          <Text fontSize={"32px"}>
-            <strong>{rating}</strong>
-          </Text>
-          <Text fontSize={"16px"}>점</Text>
-        </HStack>
-        <HStack>
-          {Array.from({ length: 5 }).map((_, idx) => {
-            const starValue = idx + 1;
-            let icon;
-            if (rating >= starValue) {
-              icon = IoIosStar;
-            } else if (rating >= starValue - 0.5) {
-              icon = IoIosStarHalf;
-            } else {
-              icon = IoIosStarOutline;
-            }
-            return (
-              <Icon
-                as={icon}
-                bgColor={"white"}
-                key={idx}
-                boxSize={"20px"}
-                color={"gold"}
-              />
-            );
-          })}
+          {/* 전체 평균 점수 (CKH) */}
+          <HStack h="42px" py="5px" paddingTop="10px">
+            <Text fontSize="16px" color="black" paddingRight="10px">
+              <Text as="span" fontSize="32px" fontWeight="bold" color="black">
+                {(reviewSummary.rating ?? 0).toFixed(1)}
+              </Text>
+              {" "}점
+            </Text>
+
+            <HStack>
+              {Array(fullStars)
+                .fill(0)
+                .map((_, i) => (
+                  <Text key={`full-${i}`} color="yellow.400" fontSize="32px">
+                    ★
+                  </Text>
+                ))}
+
+              {hasHalfStar && (
+                <Box
+                  key="half-star"
+                  width="32px"
+                  height="32px"
+                  position="relative"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Text color="gray.300" fontSize="32px">
+                    ★
+                  </Text>
+
+                  <Text
+                    color="yellow.400"
+                    fontSize="32px"
+                    position="absolute"
+                    top="0"
+                    left="0"
+                    width="50%"
+                    overflow="hidden"
+                    lineHeight="1"
+                  >
+                    ★
+                  </Text>
+                </Box>
+              )}
+
+              {Array(emptyStars)
+                .fill(0)
+                .map((_, i) => (
+                  <Text key={`empty-${i}`} color="gray.300" fontSize="32px">
+                    ★
+                  </Text>
+                ))}
+            </HStack>
+          </HStack>
         </HStack>
       </Flex>
       <Tabs.Root
@@ -773,7 +813,8 @@ export default function ShoppingDetail() {
           </Box>
         </Tabs.Content>
         <Tabs.Content value="review">
-          <ReviewChart reviews={reviews} />
+          {/* ADD BY CKH */}
+          <ReviewChart productId={id} onSummaryChange={(summary) => setReviewSummary(summary)} />
         </Tabs.Content>
         <Tabs.Content value="QnA">
           <Box mb={"32px"}>
