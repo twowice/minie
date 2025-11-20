@@ -39,6 +39,7 @@ export async function addNewOrder(
 
 export async function updateOrderStatus(orderId: string, paymentType: string, status: string) : Promise<boolean> {
     try{
+        console.log(`[client] orderid: ${orderId}\tpaymentType: ${paymentType}]\tstatus: ${status}`)
         const response = await fetchWithAuth("http://localhost:3000/api/order", {
             method: "PATCH",
             headers:{"Content-Type": "application/json"},
@@ -50,6 +51,8 @@ export async function updateOrderStatus(orderId: string, paymentType: string, st
             console.error(Error(errorData.error || "Failed to update order"))
             return false
         }
+
+        console.log("[client] updateOrderStatus success")
 
         return true
     }catch(error){
@@ -101,7 +104,7 @@ export async function getOrderExcludeOrderDetail(orderId: string) : Promise<Orde
 
 export async function getOrderDetails(orderId: string): Promise<OrderDetail[]>{
     try{
-        const response = await fetchWithAuth(`http://localhost:3000/api/order/order_detail?order-id=${orderId}`, {
+        const response = await fetch(`http://localhost:3000/api/order/order_detail?order-id=${orderId}`, {
             method:"GET"
         })
 

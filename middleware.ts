@@ -10,6 +10,8 @@ import { getUserIdByFirebaseUid } from './lib/minie/authAPI';
 const PUBLIC_API_CONFIG: Record<string, string[]> = {
   "/api/product": ["GET", "POST", "PUT", "DELETE"],
   "/api/reviews": ["GET"],
+  "/api/payment/tosspayment": ["POST", "GET", "PUT", "DELETE"],
+  "/api/order/order_detail": ["GET", "POST"],
   //추후에 인증정보가 필요없는 게스트 계정에게도 공개되어야 하는 api가 있으시면 추가하시길 바랍니다.
   //ex) "/api/auth/signup": ["POST"]
 }
@@ -24,6 +26,7 @@ function jsonErrorResponse(message: string, status: number) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const { method } = request;
+  console.log("[Middleware] pathName: ",pathname)
 
   //미들웨어가 자체 인증 API를 호출하지 않도록 예외 처리 -> node:process에러 회피를 위해서 api로 분리해주었습니다.
   if (pathname === '/api/auth/verify') {
@@ -37,7 +40,6 @@ export async function middleware(request: NextRequest) {
       if (allowedMethods.includes(method)) {
         return NextResponse.next()
       }
-      break
     }
   }
 
