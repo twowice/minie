@@ -14,7 +14,7 @@ import { isEqual } from "lodash";
 
 // 사용자 타입 정의
 interface User {
-  id: number; //supabase db에서 사용되는 user_id <- 자체 db api 통신 시 user_id 필요하시면 이거 사용하세요 아니다 자동화 할게요
+  id: number; //supabase db에서 사용되는 user_id 자동화 되어 헤더에서 조회 가능
   firebase_uid: string;
   email: string;
   name: string;

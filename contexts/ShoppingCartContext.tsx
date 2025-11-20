@@ -75,27 +75,43 @@ const initializeState = (items: CartItem[]): CartItem[] => {
 export function CartProvider({ children }: CartProviderProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [likedItems, setLikedItems] = useState<CartItem[]>([]);
+  const [cartDataLoading, setCartDataLoading] = useState(true);
   const { user, loading: userLoading } = useUser();
 
-  const init = async () => {
+  const init = useCallback(async () => {
+    if (userLoading) {
+      return;
+    }
+
+    setCartDataLoading(true);
+
     let initialCartItems: CartItem[] = [];
     let initialLikedItems: CartItem[] = [];
 
     try {
-      [initialCartItems, initialLikedItems] = await Promise.all([
-        getCartItems(),
-        getLikedItems(),
-      ]);
-      setCartItems(initialCartItems);
-      setLikedItems(initialLikedItems);
+      if (user) {
+        [initialCartItems, initialLikedItems] = await Promise.all([
+          getCartItems(),
+          getLikedItems(),
+        ]);
+        setCartItems(initialCartItems);
+        setLikedItems(initialLikedItems);
+      } else {
+        setCartItems([]);
+        setLikedItems([]);
+      }
     } catch (error) {
-      console.error("Error during parallel data fetch:", error);
+      console.error("장바구니/좋아요 아이템 불러오기 실패:", error);
+      setCartItems([]);
+      setLikedItems([]);
+    } finally {
+      setCartDataLoading(false);
     }
-  };
+  }, [user, userLoading]);
 
   useEffect(() => {
     init();
-  }, [user]);
+  }, [init]);
 
   const likedItemIds = useMemo(
     () => new Set(likedItems.map((item) => item.id)),
@@ -139,6 +155,10 @@ export function CartProvider({ children }: CartProviderProps) {
 
   const refreshCart = async () => {
     try {
+      if (user === null) {
+        throw Error("로그인 된 user 정보가 없습니다.");
+      }
+
       const updatedCartItems = (await getCartItems()).map((item) =>
         cartItemIds.has(item.id) ? { ...item, checked: false } : item
       );

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getUserIdByFirebaseUid } from './lib/minie/authAPI';
 
 
 /**
@@ -10,6 +11,7 @@ const PUBLIC_API_CONFIG: Record<string, string[]> = {
   "/api/product": ["GET", "POST", "PUT", "DELETE"],
   "/api/reviews": ["GET"],
   //추후에 인증정보가 필요없는 게스트 계정에게도 공개되어야 하는 api가 있으시면 추가하시길 바랍니다.
+  //ex) "/api/auth/signup": ["POST"]
 }
 
 /**
@@ -76,10 +78,19 @@ export async function middleware(request: NextRequest) {
   if (!decodedUid) { // 검증 결과로 uid를 받지 못했다면
     return jsonErrorResponse("Invalid Token or Verification Failure at Firebase\nCheck if the user is not registered in Firebase.", 401);
   }
+
+  const {data:dbUid, error:dbError} = await getUserIdByFirebaseUid(decodedUid)
+  if (dbError || !dbUid) {
+        console.error("Supabase user profile not found or DB error for firebase_uid:", decodedUid, dbError);
+        // Supabase에 해당 유저가 없으면 인증 실패로 간주하거나, 사용자 등록을 유도하는 응답
+        return jsonErrorResponse("User profile not found in Supabase or DB error", 401);
+      }
   
-  // 5. 요청 헤더에 X-User-UID 추가 -> api 폴더 안의 서버 부분 api에서 해당 값을 통해 user를 특정하시면 됩니다만 그냥 userContext의 userid가져오셔도 됩니다.
+  // 5. 요청 헤더에 X-User-UID 추가 -> api 폴더 안의 서버 부분 api에서 해당 값을 통해 user를 특정하시면 됩니다
+  //request에 X-User-ID로 존재할 겁니다. 단, 추출 시 string임을 잊지 말아주세요.
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('X-User-UID', decodedUid);
+  console.log("[middleware] DB에서 불러온 id:", dbUid.id)
+  requestHeaders.set('X-User-ID', dbUid.id);
 
   return NextResponse.next({
     request: {

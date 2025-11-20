@@ -10,13 +10,28 @@ import { supabaseStorage } from "@/lib/authSupabase";
 
 
 /* 
-  Bearer 토큰을 불러오는 함수를 자동으로 헤더에 추가해주는 헬퍼 함수입니다.
-  토큰을 불러오는데에 실패하면 null을 반환하기에 해당 함수를 사용하실 경우 null 체크해야 합니다.
   각각 인증 정보가 필요한 api에 request에 "Authorization": `Bearer ${token}`를 추가해주는 헬퍼 함수를 작성하시거나 각 api 수정을 하시면 됩니다.
   인증이 필요한 api 통신의 fetch를 아래의 fetchWithAuth로 변경하시면 됩니다.
-  예시 cartAPI.ts, likeAPI.ts, orderAPI.ts
-  */
+  
 
+  - 주의사항 : 해당 로직은 Firebase AccessToken이 현재 firebase 클라이언트와 firbase auth(서버)에서 관리되는 동일 firebase uid가 동일한지
+            (AccessToken유효한지) 검사하고서 header에 X-User-ID로 값을 전달해줍니다.
+            클라이언트 쪽은 코드 변경하실 필요 없고 api 폴더 안에서 변경만 하시면 됩니다.
+            uid를 가져오실 경우 아래 코드와 같이 NextRequest 인자를 받아서 진행하시면 됩니다.
+
+            export async function GET(request:NextRequest) {
+                const uid = request.headers.get('X-User-ID'); //string 타입 -> supabase의 user_id의 타입은 int이기에 number으로 전환하셔야 합니다.
+            }
+
+  사용법 예시 api/cart/route.ts, api/like/route.ts, api/order/route.ts
+
+
+  - 사용자 인증 검사를 제외 방법
+      1) middleware.ts 파일을 엽니다.
+      2) 사용자 인증 과정을 제외하는 api 루트를 보아둔 PUBLIC_API_CONFIG 객체 안에 <경로: [허용할 HTTP 메소드 배열]> 형식으로 추가합니다
+      3) 서버를 껐다가 다시 실행 시킵니다.
+      4) 적용을 확인합니다.
+  */
 export async function fetchWithAuth(path: string, options: RequestInit = {}): Promise<Response> {
   const token = await getFirebaseIdToken();
 
@@ -131,6 +146,17 @@ export const getUserByFirebaseUid = async (firebaseUid: string) => {
 
   return { data, error };
 }
+
+export const getUserIdByFirebaseUid = async (firebaseUid: string) => {
+  const { data, error } = await authSupabase
+    .from('users')
+    .select('id')
+    .eq('firebase_uid', firebaseUid)
+    .single();
+
+  return { data, error };
+}
+
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------
 // Google login 함수

@@ -3,9 +3,10 @@ import { CartItem } from "@/app/api/cart/cart"
 import { fetchWithAuth } from "./authAPI";
 
 
-
+//userId === supabase user 테이블의 id 
 export async function getCartItems(): Promise<CartItem[]> {
   try {
+    //쿼리를 통한 user id를 이용한 조회
     const response = await fetchWithAuth("http://localhost:3000/api/cart", {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -25,6 +26,7 @@ export async function getCartItems(): Promise<CartItem[]> {
 
 export async function deleteCartItem(id:number) : Promise<boolean> {
     try{
+      //body
      const response = await fetchWithAuth("http://localhost:3000/api/cart", {
         method: "DELETE",
         headers: {"Content-Type": "application/json"},

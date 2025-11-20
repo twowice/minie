@@ -2,9 +2,12 @@ import { supabase } from "@/lib/supabase"
 import { CartItem, RawCartItem } from "../cart/cart"
 import { NextRequest, NextResponse } from "next/server"
 
-export async function GET() {
-    const tempUid = 23
-    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+export async function GET(request: NextRequest) {
+    const uid = request.headers.get('X-User-ID');
+
+    if(uid === null || uid === ""){
+        throw Error("[server]로그인 된 user 정보가 없습니다.")
+    }
 
     const {data: rawCartItems, error} = await supabase
     .from('product_likes')
@@ -19,7 +22,7 @@ export async function GET() {
             discount_amount
         )`
     )
-    .eq('user_id', tempUid)
+    .eq('user_id', Number(uid))
 
     const typedRawCartItems: RawCartItem[] | null = rawCartItems as RawCartItem[] | null
 
@@ -52,15 +55,18 @@ export async function GET() {
 }
 
 export async function DELETE(request: NextRequest) {
-    const tempUid = 1
-    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+   const uid = request.headers.get('X-User-ID');
+
+    if(uid === null || uid === ""){
+        throw Error("[server]로그인 된 user 정보가 없습니다.")
+    }
 
     const {product_id:productId} = await request.json()
 
     const {error} = await supabase
     .from('product_likes')
     .delete()
-    .eq('user_id', tempUid)
+    .eq('user_id', Number(uid))
     .eq('product_id', productId)
     
     if(error){
@@ -71,13 +77,17 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    const tempUid = 1
+    const uid = request.headers.get('X-User-ID');
+
+    if(uid === null || uid === ""){
+        throw Error("[server]로그인 된 user 정보가 없습니다.")
+    }
 
     const {product_id: productId} = await request.json()
 
     const {error} = await supabase
     .from('product_likes')
-    .insert({user_id: tempUid, product_id: productId})
+    .insert({user_id: Number(uid), product_id: productId})
 
     if(error) {
         return NextResponse.json({error: 'Failed to insert liked item: ' + error.message}, {status: 500})
