@@ -10,7 +10,7 @@ import { CartProvider } from "@/contexts/ShoppingCartContext";
 import { CartItem } from "./api/cart/cart";
 import { getCartItems } from "@/lib/minie/cartAPI";
 import { getLikedItems } from "@/lib/minie/likeAPI";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 
 // 2025-11-19 session 관리를 위해 추가 (박영준)
 import { UserProvider } from "@/context/UserContext";
