@@ -2,9 +2,12 @@ import { supabase } from "@/lib/supabase"
 import { CartItem, RawCartItem } from "./cart";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-    const tempUid = 1
-    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+export async function GET(request:NextRequest) {
+    const uid = request.headers.get('X-User-ID');
+
+    if(uid === null || uid === ""){
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
 
     const {data: rawCartItems, error} = await supabase
     .from('carts')
@@ -20,7 +23,7 @@ export async function GET() {
             discount_amount
         )`
     )
-    .eq('user_id', tempUid)
+    .eq('user_id', Number(uid))         //헤더에서 읽는 데이터는 string인 것에 유의
     .order('id', { ascending: false })
 
     const typedRawCartItems: RawCartItem[] | null = rawCartItems as RawCartItem[] | null;
@@ -49,19 +52,23 @@ export async function GET() {
         };
     }).filter(item => item !== null) as CartItem[];
 
+    console.log("[server] api/cart GET return: ", transformedCartItems)
+
    return NextResponse.json(transformedCartItems, { status: 200 });
 }
 
 export async function DELETE(request: NextRequest) {
-     const tempUid = 1
-    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+    const uid = request.headers.get('X-User-ID');
 
+    if(uid === null || uid === ""){
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
     const {product_id:productId} = await request.json()
 
     const {error} = await supabase
     .from('carts')
     .delete()
-    .eq('user_id', tempUid)
+    .eq('user_id', Number(uid))
     .eq('product_id', productId)
     
     if(error){
@@ -72,12 +79,14 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    const tempUid = 1
-    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+    const uid = request.headers.get('X-User-ID');
 
+    if(uid === null || uid === ""){
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
     const itemsToInsert: { product_id: number; product_num: number }[] = await request.json()
     const dataToInsert = itemsToInsert.map(item => ({
-        user_id: tempUid,
+        user_id: Number(uid),
         product_id: item.product_id,
         product_num: item.product_num
     }))
@@ -95,15 +104,18 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request : NextRequest) {
-     const tempUid = 1
-    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+     const uid = request.headers.get('X-User-ID');
+
+    if(uid === null || uid === ""){
+       return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
 
     const {product_id:id, product_num: num} = await request.json()
 
     const {error} = await supabase
     .from('carts')
     .update({product_num: num})
-    .eq('user_id', tempUid)
+    .eq('user_id', Number(uid))
     .eq('product_id', id)
     
     if(error){

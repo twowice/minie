@@ -7,7 +7,11 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const orderId = searchParams.get('order-id')
 
-    const tempUid = 1
+    const uid = request.headers.get('X-User-ID');
+
+    if(uid === null || uid === ""){
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
 
     if (!orderId) {
         return NextResponse.json({ message: 'Order ID is required' }, { status: 400 })
@@ -18,7 +22,7 @@ export async function GET(request: NextRequest) {
             .from('orders')
             .select('*')
             .eq('order_number', orderId)
-            .eq('user_id', tempUid)
+            .eq('user_id', Number(uid))
             .single()
 
         if (error) {
@@ -52,8 +56,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
     try {
         const { order_id, order_name, payment_type, total_price, total_discount_amount, cart_items } = await request.json();
+        const uid = request.headers.get('X-User-ID');
 
-        const tempUid = 1 //TODO: user id 전역 관리 가능해지면 가져오기
+    if(uid === null || uid === ""){
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
 
         if (!order_id || !total_price || !cart_items || cart_items.length === 0) {
             return NextResponse.json({ message: 'Missing required order details' }, { status: 400 });
@@ -64,7 +71,7 @@ export async function POST(request: Request) {
             .insert({
                 order_number: order_id,
                 order_name: order_name,
-                user_id: tempUid,
+                user_id: Number(uid),
                 payment_type: payment_type,
                 total_price: total_price,
                 total_discount_amount: total_discount_amount,

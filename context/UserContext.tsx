@@ -1,12 +1,20 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from "react";
 import { auth } from "@/firebase/firebaseConfig";
 import { getUserByFirebaseUid } from "@/lib/minie/authAPI";
+import { isEqual } from "lodash";
 
 // 사용자 타입 정의
 interface User {
-  id: number;
+  id: number; //supabase db에서 사용되는 user_id 자동화 되어 헤더에서 조회 가능
   firebase_uid: string;
   email: string;
   name: string;
@@ -32,36 +40,44 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // Provider 컴포넌트
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // 1. localStorage에서 복구 시도
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+  const setUser = useCallback(
+    (newUser: User | null) => {
+      // ✅ 기존 user와 새 user가 내용상 같다면 상태 업데이트 안 함
+      if (!isEqual(user, newUser)) {
+        setUserState(newUser);
+      }
+    },
+    [user]
+  );
 
-    // 2. Firebase 인증 상태 감지
+  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        // Firebase에 로그인되어 있으면 Supabase에서 정보 가져오기
-        const { data } = await getUserByFirebaseUid(firebaseUser.uid);
-        if (data) {
-          setUser(data);
-          // localStorage에 저장 (새로고침 대비)
-          localStorage.setItem("user", JSON.stringify(data));
+        const { data: userData } = await getUserByFirebaseUid(firebaseUser.uid);
+        if (userData) {
+          if (!isEqual(user, userData)) {
+            setUser(userData);
+          }
+        } else {
+          // Firebase 로그인 했으나 Supabase에 없는 경우
+          if (user !== null) {
+            setUser(null);
+          }
         }
       } else {
-        // 로그아웃 상태
-        setUser(null);
-        localStorage.removeItem("user");
+        // 로그아웃된 경우
+        if (user !== null) {
+          setUser(null);
+        }
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   // 로그아웃 함수
   const logout = async () => {

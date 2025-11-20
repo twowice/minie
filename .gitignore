@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+#Firebase Admin 비밀키
+minie-f4b4c-firebase-adminsdk-fbsvc-40a31f692c.json
+
 # next.js
 /.next/
 /out/
