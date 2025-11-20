@@ -1,13 +1,18 @@
 import { supabase } from "@/lib/supabase";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
+import { NextRequest } from "next/server";
 
 /* 조회 */
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const months = Number(searchParams.get("months"));
   const start = searchParams.get("start");
   const end = searchParams.get("end");
+  const uid = req.headers.get('X-User-ID');
+  if (uid === null || uid === "") {
+    return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
+  }
 
   /* 전체 문의 가져오기 */
   let query = supabase
@@ -22,6 +27,7 @@ export async function GET(req: Request) {
         created_at,
         answer
         `)
+    .eq("user_id", Number(uid))
     .order("created_at", { ascending: false });
 
   /* 월 버튼 필터링 */
@@ -33,7 +39,7 @@ export async function GET(req: Request) {
     }
   }
 
-  if(start && end) query = query.gte("created_at", start).lte("created_at", end);
+  if (start && end) query = query.gte("created_at", start).lte("created_at", end);
 
   if (fromDate) query = query.gte("created_at", fromDate);
 
@@ -47,11 +53,15 @@ export async function GET(req: Request) {
 }
 
 /* 업데이트 */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const id = formData.get("id") as string;
     const content = formData.get("content") as string;
+    const uid = req.headers.get('X-User-ID');
+    if (uid === null || uid === "") {
+      return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
 
     console.log("=== POST 요청 데이터 ===");
     console.log("id:", id);

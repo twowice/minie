@@ -60,16 +60,6 @@ export default function Page() {
         >
           상품 정보
         </Box>
-
-        <Text
-          cursor="pointer"
-          color={"black"}
-          bg={"white"}
-          fontWeight={"medium"}
-          onClick={() => clear("like")}
-        >
-          전체 삭제
-        </Text>
       </Box>
       <Box flex="1" overflowY="auto" height="calc(100vh - 200px)" paddingBottom="80px">
         <Tabs.Root value="like">
@@ -102,17 +92,37 @@ export default function Page() {
           zIndex={10}
         >
           <Button
+            flex="1"
+            _hover={{
+              bg: "#eeeeeeff",
+              transform: "scale(1.03)",
+              transition: "all 0.2s ease-in-out",
+            }}
+            h="40px"
+            color={"#000000"}
+            bg={"#ffffffff"}
+            fontWeight={"medium"}
+            marginTop="10px"
+            border="1px solid #d6d6d6ff"
+            marginRight="10px"
+            onClick={() => clear("like")}
+          >
+            전체 삭제
+          </Button>
+
+          <Button
+            flex="1"
             _hover={{
               bg: "#e55b5b",
               transform: "scale(1.03)",
               transition: "all 0.2s ease-in-out",
             }}
-            w="300px"
             h="40px"
             color={"white"}
             bg={"#FA6D6D"}
             fontWeight={"medium"}
             onClick={addLikedItemsToCart}
+            marginTop="10px"
           >
             장바구니 담기
           </Button>

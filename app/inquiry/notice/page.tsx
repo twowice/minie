@@ -18,6 +18,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import InquiryDialog from "@/components/InquiryDialog";
 import { toaster } from "@/components/ui/toaster"
+import { fetchWithAuth } from "@/lib/minie/authAPI";
 
 export default function Page() {
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -36,7 +37,7 @@ export default function Page() {
     resetFilters();
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/inquiry/notice`);
+      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice`);
       const result = await res.json();
 
       if (res.ok && result.data) { console.log("응답:", result.data); setInquiry(result.data); }
@@ -50,7 +51,7 @@ export default function Page() {
     setActiveMonths(months);
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/inquiry/notice?months=${months}`);
+      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice?months=${months}`);
       const result = await res.json();
 
       if (res.ok && result.data) { console.log("응답:", result.data); setInquiry(result.data); }
@@ -76,7 +77,7 @@ export default function Page() {
     const endISO = end.toISOString();
 
     try {
-      const res = await fetch(`http://localhost:3000/api/inquiry/notice?start=${startISO}&end=${endISO}`);
+      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice?start=${startISO}&end=${endISO}`);
       const result = await res.json();
 
       if (res.ok && result.data) {

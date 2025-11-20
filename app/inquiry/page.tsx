@@ -1,9 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import { toaster } from "@/components/ui/toaster"
 import { useRouter } from "next/navigation";
 import PhotoUploader from "../../components/PhotoUploader";
+import { fetchWithAuth } from "@/lib/minie/authAPI";
 import {
     Container,
     Text,
@@ -57,7 +57,7 @@ export default function Page() {
 
 
         try {
-            const res = await fetch("/api/inquiry", {
+            const res = await fetchWithAuth("/api/inquiry", {
                 method: "POST",
                 body: formData
             });
