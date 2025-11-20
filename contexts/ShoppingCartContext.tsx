@@ -5,6 +5,7 @@ import {
   addCartItems,
   deleteAllCartItems,
   deleteCartItem,
+  getCartItems,
   updateCartItems,
 } from "@/lib/minie/cartAPI";
 import {
@@ -26,6 +27,9 @@ interface CartContextDataType {
   cartItems: CartItem[];
   likedItems: CartItem[];
   totalPrice: number;
+  totalDiscountAmount: number; //추가
+  totalCostPrice: number; //추가 할인가격 미 적용 총 가격
+  refreshCart: () => void; //추가 장바구니 상품 구매 이후 장바구니에서 해당 아이템들을 삭제 후 장바구니를 갱신하기 위함
   toggleChecked: (id: number, type: "cart" | "like") => void;
   toggleAllChecked: (type: "cart" | "like") => void;
   updateQuantity: (itemId: number, type: "plus" | "minus") => void;
@@ -85,6 +89,21 @@ export function CartProvider({
     [cartItems]
   );
 
+  const totalDiscountAmount = useMemo(
+    () =>
+      cartItems.reduce(
+        (sum, item) =>
+          sum + (item.checked ? item.discountAmount * item.num : 0),
+        0
+      ),
+    [cartItems]
+  );
+
+  const totalCostPrice = useMemo(
+    () => totalPrice + totalDiscountAmount,
+    [totalPrice]
+  );
+
   const likedItemIds = useMemo(
     () => new Set(likedItems.map((item) => item.id)),
     [likedItems]
@@ -98,7 +117,19 @@ export function CartProvider({
   );
   const isItemCart = (itemId: number) => cartItemIds.has(itemId);
 
-  //
+  const refreshCart = async () => {
+    try {
+      const updatedCartItems = (await getCartItems()).map((item) =>
+        cartItemIds.has(item.id) ? { ...item, checked: false } : item
+      );
+      setCartItems(updatedCartItems);
+    } catch (error) {
+      console.error(
+        "[ShoppingCartContext] 장바구니 아이템을 다시 불러오는 과정에서 오류가 발생했습니다:",
+        error
+      );
+    }
+  };
 
   const toggleChecked = useCallback((id: number, type: "cart" | "like") => {
     const setState = type === "cart" ? setCartItems : setLikedItems;
@@ -253,6 +284,9 @@ export function CartProvider({
     cartItems,
     likedItems,
     totalPrice,
+    totalDiscountAmount,
+    totalCostPrice,
+    refreshCart,
     toggleChecked,
     toggleAllChecked,
     updateQuantity,

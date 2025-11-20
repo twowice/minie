@@ -31,6 +31,9 @@ export default function Header() {
   const router = useRouter();  // 2025-11-19(박영준)
   const { user, logout } = useUser();  // 2025-11-19(박영준)
 
+  // 'payment/tosspayment일 때 장바구니 변경을 방지 하기 위해서 장바구니 아이콘을 해당 값에 따라 비활성화합니다.
+  const hideCart = pathname.startsWith("/payment/tosspayment");
+
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -208,7 +211,7 @@ export default function Header() {
             >
               <HamburgerIcon />
             </IconButton>
-            <ShoppingCartDrawer headerHeight={headerHeight} />
+            {!hideCart && <ShoppingCartDrawer headerHeight={headerHeight} />}
           </HStack>
         </Flex>
 
