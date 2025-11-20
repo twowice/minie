@@ -254,6 +254,8 @@ export function CartProvider({
       console.log("delete Cart Item failed : ", payload);
       return;
     }
+
+    setCartItems((prev) => [...newItems, ...prev]);
   }, [likedItems]);
 
   //장바구니 토글
