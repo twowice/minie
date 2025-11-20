@@ -26,7 +26,6 @@ function jsonErrorResponse(message: string, status: number) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const { method } = request;
-  console.log("[Middleware] pathName: ",pathname)
 
   //미들웨어가 자체 인증 API를 호출하지 않도록 예외 처리 -> node:process에러 회피를 위해서 api로 분리해주었습니다.
   if (pathname === '/api/auth/verify') {
