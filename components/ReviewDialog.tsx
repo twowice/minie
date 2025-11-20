@@ -3,7 +3,7 @@
 import { Text, Portal, CloseButton, Dialog, Button, Image, Flex, VStack, HStack, Box, Textarea } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 
-interface contentDialogProps {
+interface reviewDialogProps {
     content: string;
     reviewImage: string;
     productName: string;
@@ -19,7 +19,7 @@ interface contentDialogProps {
     onDelFail?: () => void;
 }
 
-export default function contentDialog({ id, content, reviewImage, productName, productImage, reviewrating, userId, productId, onUpdate, onSuccess, onFail, onDelSuccess, onDelFail }: contentDialogProps) {
+export default function reviewDialogDialog({ id, content, reviewImage, productName, productImage, reviewrating, userId, productId, onUpdate, onSuccess, onFail, onDelSuccess, onDelFail }: reviewDialogProps) {
     /* 별점 & 설명 & 리뷰사진 & 닫기 */
     const [rating, setRating] = useState(reviewrating);
     const [contentContent, setcontentContent] = useState(content);

@@ -1,4 +1,8 @@
 import nodemailer from "nodemailer";
+import { supabase } from "@/lib/supabase";
+import { writeFile, mkdir, unlink } from "fs/promises";
+import path from "path";
+
 export async function POST(req: Request) {
     try {
 
@@ -14,6 +18,22 @@ export async function POST(req: Request) {
         console.log("내용:", content);
         console.log("이메일:", email);
         console.log("파일:", file);
+
+        let image_url = null;
+        if (file && typeof file === "object" && "arrayBuffer" in file) {
+            const bytes = await file.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+
+            const uploadDir = path.join(process.cwd(), "public/images/inquiry");
+            await mkdir(uploadDir, { recursive: true });
+
+            // 중복 방지
+            const fileName = `${Date.now()}_${file.name}`;
+            const filePath = path.join(uploadDir, fileName);
+
+            await writeFile(filePath, buffer);
+            image_url = `/images/inquiry/${fileName}`;
+        }
 
         const transport = nodemailer.createTransport({
             host: "smtp.naver.com",
@@ -52,6 +72,24 @@ export async function POST(req: Request) {
         };
 
         await transport.sendMail(mailOptions);
+
+        // DB INSERT
+        let result;
+        const { data, error } = await supabase
+            .from("inquiry")
+            .insert([
+                {
+                    inquiry_type: category,
+                    content: content,
+                    image_url: image_url || "",
+                    reply_email: email
+                }
+            ])
+            .select();
+
+        if (error) return Response.json({ message: "리뷰 추가 실패", error: error.message }, { status: 500 });
+
+        result = data;
 
         return Response.json({ message: "이메일 요청 성공" })
     } catch (err: any) {

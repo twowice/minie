@@ -1,6 +1,6 @@
 "use client";
 import { Button, Text, Box, Checkbox, Tabs } from "@chakra-ui/react";
-import { useState, useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import { useCart } from "@/contexts/ShoppingCartContext";
 import LikedItem from "../../../components/LikedItem";
 export default function Page() {
@@ -102,7 +102,7 @@ export default function Page() {
           zIndex={10}
         >
           <Button
-           _hover={{
+            _hover={{
               bg: "#e55b5b",
               transform: "scale(1.03)",
               transition: "all 0.2s ease-in-out",
