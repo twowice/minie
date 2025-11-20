@@ -78,32 +78,6 @@ export function CartProvider({
   const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
   const [likedItems, setLikedItems] = useState<CartItem[]>(initialLikedItems);
 
-  const totalPrice = useMemo(
-    () =>
-      cartItems.reduce(
-        (sum, item) =>
-          sum +
-          (item.checked ? (item.price - item.discountAmount) * item.num : 0),
-        0
-      ),
-    [cartItems]
-  );
-
-  const totalDiscountAmount = useMemo(
-    () =>
-      cartItems.reduce(
-        (sum, item) =>
-          sum + (item.checked ? item.discountAmount * item.num : 0),
-        0
-      ),
-    [cartItems]
-  );
-
-  const totalCostPrice = useMemo(
-    () => totalPrice + totalDiscountAmount,
-    [totalPrice]
-  );
-
   const likedItemIds = useMemo(
     () => new Set(likedItems.map((item) => item.id)),
     [likedItems]
@@ -117,6 +91,33 @@ export function CartProvider({
   );
   const isItemCart = (itemId: number) => cartItemIds.has(itemId);
 
+  //
+
+  const totalCostPrice = useMemo(
+    () =>
+      cartItems.reduce((sum, item) => sum + (item.checked ? item.price : 0), 0),
+    [cartItems]
+  );
+
+  const totalDiscountAmount = useMemo(
+    () =>
+      cartItems.reduce(
+        (sum, item) => sum + (item.checked ? item.discountAmount : 0),
+        0
+      ),
+    [cartItems]
+  );
+
+  const totalPrice = useMemo(
+    () =>
+      cartItems.reduce(
+        (sum, item) =>
+          sum + (item.checked ? item.price - item.discountAmount : 0),
+        0
+      ),
+    [cartItems]
+  );
+
   const refreshCart = async () => {
     try {
       const updatedCartItems = (await getCartItems()).map((item) =>
@@ -124,10 +125,7 @@ export function CartProvider({
       );
       setCartItems(updatedCartItems);
     } catch (error) {
-      console.error(
-        "[ShoppingCartContext] 장바구니 아이템을 다시 불러오는 과정에서 오류가 발생했습니다:",
-        error
-      );
+      console.error("failed to update cartItem in useCart: ", error);
     }
   };
 
@@ -181,6 +179,14 @@ export function CartProvider({
     [cartItems]
   );
 
+  const removeItem = useCallback(async (itemId: number) => {
+    const isSuccess = await deleteCartItem(itemId);
+
+    isSuccess
+      ? setCartItems((prev) => prev.filter((item) => item.id !== itemId))
+      : console.log("delete Cart Item failed : ", itemId);
+  }, []);
+
   const updateAllQuantities = useCallback(async () => {
     const isUpdated = cartItems.filter((item) => item.isUpdated);
 
@@ -190,14 +196,6 @@ export function CartProvider({
 
     console.log("result : ", results);
   }, [cartItems]);
-
-  const removeItem = useCallback(async (itemId: number) => {
-    const isSuccess = await deleteCartItem(itemId);
-
-    isSuccess
-      ? setCartItems((prev) => prev.filter((item) => item.id !== itemId))
-      : console.log("delete Cart Item failed : ", itemId);
-  }, []);
 
   const clear = useCallback(async (type: string) => {
     switch (type) {
@@ -225,28 +223,12 @@ export function CartProvider({
     isSuccess ? setLikedItems([]) : console.log("delete All Cart Item failed");
   };
 
-  const toggleLike = useCallback(
-    async (item: CartItem) => {
-      if (isLiked(item.id)) {
-        const isSuccess = await deleteLikedItem(item.id);
-        isSuccess
-          ? setLikedItems((prev) => prev.filter((i) => i.id !== item.id))
-          : console.log("delete(unlike) Liked Item failed");
-      } else {
-        const isSuccess = await addLikedItem(item.id);
-        isSuccess
-          ? setLikedItems((prev) => [{ ...item, checked: false }, ...prev])
-          : console.log("add(like) Liked Item failed");
-      }
-    },
-    [likedItems]
-  );
-
-  //장바구니 토글
-  const toggleCart = useCallback((item: CartItem) => {
-    if (isItemCart(item.id)) {
-      // 이미 장바구니에 있으면 제거
-      setCartItems((prev) => prev.filter((i) => i.id !== item.id));
+  const toggleLike = useCallback(async (item: CartItem) => {
+    if (isLiked(item.id)) {
+      const isSuccess = await deleteLikedItem(item.id);
+      isSuccess
+        ? setLikedItems((prev) => prev.filter((i) => i.id !== item.id))
+        : console.log("delete(unlike) Liked Item failed");
     } else {
       // 장바구니에 없으면 추가
       setCartItems((prev) => [
@@ -273,12 +255,22 @@ export function CartProvider({
       return;
     }
 
-    setCartItems((prev) => [
-      ...newItems.map((i) => ({ ...i, checked: false })),
-      ...prev,
-    ]);
-    setLikedItems((prev) => prev.map((item) => ({ ...item, checked: false })));
-  }, [likedItems, cartItems]);
+    setCartItems((prev) => [...newItems, ...prev]);
+  }, [likedItems]);
+
+  //장바구니 토글
+  const toggleCart = useCallback((item: CartItem) => {
+    if (isItemCart(item.id)) {
+      // 이미 장바구니에 있으면 제거
+      setCartItems((prev) => prev.filter((i) => i.id !== item.id));
+    } else {
+      // 장바구니에 없으면 추가
+      setCartItems((prev) => [
+        { ...item, checked: false, num: item.num || 1 },
+        ...prev,
+      ]);
+    }
+  }, []);
 
   const value = {
     cartItems,
