@@ -4,17 +4,47 @@ import FilterBar from '@/components/FilterBar';
 import ShoppingItem from '@/components/ShoppingItem';
 import { ButtonGroup, Container, IconButton, Pagination, SimpleGrid } from '@chakra-ui/react';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
-import items from '@/data/items.json';
-import { useState } from 'react';
+// import items from '@/data/items.json'; //더미데이터
+import { useEffect, useState } from 'react';
 
-export default function Shopping() {
-   const [filterItem, setFilterItem] = useState(items);
+export default function Skincare() {
+   const [filterItem, setFilterItem] = useState([]);
+   const [item, setItem] = useState([]);
+
+   const [currentCategory, setCurrentCategory] = useState('스킨케어')
+
+   const [isLoading, setIsLoading] = useState(true);
+   const [error, setError] = useState(null);
+
+   useEffect(() => {
+      const fetchProducts = async () => {
+         try {
+            const response = await fetch('api/products');
+            if (!response.ok) {
+               throw new Error('데이터를 불러오는 데 실패했습니다.');
+            }
+            const data = await response.json();
+
+            setItem(data.products || []);
+            setFilterItem(data.products || []);
+         } catch (err: any) {
+            setError(err.message);
+         } finally {
+            setIsLoading(false);
+         }
+      };
+      fetchProducts();
+   }, []);
+
+   if (error) return <div>데이터 로딩 실패</div>;
+   if (isLoading) return <div>로딩중...</div>;
+
    return (
       <Container maxW={'7xl'} maxH={'100%'}>
-         <FilterBar category="스킨케어" onDataFiltered={setFilterItem} />
+         <FilterBar category={currentCategory} onDataFiltered={setFilterItem} list={item} />
          <SimpleGrid m={'0 auto'} minChildWidth={'250px'} gap={'8px'} minH={'500px'}>
-            {filterItem.map(item => (
-               <ShoppingItem key={item.id} item={item} />
+            {filterItem.map((product: any) => (
+               <ShoppingItem key={product.id} item={product} />
             ))}
          </SimpleGrid>
 
