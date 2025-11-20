@@ -1,5 +1,5 @@
 import { CartItem } from "@/app/api/cart/cart"
-import { Order, OrderDetail } from "@/app/api/order/order"
+import { Order, OrderDetail } from "@/app/api/order/order.d"
 import { fetchWithAuth } from "./authAPI"
 
 export async function addNewOrder(
@@ -112,7 +112,7 @@ export async function getOrderDetails(orderId: string): Promise<OrderDetail[]>{
             console.error(`Failed to get order: ${response.status} ${response.statusText}`);
             return [];
         }
-        const order = response.json() 
+        const order = await response.json() 
 
         return order
 
