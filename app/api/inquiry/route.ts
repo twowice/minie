@@ -2,10 +2,14 @@ import nodemailer from "nodemailer";
 import { supabase } from "@/lib/supabase";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
+import { NextRequest } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
-
+        const uid = req.headers.get('X-User-ID');
+        if(uid === null || uid === ""){
+            return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
+        }
         const formData = await req.formData();
 
         const category = formData.get("category");
@@ -79,6 +83,7 @@ export async function POST(req: Request) {
             .from("inquiry")
             .insert([
                 {
+                    user_id: Number(uid),
                     inquiry_type: category,
                     content: content,
                     image_url: image_url || "",
