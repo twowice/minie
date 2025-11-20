@@ -40,7 +40,7 @@ export async function fetchWithAuth(path: string, options: RequestInit = {}): Pr
   }
 
   const headers = {
-    "Content-Type": "application/json",
+    // "Content-Type": "application/json",
     "Authorization": `Bearer ${token}`,
     ...(options.headers || {}),
   };
