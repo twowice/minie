@@ -18,7 +18,13 @@ export default function PaymentCartItem({
       px={"10px"}
     >
       <HStack flex={2}>
-        <Image src={item.image} w={"120px"} mx={"20px"} />
+        <Image
+          src={item.image}
+          fit="contain"
+          h={"120px"}
+          w={"120px"}
+          mx={"20px"}
+        />
         <Box>
           <Box fontSize={"14px"} fontWeight={"medium"}>
             {item.title}

@@ -1,7 +1,8 @@
-import { deleteOrder, getOrderDetails, updateOrderStatus } from '@/lib/minie/orderAPI';
+import { getOrderDetails } from '@/lib/minie/orderAPI';
+import { deleteOrderAsAdmin, getOrderAsAdmin, updateOrderStatusAsAdmin } from '@/lib/minie/orderAPI.server';
+import { deleteCartItemsAsAdmin } from '@/lib/minie/cartAPI.server';
 import { NextRequest, NextResponse } from 'next/server';
-import { OrderDetail } from '../../order/order';
-import { deleteCartItem } from '@/lib/minie/cartAPI';
+import { OrderDetail } from '@/app/api/order/order.d';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -9,13 +10,18 @@ export async function GET(request: NextRequest) {
     const orderId = searchParams.get('orderId');
     const amount = searchParams.get('amount')
 
+    if (!orderId) {
+        // orderId가 없는 경우 즉시 실패 처리
+        console.error('Toss Payments callback missing orderId.');
+        return NextResponse.redirect(new URL(`/payment/fail?message=필수 주문 ID 누락`, request.nextUrl.origin));
+    }
+
     const secretKey = process.env.TOSS_SECRET_KEY;
 
     // 필수 파라미터가 없거나 시크릿 키가 없는 경우 에러 처리
-    if (!paymentKey || !orderId || !amount || !secretKey) {
+    if (!paymentKey || !amount || !secretKey) {
         console.error('필수 결제 파라미터 또는 시크릿 키 누락', { paymentKey, orderId, amount, secretKeyExists: !!secretKey });
-        // 에러 메시지와 함께 실패 페이지로 리다이렉트
-        return NextResponse.redirect(new URL(`/fail`, request.nextUrl.origin));
+        return NextResponse.redirect(new URL(`/payment/fail?message=필수 결제 파라미터 누락&orderId=${orderId}`, request.nextUrl.origin));
     }
 
     try {
@@ -36,44 +42,47 @@ export async function GET(request: NextRequest) {
 
         if (!response.ok) {
             console.error("토스페이먼츠 승인 실패:", json);
-            deleteOrder(orderId)
             const errorMessage = json.message || 'Payment confirmation failed with unknown reason';
-            return NextResponse.redirect(new URL(`payment/fail?message=${errorMessage}&orderId=${orderId}`, request.nextUrl.origin));
+            // 결제 승인에 실패했으므로, 주문 상태를 '주문실패'로 업데이트 할 수도 있습니다.
+            // await updateOrderStatusAsAdmin(orderId, '카드', '주문실패');
+            return NextResponse.redirect(new URL(`/payment/fail?message=${errorMessage}&orderId=${orderId}`, request.nextUrl.origin));
         }
 
         console.log("결제 승인 성공:", json);
 
-        //결제전->주문완료 상태 변화
-        const isUpdateSuccess = await updateOrderStatus(orderId, json.easyPay.provider, '주문완료')
+        const isUpdateSuccess = await updateOrderStatusAsAdmin(orderId, json.easyPay?.provider || '카드', '주문완료')
 
         if(!isUpdateSuccess){
             console.error("결제 후 주문 데이터 업데이트 과정에서 문제 발생 ", orderId)
-            deleteOrder(orderId)
-            return NextResponse.redirect(new URL(`payment/fail?message=Internal server error during updating order status`, request.nextUrl.origin))
+            await deleteOrderAsAdmin(orderId); // 실패 시 생성된 주문 삭제
+            return NextResponse.redirect(new URL(`/payment/fail?message=Internal server error during updating order status&orderId=${orderId}`, request.nextUrl.origin))
         }
 
-        //장바구니 비우기 시작
-        const orderDetails : OrderDetail[]= await getOrderDetails(orderId)
+        console.log(`주문 ${orderId}의 장바구니 상품 삭제를 시작합니다.`);
+        
+        const order = await getOrderAsAdmin(orderId);
+        if (!order) {
+            console.error(`[Fatal] Cannot find order ${orderId} to clear cart items. Proceeding without cart deletion.`);
+            // 주문은 성공했으므로 계속 진행하되, 심각한 오류임을 기록
+            return NextResponse.redirect(new URL(`/orderfinish?order-id=${orderId}`, request.nextUrl.origin));
+        }
 
-       const deletePromises = orderDetails.map(detail => 
-                deleteCartItem(detail.productId)
-        )
+        const orderDetails : OrderDetail[] = await getOrderDetails(orderId);
+        const productIdsToDelete = orderDetails.map(detail => detail.productId);
 
-        const results = await Promise.all(deletePromises)
-        const allItemsCleared = results.every(result => result === true);
+        const allItemsCleared = await deleteCartItemsAsAdmin(order.user_id, productIdsToDelete);
 
-            if (!allItemsCleared) {
-                console.warn(`주의: 주문 ${orderId}의 일부 장바구니 상품 삭제 실패`);
-            } else {
-                console.log(`주문 ${orderId}의 장바구니 상품 모두 삭제 성공`);
-            }
-
-
+        if (!allItemsCleared) {
+            console.warn(`주의: 주문 ${orderId}의 일부 또는 전체 장바구니 상품 삭제 실패`);
+        } else {
+            console.log(`주문 ${orderId}의 장바구니 상품 모두 삭제 성공`);
+        }
         return NextResponse.redirect(new URL(`/orderfinish?order-id=${orderId}`, request.nextUrl.origin));
 
-    } catch (error) {
-        deleteOrder(orderId)
-        console.error("결제 승인 중 예외 발생:", error);
-        return NextResponse.redirect(new URL(`payment/fail?message=Internal server error during payment confirmation`, request.nextUrl.origin));
+    } catch (err) {
+        console.error("결제 승인 중 예외 발생:", err);
+        await deleteOrderAsAdmin(orderId);
+        const errorMessage = (err instanceof Error) ? err.message : 'Internal server error during payment confirmation';
+        return NextResponse.redirect(new URL(`/payment/fail?message=${errorMessage}&orderId=${orderId}`, request.nextUrl.origin));
     }
 }

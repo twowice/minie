@@ -65,6 +65,7 @@ export async function POST(request: Request) {
         if (!order_id || !total_price || !cart_items || cart_items.length === 0) {
             return NextResponse.json({ message: 'Missing required order details' }, { status: 400 });
         }
+        const time = new Date().toISOString()
 
         const { error: orderError } = await supabase
             .from('orders')
@@ -75,7 +76,8 @@ export async function POST(request: Request) {
                 payment_type: payment_type,
                 total_price: total_price,
                 total_discount_amount: total_discount_amount,
-                created_at: new Date().toISOString(),
+                created_at: time,
+                updated_at: time,
                 status: '결제 전'
                 // 주문 상태 컬럼 추가했습니다. redirect된 토스 api에서 돌아와서 cartitem을 db로 보내줄 수 없어서 이후 status를 업데이트하는 방향으로 틀었습니다.
             })
@@ -116,14 +118,24 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: NextRequest){
     try{
+        const uid = request.headers.get('X-User-ID');
+
+        console.log(`[server] api/order PATCH \tuid: ${uid}`)
+
+        if(uid === null || uid === ""){
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
+
         const {order_id: orderId, payment_type: paymentType, order_status: status} = await request.json() 
+
+        console.log(`[server] api/order PATCH \torder_id : ${orderId}\tpayment_type: ${paymentType}\torder_status: ${status}`)
 
         const { error: updateError } = await supabase
             .from('orders')
             .update({
                 status: status,
                 payment_type: paymentType,
-                created_at:new Date().toISOString()
+                updated_at:new Date().toISOString()
             })
             .eq('order_number', orderId);
 
