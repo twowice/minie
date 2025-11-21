@@ -24,6 +24,7 @@ interface User {
       | { year: string; month: string; day: string }  // 프론트에서 쓰는 형식
       | null;
   profile_image: string | null;
+  is_admin: boolean; // 관리자 여부 추가 2025-11-21 "박영준"
 }
 
 // Context 타입 정의
@@ -32,6 +33,7 @@ interface UserContextType {
   setUser: (user: User | null) => void;
   loading: boolean;
   logout: () => Promise<void>;
+  isAdmin: boolean; // 관리자 여부 추가 2025-11-21 "박영준"
 }
 
 // Context 생성
@@ -42,9 +44,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // 관리자 여부 계산 - user가 있고 is_admin이 true일 때만 2025-11-21 "박영준"
+  const isAdmin = user?.is_admin ?? false;
+
   const setUser = useCallback(
     (newUser: User | null) => {
-      // ✅ 기존 user와 새 user가 내용상 같다면 상태 업데이트 안 함
+      // 기존 user와 새 user가 내용상 같다면 상태 업데이트 안 함
       if (!isEqual(user, newUser)) {
         setUserState(newUser);
       }
@@ -86,7 +91,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser, loading, logout }}>
+    <UserContext.Provider value={{ user, setUser, loading, logout, isAdmin }}>
       {children}
     </UserContext.Provider>
   );
