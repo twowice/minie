@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toaster } from "@/components/ui/toaster"
 import { useRouter } from "next/navigation";
 import PhotoUploader from "../../components/PhotoUploader";
@@ -17,6 +17,7 @@ import {
     Flex,
     Box
 } from "@chakra-ui/react";
+import { useUser } from "@/context/UserContext"; 
 
 export default function Page() {
     const [photo, setPhoto] = useState<File | null>(null);
@@ -28,6 +29,11 @@ export default function Page() {
     const [categoryError, setCategoryError] = useState(false);
     const [contentError, setContentError] = useState(false);
     const [emailError, setEmailError] = useState(false);
+    const router = useRouter();
+
+    /* 관리자 여부 */
+    const { user, isAdmin } = useUser();
+    useEffect(() => { if(!user) router.push("/login"); })
 
     /* REQUEST */
     const handleSend = async () => {
@@ -81,7 +87,6 @@ export default function Page() {
         }
     }
 
-    const router = useRouter();
     const handleCancle = () => { router.push("/inquiry/notice"); }
 
     return (

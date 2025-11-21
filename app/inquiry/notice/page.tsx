@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Container,
   Text,
@@ -19,6 +20,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import InquiryDialog from "@/components/InquiryDialog";
 import { toaster } from "@/components/ui/toaster"
 import { fetchWithAuth } from "@/lib/minie/authAPI";
+import { useUser } from "@/context/UserContext";
 
 export default function Page() {
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -26,11 +28,11 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [inquiry, setInquiry] = useState<any[]>([]);
   const [activeMonths, setActiveMonths] = useState<number | null>(null);
-
+  const router = useRouter();
+  const { user, isAdmin } = useUser(); //관리자 여부
+  useEffect(() => { if (!user) router.push("/login"); })
   useEffect(() => { fetchInquiry(); }, []);
-  useEffect(() => {
-    if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); }
-  }, [startDate, endDate])
+  useEffect(() => { if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); } }, [startDate, endDate])
 
   /* 전체 조회 */
   const fetchInquiry = async () => {
@@ -212,18 +214,20 @@ export default function Page() {
                 <Box p={3} borderRadius="5px">
                   <HStack marginBottom="10px">
                     <Text fontWeight="bold" color="#fc6a6aff">답변</Text>
-                    <InquiryDialog
-                      id={item.id}
-                      content={item.content}
-                      type={item.inquiry_type}
-                      imageUrl={item.image_url}
-                      answer={item.answer}
-                      onUpdate={fetchInquiry}
-                      onSuccess={showSaveSuccessToast}
-                      onFail={showSaveFailToast}
-                      onDelSuccess={showDelSuccessToast}
-                      onDelFail={showDelFailToast}
-                    />
+                    {isAdmin && (
+                      <InquiryDialog
+                        id={item.id}
+                        content={item.content}
+                        type={item.inquiry_type}
+                        imageUrl={item.image_url}
+                        answer={item.answer}
+                        onUpdate={fetchInquiry}
+                        onSuccess={showSaveSuccessToast}
+                        onFail={showSaveFailToast}
+                        onDelSuccess={showDelSuccessToast}
+                        onDelFail={showDelFailToast}
+                      />
+                    )}
                   </HStack>
                   <Text color="#3f3f3f">{item.answer || "아직 답변이 등록되지 않았습니다."}</Text>
                 </Box>
