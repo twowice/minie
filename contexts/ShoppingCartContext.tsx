@@ -21,6 +21,11 @@ interface CartContextDataType {
    addLikedItemsToCart: () => void;
    isLiked: (itemId: number) => boolean;
    isItemCart: (itemId: number) => boolean;
+   addToCart: (itemId: CartItem) => Promise<void>;
+   buyDirectly: (item: CartItem) => void; //추가
+   paymentItems: CartItem[]; //추가
+   paymentTotal: number; //추가
+   resetDirectOrder: () => void; //추가
 }
 
 const CartContext = createContext<CartContextDataType | undefined>(undefined);
@@ -45,20 +50,27 @@ export function CartProvider({ children }: CartProviderProps) {
    const [cartItems, setCartItems] = useState<CartItem[]>([]);
    const [likedItems, setLikedItems] = useState<CartItem[]>([]);
    const [cartDataLoading, setCartDataLoading] = useState(true);
+   const [directOrderItem, setDirectOrderItem] = useState<CartItem | null>(null);
    const { user, loading: userLoading } = useUser();
 
-   // totalPrice 계산 (중복 제거)
+   // totalPrice 계산
    const totalPrice = useMemo(
       () =>
-         cartItems.reduce((sum, item) => sum + (item.checked ? (item.price - item.discountAmount) * item.num : 0), 0),
+         cartItems.reduce((sum, item) => {
+            const price = Number(item.price) || 0;
+            const discount = Number(item.discountAmount) || 0;
+            const num = Number(item.num) || 1;
+            // checked가 true인 것만 계산
+            return sum + (item.checked ? (price - discount) * num : 0);
+         }, 0),
       [cartItems],
    );
 
-   // likedItemIds (중복 제거)
+   // likedItemIds
    const likedItemIds = useMemo(() => new Set(likedItems.map(item => item.id)), [likedItems]);
    const isLiked = (itemId: number) => likedItemIds.has(itemId);
 
-   // cartItemIds (중복 제거)
+   // cartItemIds
    const cartItemIds = useMemo(() => new Set(cartItems.map(item => item.id)), [cartItems]);
    const isItemCart = (itemId: number) => cartItemIds.has(itemId);
 
@@ -75,8 +87,15 @@ export function CartProvider({ children }: CartProviderProps) {
       try {
          if (user) {
             [initialCartItems, initialLikedItems] = await Promise.all([getCartItems(), getLikedItems()]);
-            setCartItems(initialCartItems);
-            setLikedItems(initialLikedItems);
+            const normalize = item => ({
+               ...item,
+               price: Number(item.price) || 0,
+               discountAmount: Number(item.discountAmount ?? item.discount_amount ?? item.discount ?? 0) || 0,
+               num: Number(item.num) || 1,
+               checked: Boolean(item.checked),
+            });
+            setCartItems(initialCartItems.map(normalize));
+            setLikedItems(initialLikedItems.map(normalize));
          } else {
             setCartItems([]);
             setLikedItems([]);
@@ -93,6 +112,27 @@ export function CartProvider({ children }: CartProviderProps) {
    useEffect(() => {
       init();
    }, [init]);
+   const buyDirectly = useCallback((newItem: CartItem) => {
+      setDirectOrderItem({ ...newItem, checked: true });
+   }, []);
+
+   const resetDirectOrder = useCallback(() => {
+      setDirectOrderItem(null);
+   }, []);
+
+   const paymentItems = useMemo(() => {
+      if (directOrderItem) return [directOrderItem];
+      return cartItems.filter(item => item.checked);
+   }, [directOrderItem, cartItems]);
+
+   const paymentTotal = useMemo(() => {
+      return paymentItems.reduce((sum, item) => {
+         const price = Number(item.price) || 0;
+         const discount = Number(item.discountAmount) || 0;
+         const num = Number(item.num) || 1;
+         return sum + (price - discount) * num;
+      }, 0);
+   }, [paymentItems]);
 
    const refreshCart = async () => {
       try {
@@ -119,7 +159,7 @@ export function CartProvider({ children }: CartProviderProps) {
       [cartItems, likedItems],
    );
 
-   // updateQuantity 함수 수정 (잘못된 로직 수정)
+   // updateQuantity 함수
    const updateQuantity = useCallback(
       async (itemId: number, type: 'plus' | 'minus') => {
          setCartItems(prev =>
@@ -142,7 +182,7 @@ export function CartProvider({ children }: CartProviderProps) {
       [cartItems],
    );
 
-   // updateAllQuantities 함수 구현 (누락되어 있었음)
+   // updateAllQuantities 함수 구현
    const updateAllQuantities = useCallback(async () => {
       const payload = cartItems.map(item => ({
          product_id: item.id,
@@ -151,7 +191,7 @@ export function CartProvider({ children }: CartProviderProps) {
       await updateCartItems(payload);
    }, [cartItems]);
 
-   // removeItem 함수 구현 (누락되어 있었음)
+   // removeItem 함수 구현
    const removeItem = useCallback(async (itemId: number) => {
       const isSuccess = await deleteCartItem(itemId);
       if (isSuccess) {
@@ -227,6 +267,28 @@ export function CartProvider({ children }: CartProviderProps) {
       [isItemCart],
    );
 
+   const addToCart = useCallback(
+      async (newItem: CartItem) => {
+         setDirectOrderItem(null);
+         // 1. 이미 장바구니에 있는지 확인
+         const existingItem = cartItems.find(item => item.id === newItem.id);
+
+         if (existingItem) {
+            const newQuantity = existingItem.num + (newItem.num || newItem.quantity || 1);
+            setCartItems(prev => prev.map(item => (item.id === newItem.id ? { ...item, num: newQuantity } : item)));
+            // API 호출
+            await updateCartItems([{ product_id: newItem.id, product_num: newQuantity }]);
+         } else {
+            const initialNum = newItem.num || newItem.quantity || 1;
+            // State 선반영
+            setCartItems(prev => [{ ...newItem, num: initialNum, checked: true }, ...prev]);
+            // API 호출
+            await addCartItems([{ product_id: newItem.id, product_num: initialNum }]);
+         }
+      },
+      [cartItems],
+   );
+
    const addLikedItemsToCart = useCallback(async () => {
       const itemsToAdd = likedItems.filter(item => item.checked);
       const cartItemIds = new Set(cartItems.map(i => i.id));
@@ -262,6 +324,11 @@ export function CartProvider({ children }: CartProviderProps) {
       isItemCart,
       toggleCart,
       totalPrice,
+      addToCart,
+      buyDirectly,
+      paymentItems,
+      paymentTotal,
+      resetDirectOrder,
    };
 
    return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

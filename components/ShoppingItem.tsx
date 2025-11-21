@@ -17,7 +17,6 @@ interface ShoppingItemProps {
 export default function ShoppingItem({ item, isLoading = false }: ShoppingItemProps) {
    const { isItemCart, toggleCart, toggleLike, isLiked } = useCart();
 
-   // 2. useMemo를 최상단으로 이동 (Loading 체크보다 먼저 실행되어야 함)
    const { cleanItem, finalPrice, discountRate, safePrice, safeDiscountAmount } = useMemo(() => {
       if (!item) {
          return {
@@ -58,6 +57,10 @@ export default function ShoppingItem({ item, isLoading = false }: ShoppingItemPr
          safeDiscountAmount: sDiscountAmount,
       };
    }, [item]);
+   const isItemInCart = isItemCart(cleanItem.id);
+   const isItemLike = isLiked(cleanItem.id);
+
+   if (!item) return null;
 
    if (isLoading) {
       return (
@@ -90,11 +93,6 @@ export default function ShoppingItem({ item, isLoading = false }: ShoppingItemPr
          </VStack>
       );
    }
-
-   if (!item) return null;
-
-   const isItemInCart = isItemCart(cleanItem.id);
-   const isItemLike = isLiked(cleanItem.id);
 
    const handleCartClick = (e: React.MouseEvent) => {
       e.preventDefault();

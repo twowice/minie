@@ -2,7 +2,7 @@
 
 import FilterBar from '@/components/FilterBar';
 import ShoppingItem from '@/components/ShoppingItem';
-import { ButtonGroup, Container, IconButton, Pagination, SimpleGrid } from '@chakra-ui/react';
+import { Box, ButtonGroup, Container, IconButton, Pagination, SimpleGrid } from '@chakra-ui/react';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 
@@ -58,26 +58,36 @@ export default function Haircare() {
    const offset = (page - 1) * pageSize;
    const currentItems = filterItem.slice(offset, offset + pageSize);
 
-   if (error) return <div>데이터 로딩 실패</div>;
+   const emptyCount = !showSkeleton ? pageSize - currentItems.length : 0;
+   const dummyItem = filterItem.length > 0 ? filterItem[0] : null;
 
-   // [삭제됨] if (isLoading) return <div>로딩중...</div>;
-   // -> 이제 아래 return 문에서 처리합니다.
+   if (error) return <div>데이터 로딩 실패</div>;
 
    return (
       <Container maxW={'7xl'} maxH={'100%'}>
-         {/* 로딩 중에도 필터바는 보이게 유지 */}
          <FilterBar category={currentCategory} onDataFiltered={setFilterItem} list={item} />
 
          <SimpleGrid m={'0 auto'} minChildWidth={'250px'} gap={'8px'} minH={'500px'}>
-            {showSkeleton
-               ? // 로딩 중일 때는 스켈레톤 (개수도 pageSize에 맞춤)
-                 Array.from({ length: pageSize }).map((_, index) => <ShoppingItem key={index} isLoading={true} />)
-               : // 3. 전체 filterItem이 아니라 잘라낸 currentItems만 렌더링
-                 currentItems.map((product: any) => <ShoppingItem key={product.id} item={product} />)}
+            {showSkeleton ? (
+               Array.from({ length: pageSize }).map((_, index) => <ShoppingItem key={index} isLoading={true} />)
+            ) : (
+               <>
+                  {currentItems.map((product: any) => (
+                     <ShoppingItem key={product.id} item={product} />
+                  ))}
+
+                  {emptyCount > 0 &&
+                     dummyItem &&
+                     Array.from({ length: emptyCount }).map((_, index) => (
+                        <Box key={`empty-${index}`} visibility="hidden" pointerEvents="none" aria-hidden="true">
+                           <ShoppingItem item={dummyItem} />
+                        </Box>
+                     ))}
+               </>
+            )}
          </SimpleGrid>
 
          {/* pagination */}
-         {/* 로딩이 아닐 때만 페이지네이션을 보여주거나, 로딩 중엔 숨기는 것이 자연스럽습니다 */}
          {!showSkeleton && (
             <Pagination.Root
                count={filterItem.length} // 전체 개수

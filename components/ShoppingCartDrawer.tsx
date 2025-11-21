@@ -44,7 +44,6 @@ export default function ShoppingCartDrawer({ headerHeight }: { headerHeight: num
       }
    }, [isCartActivity]);
 
-   /* 화면UI 시작 (모든 핸들러 함수가 Context의 함수로 대체됨) */
    return (
       <Drawer.Root
          open={isCartActivity}
