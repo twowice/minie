@@ -11,6 +11,7 @@ interface reviewDialogProps {
     productImage: string;
     reviewrating: number;
     userId: string;
+    loginUserId: number | undefined;
     productId: string;
     id: string;
     onUpdate?: () => void;
@@ -20,7 +21,7 @@ interface reviewDialogProps {
     onDelFail?: () => void;
 }
 
-export default function reviewDialogDialog({ id, content, reviewImage, productName, productImage, reviewrating, userId, productId, onUpdate, onSuccess, onFail, onDelSuccess, onDelFail }: reviewDialogProps) {
+export default function reviewDialogDialog({ id, content, reviewImage, productName, productImage, reviewrating, userId, loginUserId, productId, onUpdate, onSuccess, onFail, onDelSuccess, onDelFail }: reviewDialogProps) {
     /* 별점 & 설명 & 리뷰사진 & 닫기 */
     const [rating, setRating] = useState(reviewrating);
     const [contentContent, setcontentContent] = useState(content);
@@ -108,17 +109,29 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
                 }
             }}>
 
-            <Dialog.Trigger asChild>
+            {String(userId) === String(loginUserId) ? (
+                <Dialog.Trigger asChild>
+                    <Text
+                        textAlign="left"
+                        fontSize="12px"
+                        color="#5C5C5C"
+                        cursor="pointer"
+                        _hover={{ textDecoration: "underline" }}
+                    >
+                        {content}
+                    </Text>
+                </Dialog.Trigger>
+            ) : (
                 <Text
                     textAlign="left"
                     fontSize="12px"
-                    color="#5C5C5C"
-                    cursor="pointer"
-                    _hover={{ textDecoration: "underline" }}
+                    color="#8E8E8E"
+                    cursor="not-allowed"
+                    onClick={(e) => e.preventDefault()}
                 >
                     {content}
                 </Text>
-            </Dialog.Trigger>
+            )}
 
             <Portal>
                 <Dialog.Backdrop />

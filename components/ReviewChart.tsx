@@ -5,8 +5,12 @@ import { Spinner, Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeS
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import { toaster } from "@/components/ui/toaster"
 import ReviewDialog from "@/components/ReviewDialog";
+import { useUser } from "@/context/UserContext";
 
 export default function ReviewChart({ productId, onSummaryChange }: { productId: any; onSummaryChange?: (summary: any) => void }) {
+  /* 관리자 여부 */
+  const { user, isAdmin } = useUser();
+
   /* 필터 & 정렬 */
   const [sortType, setSortType] = useState<"latest" | "rating">("latest");
   const [photoFilter, setPhotoFilter] = useState(false);
@@ -105,7 +109,7 @@ export default function ReviewChart({ productId, onSummaryChange }: { productId:
             {" "}개의 리뷰
           </Text>
         </Flex>
-      
+
         {/* 5,4,3,2,1점 별 통계 그래프 */}
         <Flex gap="20px" alignItems="flex-end" h="176px" borderBottom="1px solid #D8D8D8" py="15px">
           {Object.entries(reviewTotalData.distribution)
@@ -276,6 +280,7 @@ export default function ReviewChart({ productId, onSummaryChange }: { productId:
                     productImage={review.products.image}
                     reviewrating={review.rating}
                     userId={review.user_id}
+                    loginUserId={user?.id}
                     productId={review.product_id}
                     id={review.id}
                     onUpdate={fetchReviews}
