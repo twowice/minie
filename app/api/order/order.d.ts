@@ -27,3 +27,10 @@ export interface OrdersForTracking {
     createdAt: string,
     updatedAt: string,
 }
+
+export type PaginatedOrderDetailsResponse = {
+    items: OrderDetail[]
+    totalCount: number
+    currentPage: number
+    totalPages: number
+};
