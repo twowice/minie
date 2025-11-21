@@ -39,7 +39,7 @@ export default function Page() {
     resetFilters();
     setLoading(true);
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice`);
+      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice?is_admin=${isAdmin}`);
       const result = await res.json();
 
       if (res.ok && result.data) { console.log("응답:", result.data); setInquiry(result.data); }
