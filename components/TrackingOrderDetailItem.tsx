@@ -1,6 +1,8 @@
 import { OrderDetail } from "@/app/api/order/order";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
-import { Box, Button, Flex, HStack, Image, Stack } from "@chakra-ui/react";
+import { Box, Flex, HStack, Image, Stack } from "@chakra-ui/react";
+import ReviewAddDialog from "@/components/ReviewAddDialog";
+import { toaster } from "@/components/ui/toaster"
 
 export default function TrackingOrderDetailItem({
   order,
@@ -13,6 +15,14 @@ export default function TrackingOrderDetailItem({
   updatedAt: string;
   status: string;
 }) {
+  /* 토스트 CKH */
+  const showSaveSuccessToast = () => {
+    toaster.create({ type: "success", title: "답변이 성공적으로 추가되었습니다!" });
+  }
+  const showSaveFailToast = () => {
+    toaster.create({ type: "error", title: "답변 추가 실패!" });
+  }
+
   return (
     <Flex
       p={3}
@@ -39,16 +49,14 @@ export default function TrackingOrderDetailItem({
       <Stack flex="1" justifyContent={"center"} alignItems={"center"}>
         <Box>{status === "주문완료" ? "배송완료" : status}</Box>
         {status === "주문완료" && (
-          <Button
-            w={"46px"}
-            h={"20px"}
-            bg={"#F5F5F5"}
-            borderRadius={"4px"}
-            border={"1px solid #C4C4C4"}
-            fontSize={"8px"}
-          >
-            리뷰작성
-          </Button>
+          /* Add by CKH */
+          <ReviewAddDialog
+            productId={order.productId}
+            productName={order.productName}
+            productImage={order.productImage}
+            onSuccess={showSaveSuccessToast}
+            onFail={showSaveFailToast}
+          />
         )}
         {status === "주문취소" && <Box>{updatedAt.split("T")[0]}</Box>}
       </Stack>
