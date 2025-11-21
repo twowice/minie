@@ -2,7 +2,7 @@ import { OrderDetail } from "@/app/api/order/order";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import { Box, Flex, HStack, Image, Stack } from "@chakra-ui/react";
 import ReviewAddDialog from "@/components/ReviewAddDialog";
-import { toaster } from "@/components/ui/toaster"
+import { toaster } from "@/components/ui/toaster";
 
 export default function TrackingOrderDetailItem({
   order,
@@ -17,11 +17,14 @@ export default function TrackingOrderDetailItem({
 }) {
   /* 토스트 CKH */
   const showSaveSuccessToast = () => {
-    toaster.create({ type: "success", title: "답변이 성공적으로 추가되었습니다!" });
-  }
+    toaster.create({
+      type: "success",
+      title: "답변이 성공적으로 추가되었습니다!",
+    });
+  };
   const showSaveFailToast = () => {
     toaster.create({ type: "error", title: "답변 추가 실패!" });
-  }
+  };
 
   return (
     <Flex
@@ -46,7 +49,9 @@ export default function TrackingOrderDetailItem({
         <Box>{order.productName}</Box>
       </HStack>
       <Box flex="1">{order.productNum}</Box>
-      <Box flex="1">{numberFormatter.format(order.price)}원</Box>
+      <Box flex="1">
+        {numberFormatter.format(order.price * order.productNum)}원
+      </Box>
       <Stack flex="1" justifyContent={"center"} alignItems={"center"}>
         <Box>{status === "주문완료" ? "배송완료" : status}</Box>
         {status === "주문완료" && (

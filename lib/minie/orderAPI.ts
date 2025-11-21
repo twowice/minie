@@ -126,6 +126,28 @@ export async function getOrderDetails(orderId: string, page: number = 1, limit: 
     }
 }
 
+export async function getOrderDetailsCount(orderId: string, limit: number = 5): Promise<{ totalCount: number, itemsPerPage: number, totalPages: number }> {
+    try {
+        const response = await fetchWithAuth(`/api/order/order_detail/${orderId}/count?limit=${limit}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error(`Failed to get order details count for ID ${orderId}: ${response.status} ${response.statusText}`, errorData);
+            return { totalCount: 0, itemsPerPage: limit, totalPages: 0 };
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error(`Error during getting order details count for ID ${orderId}:`, error);
+        return { totalCount: 0, itemsPerPage: limit, totalPages: 0 };
+    }
+}
+
 export async function getOrdersForTracking() {
     try {
         const response = await fetchWithAuth('http://localhost:3000/api/order/tracking', {
