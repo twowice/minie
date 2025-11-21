@@ -31,7 +31,7 @@ export default function Page() {
       try {
         setLoading(true);
         const fetchedOrders = await getOrderDetails(orderId);
-        setOrders(fetchedOrders.items);
+        setOrders(fetchedOrders);
       } catch (err: any) {
         console.error("Error in Page component fetching orders:", err);
         setError(err);
@@ -45,7 +45,7 @@ export default function Page() {
   if (loading) return <Box color="black">주문 내역 로딩 중...</Box>;
   if (error)
     return <Box color="black">오류 발생: {error || "알 수 없는 오류"}</Box>;
-  if (orders.length === 0)
+  if (!orders || orders.length === 0)
     return <Box color="black">주문 내역이 없습니다.</Box>;
 
   console.log(orders);

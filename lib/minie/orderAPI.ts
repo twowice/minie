@@ -104,7 +104,7 @@ export async function getOrderExcludeOrderDetail(orderId: string): Promise<Order
     }
 }
 
-export async function getOrderDetails(orderId: string, page: number = 1, limit: number = 5): Promise<PaginatedOrderDetailsResponse> {
+export async function getOrderDetails(orderId: string, page: number = 1, limit: number = 5): Promise<OrderDetail[]> {
     try {
         const response = await fetchWithAuth(`/api/order/order_detail?order-id=${orderId}&page=${page}&limit=${limit}`, {
             method: "GET",
@@ -114,15 +114,15 @@ export async function getOrderDetails(orderId: string, page: number = 1, limit: 
         if (!response.ok) {
             const errorData = await response.json();
             console.error(`Failed to get order details for ID ${orderId}: ${response.status} ${response.statusText}`, errorData);
-            return { items: [], totalCount: 0, currentPage: page, totalPages: 0 };
+            return []
         }
 
-        const data: PaginatedOrderDetailsResponse = await response.json();
+        const data: OrderDetail[] = await response.json();
         return data;
 
     } catch (error) {
         console.error(`Error during getting order details for ID ${orderId}:`, error);
-        return { items: [], totalCount: 0, currentPage: page, totalPages: 0 }; // 에러 시 빈 응답 반환
+        return []; // 에러 시 빈 응답 반환
     }
 }
 
