@@ -31,7 +31,7 @@ export default function Page() {
       try {
         setLoading(true);
         const fetchedOrders = await getOrderDetails(orderId);
-        setOrders(fetchedOrders);
+        setOrders(fetchedOrders.items);
       } catch (err: any) {
         console.error("Error in Page component fetching orders:", err);
         setError(err);
@@ -66,6 +66,7 @@ export default function Page() {
         <Flex bg="#00000010" p={3} borderTopWidth="1px">
           <Box flex="1">주문일자</Box>
           <Box flex="3">상품</Box>
+          <Box flex="1">수량</Box>
           <Box flex="1">주문금액</Box>
           <Box flex="1">상태</Box>
         </Flex>

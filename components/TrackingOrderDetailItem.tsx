@@ -45,6 +45,7 @@ export default function TrackingOrderDetailItem({
         <Image src={order.productImage} w={"70px"} h={"70px"} fit={"contain"} />
         <Box>{order.productName}</Box>
       </HStack>
+      <Box flex="1">{order.productNum}</Box>
       <Box flex="1">{numberFormatter.format(order.price)}원</Box>
       <Stack flex="1" justifyContent={"center"} alignItems={"center"}>
         <Box>{status === "주문완료" ? "배송완료" : status}</Box>
