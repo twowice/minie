@@ -10,7 +10,6 @@ import { useUser } from "@/context/UserContext";
 export default function Page() {
     /* 관리자 여부 */
     const { user, isAdmin } = useUser();
-
     /* 필터 & 정렬 */
     const [sortType, setSortType] = useState<"latest" | "rating">("latest");
     const [photoFilter, setPhotoFilter] = useState(false);
