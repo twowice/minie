@@ -1,0 +1,65 @@
+import { OrderDetail } from "@/app/api/order/order";
+import { numberFormatter } from "@/utils/formatter/numberFomatter";
+import { Box, Flex, HStack, Image, Stack } from "@chakra-ui/react";
+import ReviewAddDialog from "@/components/ReviewAddDialog";
+import { toaster } from "@/components/ui/toaster"
+
+export default function TrackingOrderDetailItem({
+  order,
+  createAt,
+  updatedAt,
+  status,
+}: {
+  order: OrderDetail;
+  createAt: string;
+  updatedAt: string;
+  status: string;
+}) {
+  /* 토스트 CKH */
+  const showSaveSuccessToast = () => {
+    toaster.create({ type: "success", title: "답변이 성공적으로 추가되었습니다!" });
+  }
+  const showSaveFailToast = () => {
+    toaster.create({ type: "error", title: "답변 추가 실패!" });
+  }
+
+  return (
+    <Flex
+      p={3}
+      h={"90px"}
+      borderBottomWidth="1px"
+      borderColor="#00000020"
+      fontSize={"12px"}
+      textAlign={"center"}
+      alignItems={"center"}
+      color={"black"}
+    >
+      <Box flex="1">{createAt.split("T")[0]}</Box>
+      <HStack
+        color={"black"}
+        flex="3"
+        textAlign="left"
+        alignItems={"center"}
+        gap={"12px"}
+      >
+        <Image src={order.productImage} w={"70px"} h={"70px"} fit={"contain"} />
+        <Box>{order.productName}</Box>
+      </HStack>
+      <Box flex="1">{numberFormatter.format(order.price)}원</Box>
+      <Stack flex="1" justifyContent={"center"} alignItems={"center"}>
+        <Box>{status === "주문완료" ? "배송완료" : status}</Box>
+        {status === "주문완료" && (
+          /* Add by CKH */
+          <ReviewAddDialog
+            productId={order.productId}
+            productName={order.productName}
+            productImage={order.productImage}
+            onSuccess={showSaveSuccessToast}
+            onFail={showSaveFailToast}
+          />
+        )}
+        {status === "주문취소" && <Box>{updatedAt.split("T")[0]}</Box>}
+      </Stack>
+    </Flex>
+  );
+}

@@ -4,27 +4,18 @@ import { Text, Portal, CloseButton, Dialog, Button, Image, Flex, VStack, HStack,
 import { useState, useRef } from "react";
 import { fetchWithAuth } from "@/lib/minie/authAPI";
 
-interface reviewDialogProps {
-    content: string;
-    reviewImage: string;
+interface reviewAddDialogProps {
+    productId: number;
     productName: string;
     productImage: string;
-    reviewrating: number;
-    userId: string;
-    loginUserId: number | undefined;
-    productId: string;
-    id: string;
-    onUpdate?: () => void;
     onSuccess?: () => void;
     onFail?: () => void;
-    onDelSuccess?: () => void;
-    onDelFail?: () => void;
 }
 
-export default function reviewDialogDialog({ id, content, reviewImage, productName, productImage, reviewrating, userId, loginUserId, productId, onUpdate, onSuccess, onFail, onDelSuccess, onDelFail }: reviewDialogProps) {
+export default function reviewDialogDialog({ productName, productImage, productId, onSuccess, onFail }: reviewAddDialogProps) {
     /* 별점 & 설명 & 리뷰사진 & 닫기 */
-    const [rating, setRating] = useState(reviewrating);
-    const [contentContent, setcontentContent] = useState(content);
+    const [rating, setRating] = useState("");
+    const [contentContent, setcontentContent] = useState("");
     const [photo, setPhoto] = useState<File | null>(null);
     const [photoURL, setPhotoURL] = useState<string | null>(null);
     const closeBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -37,21 +28,15 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
         const { left, width } = e.currentTarget.getBoundingClientRect();
         const clickX = e.clientX - left;
         const newRating = clickX < width / 2 ? index - 0.5 : index;
-        setRating(newRating);
+        setRating(String(newRating));
     };
 
     /* 저장 */
     const handleSave = async () => {
         const formData = new FormData();
-        formData.append("id", id);
         formData.append("rating", rating.toString());
         formData.append("content", contentContent);
-        formData.append("user_id", userId);
-        formData.append("product_id", productId);
-
-        /* 이미지 URL */
-        if (photoURL === null) formData.append("imageUrl", "");
-        else formData.append("imageUrl", reviewImage);
+        formData.append("product_id", String(productId));
 
         /* 이미지 FILE */
         if (photo) formData.append("image", photo);
@@ -72,66 +57,38 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
             const result = await res.json();
             console.log("서버 응답:", result);
 
-            if (result.message === "리뷰 수정 성공") {
+            if (result.message === "리뷰 추가 성공") {
                 closeBtnRef.current?.click();
                 onSuccess?.();
-                onUpdate?.();
             }
         } catch (e) { console.error("에러:", e); onFail?.(); }
-    }
-
-    /* 삭제 */
-    const handleDel = async () => {
-        try {
-            const res = await fetchWithAuth(`/api/reviews?id=${id}`, {
-                method: "DELETE",
-            });
-
-            const result = await res.json();
-            console.log("서버 응답:", result);
-
-            if (result.message === "리뷰 삭제 성공") {
-                closeBtnRef.current?.click();
-                onDelSuccess?.();
-                onUpdate?.();
-            }
-        } catch (e) { console.error("에러:", e); onDelFail?.(); }
     }
 
     return (
         <Dialog.Root
             onOpenChange={(open) => {
                 if (open) {
-                    setRating(reviewrating);
+                    setRating("");
                     setPhoto(null);
-                    setPhotoURL(reviewImage || null);
-                    setcontentContent(content);
+                    setPhotoURL(null);
+                    setcontentContent("");
                 }
             }}>
 
-            {String(userId) === String(loginUserId) ? (
-                <Dialog.Trigger asChild>
-                    <Text
-                        textAlign="left"
-                        fontSize="12px"
-                        color="#5C5C5C"
-                        cursor="pointer"
-                        _hover={{ textDecoration: "underline" }}
-                    >
-                        {content}
-                    </Text>
-                </Dialog.Trigger>
-            ) : (
-                <Text
-                    textAlign="left"
-                    fontSize="12px"
-                    color="#8E8E8E"
-                    cursor="not-allowed"
-                    onClick={(e) => e.preventDefault()}
+
+            <Dialog.Trigger asChild>
+                <Button
+                    w={"46px"}
+                    h={"20px"}
+                    bg={"#F5F5F5"}
+                    borderRadius={"4px"}
+                    border={"1px solid #C4C4C4"}
+                    fontSize={"8px"}
                 >
-                    {content}
-                </Text>
-            )}
+                    리뷰작성
+                </Button>
+            </Dialog.Trigger>
+
 
             <Portal>
                 <Dialog.Backdrop />
@@ -211,8 +168,8 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
 
                                 <HStack justify="center" align="center">
                                     {[1, 2, 3, 4, 5].map((i) => {
-                                        const isHalf = rating >= i - 0.5 && rating < i;
-                                        const isFull = rating >= i;
+                                        const isHalf = Number(rating) >= i - 0.5 && Number(rating) < i;
+                                        const isFull = Number(rating) >= i;
 
                                         return (
                                             <Box
@@ -338,8 +295,7 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
                         {/* 푸터 */}
                         <Dialog.Footer p="0" paddingTop="10px">
                             <Flex w="100%" gap="8px">
-                                <Button flex="1" bg="#FFFFFF" border="1px solid #cececeff" borderRadius="4px" fontSize="16px" color="#000000" _hover={{ bg: "#f5f5f5", borderColor: "#bfbfbf" }} onClick={handleDel}>삭제</Button>
-                                <Button flex="1" bg="#FA6D6D" borderRadius="4px" fontSize="16px" color="#FFFFFF" _hover={{ bg: "#ff8e8eff" }} onClick={handleSave} >저장</Button>
+                                <Button flex="1" bg="#FA6D6D" borderRadius="4px" fontSize="16px" color="#FFFFFF" _hover={{ bg: "#ff8e8eff" }} onClick={handleSave} >등록</Button>
                             </Flex>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>

@@ -5,8 +5,11 @@ import { Spinner, Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeS
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import { toaster } from "@/components/ui/toaster"
 import ReviewDialog from "@/components/ReviewDialog";
+import { useUser } from "@/context/UserContext";
 
 export default function Page() {
+  /* 관리자 여부 */
+  const { user, isAdmin } = useUser();
   /* 필터 & 정렬 */
   const [sortType, setSortType] = useState<"latest" | "rating">("latest");
   const [photoFilter, setPhotoFilter] = useState(false);
@@ -23,7 +26,8 @@ export default function Page() {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/reviews?page=${page}&pageSize=${pageSize}&sort=${sortType}&photo=${photoFilter}&normal=${normalFilter}`);
+      const res = await fetch(`http://localhost:3000/api/reviews?user_id=${user?.id}&page=${page}&pageSize=${pageSize}&sort=${sortType}&photo=${photoFilter}&normal=${normalFilter}`);
+      console.log("res:",res)
       const result = await res.json();
 
       if (res.ok && result.data) {
@@ -39,7 +43,7 @@ export default function Page() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchReviews(); }, [page, sortType, photoFilter, normalFilter]);
+  useEffect(() => { if (!user) return; fetchReviews(); }, [user, page, sortType, photoFilter, normalFilter]);
 
   /* 전체 평균 점수 계산 */
   const fullStars = Math.floor(reviewTotalData.rating);
@@ -327,6 +331,7 @@ export default function Page() {
                   productImage={review.products.image}
                   reviewrating={review.rating}
                   userId={review.user_id}
+                  loginUserId={user?.id}
                   productId={review.product_id}
                   id={review.id}
                   onUpdate={fetchReviews}

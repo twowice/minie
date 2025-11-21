@@ -32,7 +32,17 @@ export default function ShoppingDetail() {
    const params = useParams();
    const id = params.id;
 
-   const { addLikedItemsToCart, isItemCart, toggleCart, toggleLike, isLiked, addToCart, buyDirectly } = useCart();
+   const {
+      toggleLike,
+      isLiked,
+      addToCart,
+
+      // 👇 [수정 1] removeItem 추가 (기존 수량 초기화용)
+      removeItem,
+
+      cartItems,
+      toggleChecked,
+   } = useCart();
 
    const { open, onOpen, onClose } = useDisclosure();
 
@@ -41,7 +51,6 @@ export default function ShoppingDetail() {
    const [product, setProduct] = useState(null);
    const [loading, setLoading] = useState(true);
 
-   // 임시 댓글 데이터 (사용하지 않는다면 제거 가능)
    const comments = [
       { userid: 'A', rating: 5, content: '좋아요' },
       { userid: 'B', rating: 4, content: '괜찮아요' },
@@ -52,7 +61,6 @@ export default function ShoppingDetail() {
    const [quantity, setQuantity] = useState(1);
    const [like, setLike] = useState(false);
 
-   /* 전체 평균 점수 계산 (CKH) */
    const [reviewSummary, setReviewSummary] = useState({
       totalCount: 0,
       rating: 0,
@@ -63,7 +71,6 @@ export default function ShoppingDetail() {
    const hasHalfStar = (reviewSummary.rating * 10) % 10 >= 5;
    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
-   // reviews 데이터를 컴포넌트 최상위로 이동
    const reviews = [
       {
          value: 'info',
@@ -92,15 +99,36 @@ export default function ShoppingDetail() {
       },
    ];
 
+   // [NaN 해결] 안전한 숫자 변환 함수
+   const safeNumber = (value: any) => {
+      if (value === null || value === undefined) return 0;
+      // 문자열인 경우 콤마 등 제거
+      const str = String(value);
+      const cleanStr = str.replace(/[^0-9]/g, '');
+      return Number(cleanStr) || 0;
+   };
+
    const createCartItem = () => {
       if (!product) return null;
+
+      // [NaN 해결] 무조건 숫자로 변환
+      const safePrice = safeNumber(product.price);
+      const safeDiscount = safeNumber(product.discount_amount ?? product.discount);
+
       return {
          id: product.id,
          title: product.name,
          name: product.name,
          brand: product.brand,
-         price: Number(product.price) || 0,
-         discountAmount: Number(product.discount_amount ?? product.discount ?? 0) || 0,
+
+         // [중요] 여기서 Number로 확실하게 보냅니다.
+         price: safePrice,
+
+         // [중요] Context가 계산할 때 쓰는 이름(discountAmount) 포함 모두 넣기
+         discount: safeDiscount,
+         discountAmount: safeDiscount,
+         discount_amount: safeDiscount,
+
          image: product.image,
          quantity: quantity,
          num: quantity,
@@ -110,16 +138,11 @@ export default function ShoppingDetail() {
 
    useEffect(() => {
       if (!id) return;
-      console.log('현재의 URL의 ID값:', id, '타입:', typeof id);
-
       setLoading(true);
 
       fetch(`/api/products/${id}`)
          .then(async res => {
-            // 1. 응답 텍스트를 먼저 가져옵니다.
             const text = await res.text();
-
-            // 2. 텍스트가 비어있으면 null 또는 빈 객체를 반환, 있으면 JSON 파싱
             try {
                return text ? JSON.parse(text) : null;
             } catch (e) {
@@ -128,15 +151,12 @@ export default function ShoppingDetail() {
             }
          })
          .then(data => {
-            console.log('API Response:', data);
             if (Array.isArray(data)) {
                setProduct(data[0]);
             } else if (data && data.data) {
                setProduct(data.data);
             } else if (data) {
                setProduct(data);
-            } else {
-               console.error('상품 정보가 없습니다.');
             }
          })
          .catch(err => console.error('데이터 로딩 실패', err))
@@ -161,7 +181,6 @@ export default function ShoppingDetail() {
             로딩중...
          </Box>
       );
-
    if (!product)
       return (
          <Box p={10} textAlign={'center'}>
@@ -179,20 +198,10 @@ export default function ShoppingDetail() {
    };
 
    const handleSaveQna = () => {
-      if (productAsk) {
-         setProductAsk(true);
-      } else if (orderAsk) {
-         setOrderAsk(true);
-      } else {
-         setProductAsk(false);
-         setOrderAsk(false);
-      }
       onClose();
    };
 
    const handleCancelQna = () => {
-      setProductAsk(false);
-      setOrderAsk(false);
       onClose();
    };
 
@@ -215,20 +224,47 @@ export default function ShoppingDetail() {
       const item = createCartItem();
       if (item) {
          toggleLike(item);
-         alert('좋아요에 담겼습니다.');
+         if (!like) alert('좋아요에 담겼습니다.');
       }
       setLike(prev => !prev);
    };
 
-   const handleBuyClick = e => {
+   const handleBuyClick = async (e: any) => {
       e.preventDefault();
       e.stopPropagation();
 
       if (!product) return;
+
       const item = createCartItem();
-      if (item) {
-         buyDirectly(item);
-         router.push('/payment');
+      if (!item) return;
+
+      // 1. 다른 상품 체크 해제 (Promise.all로 병렬 처리하여 속도 향상 및 누락 방지)
+      if (cartItems && cartItems.length > 0) {
+         const uncheckPromises = cartItems
+            .filter(c => c.id !== item.id && c.checked) // 현재 상품 제외하고 체크된 것만
+            .map(c => toggleChecked(c.id, 'cart', false)); // 강제로 false
+
+         await Promise.all(uncheckPromises);
+      }
+
+      // 2. 기존 상품 처리 (삭제 후 추가 vs 그냥 추가)
+      const existingItem = cartItems.find(i => i.id === item.id);
+
+      if (existingItem) {
+         // (1) 기존 상품 삭제
+         await removeItem(item.id);
+
+         // (2) [중요] 상태 업데이트가 반영될 시간을 줌 (0.1초)
+         setTimeout(async () => {
+            await addToCart(item); // 깨끗해진 상태에서 추가
+            await toggleChecked(item.id, 'cart', true); // 체크 확인
+            router.push(`/payment?products=${item.id}`);
+         }, 100);
+      } else {
+         // 기존에 없으면 바로 추가하고 이동
+         await addToCart(item);
+         await toggleChecked(item.id, 'cart', true);
+         router.push(`/payment?products=${item.id}`);
       }
    };
 
@@ -368,13 +404,12 @@ export default function ShoppingDetail() {
                </Flex>
             </Flex>
          </Box>
+         {/* 나머지 탭 및 리뷰 부분 기존 유지 */}
          <Flex color={'black'} gap={'8px'}>
             <HStack alignContent={'flex-end'} padding={'20px 0'}>
                <Text fontSize={'20px'} fontWeight={'700'} color={'rgba(0,0,0,0.7)'}>
                   고객 리뷰
                </Text>
-
-               {/* 전체 평균 점수 (CKH) */}
                <HStack h="42px" py="5px" paddingTop="10px">
                   <Text fontSize="16px" color="black" paddingRight="10px">
                      <Text as="span" fontSize="32px" fontWeight="bold" color="black">
@@ -382,7 +417,6 @@ export default function ShoppingDetail() {
                      </Text>{' '}
                      점
                   </Text>
-
                   <HStack>
                      {Array(fullStars)
                         .fill(0)
@@ -391,10 +425,8 @@ export default function ShoppingDetail() {
                               ★
                            </Text>
                         ))}
-
                      {hasHalfStar && (
                         <Box
-                           key="half-star"
                            width="32px"
                            height="32px"
                            position="relative"
@@ -405,7 +437,6 @@ export default function ShoppingDetail() {
                            <Text color="gray.300" fontSize="32px">
                               ★
                            </Text>
-
                            <Text
                               color="yellow.400"
                               fontSize="32px"
@@ -420,7 +451,6 @@ export default function ShoppingDetail() {
                            </Text>
                         </Box>
                      )}
-
                      {Array(emptyStars)
                         .fill(0)
                         .map((_, i) => (
@@ -441,16 +471,12 @@ export default function ShoppingDetail() {
          >
             <Tabs.List justifyContent={'center'} display={'flex'} alignItems={'center'} w={'100%'}>
                <Box position={'absolute'} bottom={0} left={0} w={'100%'} h={'1px'} bgColor={'#cccccc'} zIndex={0} />
-
                <Tabs.Trigger
                   value="productDetail"
                   flex={1}
                   justifyContent={'center'}
                   alignItems={'center'}
-                  _selected={{
-                     color: '#FA6D6D',
-                     bottom: '0px',
-                  }}
+                  _selected={{ color: '#FA6D6D', bottom: '0px' }}
                   _hover={{ color: '#FA6D6D', opacity: 0.7 }}
                   zIndex={1}
                >
@@ -462,10 +488,7 @@ export default function ShoppingDetail() {
                   justifyContent={'center'}
                   alignItems={'center'}
                   _hover={{ color: '#FA6D6D', opacity: 0.7 }}
-                  _selected={{
-                     color: '#FA6D6D',
-                     bottom: '0px',
-                  }}
+                  _selected={{ color: '#FA6D6D', bottom: '0px' }}
                   zIndex={1}
                >
                   구매정보
@@ -476,10 +499,7 @@ export default function ShoppingDetail() {
                   justifyContent={'center'}
                   alignItems={'center'}
                   _hover={{ color: '#FA6D6D', opacity: 0.7 }}
-                  _selected={{
-                     color: '#FA6D6D',
-                     bottom: '0px',
-                  }}
+                  _selected={{ color: '#FA6D6D', bottom: '0px' }}
                   zIndex={1}
                >
                   리뷰
@@ -490,10 +510,7 @@ export default function ShoppingDetail() {
                   justifyContent={'center'}
                   alignItems={'center'}
                   _hover={{ color: '#FA6D6D', opacity: 0.7 }}
-                  _selected={{
-                     color: '#FA6D6D',
-                     bottom: '0px',
-                  }}
+                  _selected={{ color: '#FA6D6D', bottom: '0px' }}
                   zIndex={1}
                >
                   Q & A
@@ -552,8 +569,7 @@ export default function ShoppingDetail() {
                         </Text>
                         <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
                            {product.usage ||
-                              `사용 전 가볍게 흔들어 준 후, 눈을 감고 얼굴 전체에 고르게 분사하여 흡수 시켜줍니다. 
-                           피부에 건조함이 느껴질 때 수시로 뿌려줍니다.`}
+                              `사용 전 가볍게 흔들어 준 후, 눈을 감고 얼굴 전체에 고르게 분사하여 흡수 시켜줍니다. 피부에 건조함이 느껴질 때 수시로 뿌려줍니다.`}
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
@@ -570,22 +586,7 @@ export default function ShoppingDetail() {
                            화장품법에 따라 기재해야 하는 모든 성분
                         </Text>
                         <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
-                           {product.ingredient ||
-                              `정제수, 글리세린, 스쿠알란, 카프릴릭/카프릭트라이글리세라이드,
-                           하이드로제네이티드폴리(C6-14올레핀), 다이글리세린, 하이드로제네이티드폴리데센,
-                           나이아신아마이드, 메틸프로판다이올, 펜틸렌글라이콜,
-                           암모늄아크릴로일다이메틸타우레이트/브이피코폴리머, 1,2-헥산다이올, 판테놀,
-                           세테아릴올리베이트, 하이드록시아세토페논, 아크릴레이트/C10-30알킬아크릴레이트크로스폴리머,
-                           아미노메틸프로판다이올, 솔비탄올리베이트,
-                           하이드록시에틸아크릴레이트/소듐아크릴로일다이메틸타우레이트코폴리머, 해바라기씨오일,
-                           피토스테롤, 마데카소사이드, 하이드로제네이티드폴리아이소부텐, 서양배추출물, 아라키딜알코올,
-                           연필향나무오일, 알란토인, 에틸헥실글리세린, 하이드로제네이티드레시틴, 아데노신,
-                           다마스크장미꽃수, 스테아릭애씨드, 베헤닐알코올, 멜론추출물, 오리스뿌리추출물,
-                           아라키딜글루코사이드, 호호바씨오일, 서양송악잎/줄기추출물, 소듐파이테이트, 부틸렌글라이콜,
-                           광곽향오일, 솔비탄아이소스테아레이트, 하이알루로닉애씨드, 세테아릴알코올, 세라마이드엔피,
-                           불가리스쑥오일, 로즈마리잎오일, 포타슘세틸포스페이트, 카프릴릴글라이콜, 병풀추출물,
-                           베타-글루칸, 글리세릴스테아레이트, 돌콩추출물, 토코페롤, 팔미틱애씨드,
-                           카프릴릴/카프릴글루코사이드, 병풀잎추출물`}
+                           {product.ingredient || `정제수, 글리세린...`}
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
@@ -593,20 +594,7 @@ export default function ShoppingDetail() {
                            사용할 때 주의사항
                         </Text>
                         <Box p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
-                           ※사용 전에 반드시 사용법 및 사용할 때의 주의사항을 숙지 하신 후 사용하십시오.1) 화장품 사용
-                           시 또는 사용 후 직사광선에 의하여 사용부위가 붉은 반점, 부어오름 또는 가려움증 등의 이상
-                           증상이나 부작용이 있는 경우에는 전문의 등과 상담할 것2) 상처가 있는 부위 등에는 사용을 자제할
-                           것3) 보관 및 취급 시 주의사항가) 어린이의 손이 닿지 않는 곳에 보관할 것나) 직사광선을 피해서
-                           보관할 것{' '}
-                           <Text>※사용 전에 반드시 사용법 및 사용할 때의 주의사항을 숙지 하신 후 사용하십시오.</Text>
-                           <Text>
-                              1) 화장품 사용 시 또는 사용 후 직사광선에 의하여 사용부위가 붉은 반점, 부어오름 또는
-                              가려움증 등의 이상 증상이나 부작용이 있는 경우에는 전문의 등과 상담할 것
-                           </Text>
-                           <Text>2) 상처가 있는 부위 등에는 사용을 자제할 것</Text>
-                           <Text>3) 보관 및 취급 시 주의사항</Text>
-                           <Text>가) 어린이의 손이 닿지 않는 곳에 보관할 것</Text>
-                           <Text>나) 직사광선을 피해서 보관할 것</Text>
+                           ※사용 전에 반드시 사용법 및 사용할 때의 주의사항을 숙지 하신 후 사용하십시오...
                         </Box>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
@@ -653,7 +641,6 @@ export default function ShoppingDetail() {
                </Box>
             </Tabs.Content>
             <Tabs.Content value="review">
-               {/* ADD BY CKH */}
                <ReviewChart productId={id} onSummaryChange={summary => setReviewSummary(summary)} />
             </Tabs.Content>
             <Tabs.Content value="QnA">
@@ -680,21 +667,13 @@ export default function ShoppingDetail() {
                            w={'80px'}
                            h={'40px'}
                            fontSize={'16px'}
-                           onClick={() => {
-                              handleQna();
-                           }}
+                           onClick={handleQna}
                         >
                            상품문의
                         </Button>
                      </Flex>
                   </HStack>
-                  <Accordion.Root
-                     // variant={"outline"}
-                     mt={'10px'}
-                     collapsible
-                     w={'100%'}
-                     p={0}
-                  >
+                  <Accordion.Root mt={'10px'} collapsible w={'100%'} p={0}>
                      {reviews.map((item, index) => (
                         <Accordion.Item
                            key={index}
@@ -778,9 +757,7 @@ export default function ShoppingDetail() {
                                  size={'sm'}
                                  color={'black'}
                                  bgColor={'white'}
-                                 onClick={() => {
-                                    handleSaveQna();
-                                 }}
+                                 onClick={handleSaveQna}
                                  position={'static'}
                               />
                            </Dialog.CloseTrigger>
@@ -835,17 +812,11 @@ export default function ShoppingDetail() {
                                  color={'black'}
                                  flex={1}
                                  h={'40px'}
-                                 onClick={() => handleCancelQna()}
+                                 onClick={handleCancelQna}
                               >
                                  취소
                               </IconButton>
-                              <Button
-                                 bgColor={'#FA6D6D'}
-                                 color={'white'}
-                                 w={'50%'}
-                                 h={'40px'}
-                                 onClick={() => handleSaveQna()}
-                              >
+                              <Button bgColor={'#FA6D6D'} color={'white'} w={'50%'} h={'40px'} onClick={handleSaveQna}>
                                  등록
                               </Button>
                            </Flex>

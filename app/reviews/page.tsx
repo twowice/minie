@@ -5,8 +5,11 @@ import { Spinner, Box, Text, HStack, VStack, Flex, Portal, NativeSelect, NativeS
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import { toaster } from "@/components/ui/toaster"
 import ReviewDialog from "@/components/ReviewDialog";
+import { useUser } from "@/context/UserContext"; 
 
 export default function Page() {
+    /* 관리자 여부 */
+    const { user, isAdmin } = useUser();
     /* 필터 & 정렬 */
     const [sortType, setSortType] = useState<"latest" | "rating">("latest");
     const [photoFilter, setPhotoFilter] = useState(false);
@@ -27,6 +30,7 @@ export default function Page() {
             const result = await res.json();
 
             if (res.ok && result.data) {
+                console.log("data:", result.data);
                 setReviews(result.data);
                 setReviewTotal({
                     totalCount: result.totalCount,
@@ -316,7 +320,7 @@ export default function Page() {
                                         </HStack>
                                     </Flex>
 
-                                    <Text fontSize="12px" color="#A8A8A8">
+                                    <Text fontSize="12px" color="#636363ff">
                                         {review.products.name}
                                     </Text>
 
@@ -328,6 +332,7 @@ export default function Page() {
                                         productImage={review.products.image}
                                         reviewrating={review.rating}
                                         userId={review.user_id}
+                                        loginUserId={user?.id}
                                         productId={review.product_id}
                                         id={review.id}
                                         onUpdate={fetchReviews}

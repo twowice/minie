@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   const months = Number(searchParams.get("months"));
   const start = searchParams.get("start");
   const end = searchParams.get("end");
+  const isAdmin = searchParams.get("is_admin");
   const uid = req.headers.get('X-User-ID');
   if (uid === null || uid === "") {
     return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
@@ -27,9 +28,11 @@ export async function GET(req: NextRequest) {
         created_at,
         answer
         `)
-    .eq("user_id", Number(uid))
     .order("created_at", { ascending: false });
 
+  /* 관리자 유무 확인 */
+  if(isAdmin !== "true") query = query.eq("user_id", Number(uid));
+  
   /* 월 버튼 필터링 */
   let fromDate = null;
   if (months) {

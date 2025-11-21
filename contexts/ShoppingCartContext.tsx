@@ -127,9 +127,18 @@ export function CartProvider({ children }: CartProviderProps) {
 
    const paymentTotal = useMemo(() => {
       return paymentItems.reduce((sum, item) => {
-         const price = Number(item.price) || 0;
-         const discount = Number(item.discountAmount) || 0;
+         const cleanPrice =
+            typeof item.price === 'string' ? Number(String(item.price).replace(/,/g, '')) : Number(item.price);
+
+         const cleanDiscount =
+            typeof item.discountAmount === 'string'
+               ? Number(String(item.discountAmount).replace(/,/g, ''))
+               : Number(item.discountAmount);
+
+         const price = cleanPrice || 0;
+         const discount = cleanDiscount || 0;
          const num = Number(item.num) || 1;
+
          return sum + (price - discount) * num;
       }, 0);
    }, [paymentItems]);

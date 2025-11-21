@@ -71,40 +71,37 @@ export default function Header() {
     { href: "/signup", label: "회원가입" }, // 2025월 11월 10일 수정 (박영준)
     { href: "/orders", label: "주문조회" },
     { href: "/mypage", label: "마이페이지" },
-    { href: "/support", label: "고객센터" },
     { href: "/reviews", label: "리뷰" },
     { href: "/payment", label: "결제" },
     { href: "/inquiry", label: "1:1문의" },
   ];
 */
 
-   // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 시작 (박영준)
-   const topBarLinks = user
-      ? [
-           // 로그인 상태일 때
-           { href: '/orders', label: '주문조회' },
-           { href: '/mypage', label: '마이페이지' },
-           { href: '/support', label: '고객센터' },
-           { href: '/reviews', label: '리뷰' },
-           { href: '/payment', label: '결제' },
-           { href: '/inquiry', label: '1:1문의' },
-        ]
-      : [
-           // 로그아웃 상태일 때
-           { href: '/login', label: '로그인' },
-           { href: '/signup', label: '회원가입' },
-           { href: '/orders', label: '주문조회' },
-           { href: '/mypage', label: '마이페이지' },
-           { href: '/support', label: '고객센터' },
-           { href: '/reviews', label: '리뷰' },
-           { href: '/payment', label: '결제' },
-           { href: '/inquiry', label: '1:1문의' },
-        ];
-   const handleLogout = async () => {
-      await logout();
-      router.push('/');
-   };
-   // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 끝 (박영준)
+ // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 시작 (박영준)
+  const topBarLinks = user
+    ? [
+        // 로그인 상태일 때
+        { href: "/orders", label: "주문조회" },
+        { href: "/mypage", label: "마이페이지" },
+        { href: "/reviews", label: "리뷰" },
+        { href: "/payment", label: "결제" },
+        { href: "/inquiry", label: "1:1문의" },
+      ]
+    : [
+        // 로그아웃 상태일 때
+        { href: "/login", label: "로그인" },
+        { href: "/signup", label: "회원가입" },
+        { href: "/orders", label: "주문조회" },
+        { href: "/mypage", label: "마이페이지" },
+        { href: "/reviews", label: "리뷰" },
+        { href: "/payment", label: "결제" },
+        { href: "/inquiry", label: "1:1문의" },
+      ];
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
+ // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 끝 (박영준)
 
    return (
       <Box as="header" ref={headerRef} flexShrink={0} bg="white">

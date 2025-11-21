@@ -12,6 +12,7 @@ export async function GET(req: Request) {
   const photo = url.searchParams.get("photo") === "true";
   const normal = url.searchParams.get("normal") === "true";
   const productId = url.searchParams.get("product_id");
+  const userId = url.searchParams.get("user_id");
 
   /* 전체 리뷰 가져오기 */
   let query = supabase
@@ -33,6 +34,7 @@ export async function GET(req: Request) {
         image
       )
     `);
+  if (userId) query = query.eq("user_id", userId)
   if (productId) query = query.eq("product_id", productId);
   const { data: allReviews, error: allError } = await query;
   if (allError) return Response.json({ message: "전체 리뷰 조회 실패", error: allError.message }, { status: 500 });
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest) {
     console.log("image:", image ? { name: image.name, size: image.size } : null);
 
     /* 예외 처리 */
-    if (!rating || !content || !user_id || !product_id) {
+    if (!rating || !content || !product_id) {
       return Response.json(
         { message: "필수 데이터 누락" },
         { status: 400 }
@@ -180,7 +182,7 @@ export async function POST(req: NextRequest) {
             rating,
             content,
             image_url: image_url || "",
-            user_id: Number(user_id),
+            user_id: uid,
             product_id: Number(product_id)
           }
         ])
