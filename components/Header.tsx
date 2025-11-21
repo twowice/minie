@@ -67,7 +67,6 @@ export default function Header() {
     { href: "/signup", label: "회원가입" }, // 2025월 11월 10일 수정 (박영준)
     { href: "/orders", label: "주문조회" },
     { href: "/mypage", label: "마이페이지" },
-    { href: "/support", label: "고객센터" },
     { href: "/reviews", label: "리뷰" },
     { href: "/payment", label: "결제" },
     { href: "/inquiry", label: "1:1문의" },
@@ -80,7 +79,6 @@ export default function Header() {
         // 로그인 상태일 때
         { href: "/orders", label: "주문조회" },
         { href: "/mypage", label: "마이페이지" },
-        { href: "/support", label: "고객센터" },
         { href: "/reviews", label: "리뷰" },
         { href: "/payment", label: "결제" },
         { href: "/inquiry", label: "1:1문의" },
@@ -91,7 +89,6 @@ export default function Header() {
         { href: "/signup", label: "회원가입" },
         { href: "/orders", label: "주문조회" },
         { href: "/mypage", label: "마이페이지" },
-        { href: "/support", label: "고객센터" },
         { href: "/reviews", label: "리뷰" },
         { href: "/payment", label: "결제" },
         { href: "/inquiry", label: "1:1문의" },

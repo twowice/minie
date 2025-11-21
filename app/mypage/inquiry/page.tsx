@@ -29,9 +29,10 @@ export default function Page() {
   const { user, isAdmin } = useUser(); //관리자 여부
 
   useEffect(() => { fetchInquiry(); }, []);
-  useEffect(() => { 
-  if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); }}, 
-  [startDate, endDate])
+  useEffect(() => {
+    if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); }
+  },
+    [startDate, endDate])
 
   /* 전체 조회 */
   const fetchInquiry = async () => {
@@ -224,7 +225,7 @@ export default function Page() {
                         onDelSuccess={showDelSuccessToast}
                         onDelFail={showDelFailToast}
                       />
-                  )}
+                    )}
                   </HStack>
                   <Text color="#3f3f3f">{item.answer || "아직 답변이 등록되지 않았습니다."}</Text>
                 </Box>
