@@ -208,6 +208,7 @@ export default function Header() {
               display={{ base: "flex", lg: "none" }}
               color={isMobileMenuOpen ? "#FA6D6D" : "black"}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              bgColor={'transparent'}
             >
               <HamburgerIcon />
             </IconButton>

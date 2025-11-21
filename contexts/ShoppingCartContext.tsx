@@ -1,13 +1,13 @@
 'use client';
 
 import { CartItem } from '@/app/api/cart/cart';
-import { addCartItems, deleteAllCartItems, deleteCartItem, updateCartItems } from '@/lib/minie/cartAPI';
-import { addLikedItem, deleteAllLikedItem, deleteLikedItem } from '@/lib/minie/likeAPI';
-import { useContext, createContext, ReactNode, useState, useCallback, useMemo } from 'react';
+import { useUser } from '@/context/UserContext';
+import { addCartItems, deleteAllCartItems, deleteCartItem, getCartItems, updateCartItems } from '@/lib/minie/cartAPI';
+import { addLikedItem, deleteAllLikedItem, deleteLikedItem, getLikedItems } from '@/lib/minie/likeAPI';
+import { useContext, createContext, ReactNode, useState, useCallback, useMemo, useEffect } from 'react';
 
-// Context가 제공할 데이터와 함수의 타입을 정의
 interface CartContextDataType {
-   totalPrice: number;//추가
+   totalPrice: number;
    cartItems: CartItem[];
    likedItems: CartItem[];
    toggleChecked: (id: number, type: 'cart' | 'like') => void;
@@ -17,10 +17,10 @@ interface CartContextDataType {
    removeItem: (itemId: number) => void;
    clear: (type: string) => void;
    toggleLike: (item: CartItem) => void;
-   toggleCart: (item: CartItem) => void; //추가
+   toggleCart: (item: CartItem) => void;
    addLikedItemsToCart: () => void;
    isLiked: (itemId: number) => boolean;
-   isItemCart: (itemId: number) => boolean; //추가
+   isItemCart: (itemId: number) => boolean;
 }
 
 const CartContext = createContext<CartContextDataType | undefined>(undefined);
@@ -42,122 +42,132 @@ interface CartProviderProps {
 }
 
 export function CartProvider({ children }: CartProviderProps) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [likedItems, setLikedItems] = useState<CartItem[]>([]);
-  const [cartDataLoading, setCartDataLoading] = useState(true);
-  const { user, loading: userLoading } = useUser();
+   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+   const [likedItems, setLikedItems] = useState<CartItem[]>([]);
+   const [cartDataLoading, setCartDataLoading] = useState(true);
+   const { user, loading: userLoading } = useUser();
 
-  const totalPrice = useMemo(
-    () =>
-      cartItems.reduce(
-        (sum, item) =>
-          sum +
-          (item.checked ? (item.price - item.discountAmount) * item.num : 0),
-        0
-      ),
-    [cartItems]
-  );
+   // totalPrice 계산 (중복 제거)
+   const totalPrice = useMemo(
+      () =>
+         cartItems.reduce((sum, item) => sum + (item.checked ? (item.price - item.discountAmount) * item.num : 0), 0),
+      [cartItems],
+   );
 
-   //장바구니 확인
+   // likedItemIds (중복 제거)
+   const likedItemIds = useMemo(() => new Set(likedItems.map(item => item.id)), [likedItems]);
+   const isLiked = (itemId: number) => likedItemIds.has(itemId);
+
+   // cartItemIds (중복 제거)
    const cartItemIds = useMemo(() => new Set(cartItems.map(item => item.id)), [cartItems]);
    const isItemCart = (itemId: number) => cartItemIds.has(itemId);
-   //
 
-  const likedItemIds = useMemo(
-    () => new Set(likedItems.map((item) => item.id)),
-    [likedItems]
-  );
-  const isLiked = (itemId: number) => likedItemIds.has(itemId);
-
-  //장바구니 확인
-  const cartItemIds = useMemo(
-    () => new Set(cartItems.map((item) => item.id)),
-    [cartItems]
-  );
-
-  const isItemCart = (itemId: number) => cartItemIds.has(itemId);
-
-  const init = useCallback(async () => {
-    if (userLoading) {
-      return;
-    }
-
-    setCartDataLoading(true);
-
-    let initialCartItems: CartItem[] = [];
-    let initialLikedItems: CartItem[] = [];
-
-    try {
-      if (user) {
-        [initialCartItems, initialLikedItems] = await Promise.all([
-          getCartItems(),
-          getLikedItems(),
-        ]);
-        setCartItems(initialCartItems);
-        setLikedItems(initialLikedItems);
-      } else {
-        setCartItems([]);
-        setLikedItems([]);
+   const init = useCallback(async () => {
+      if (userLoading) {
+         return;
       }
-    } catch (error) {
-      console.error("장바구니/좋아요 아이템 불러오기 실패:", error);
-      setCartItems([]);
-      setLikedItems([]);
-    } finally {
-      setCartDataLoading(false);
-    }
-  }, [user, userLoading]);
 
-  useEffect(() => {
-    init();
-  }, [init]);
+      setCartDataLoading(true);
 
-  const refreshCart = async () => {
-    try {
-      const updatedCartItems = (await getCartItems()).map((item) =>
-        cartItemIds.has(item.id) ? { ...item, checked: false } : item
-      );
-      setCartItems(updatedCartItems);
-    } catch (error) {
-      console.error(
-        "[ShoppingCartContext] 장바구니 아이템을 다시 불러오는 과정에서 오류가 발생했습니다:",
-        error
-      );
-    }
-  };
+      let initialCartItems: CartItem[] = [];
+      let initialLikedItems: CartItem[] = [];
 
-  const toggleChecked = useCallback((id: number, type: "cart" | "like") => {
-    const setState = type === "cart" ? setCartItems : setLikedItems;
-    setState((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
-  }, []);
+      try {
+         if (user) {
+            [initialCartItems, initialLikedItems] = await Promise.all([getCartItems(), getLikedItems()]);
+            setCartItems(initialCartItems);
+            setLikedItems(initialLikedItems);
+         } else {
+            setCartItems([]);
+            setLikedItems([]);
+         }
+      } catch (error) {
+         console.error('장바구니/좋아요 아이템 불러오기 실패:', error);
+         setCartItems([]);
+         setLikedItems([]);
+      } finally {
+         setCartDataLoading(false);
+      }
+   }, [user, userLoading]);
 
-  const toggleAllChecked = useCallback(
-    (type: "cart" | "like") => {
-      const [items, setState] =
-        type === "cart"
-          ? [cartItems, setCartItems]
-          : [likedItems, setLikedItems];
-      const isAllChecked =
-        items.length > 0 && items.every((item) => item.checked);
-      setState((prev) =>
-        prev.map((item) => ({ ...item, checked: !isAllChecked }))
-      );
-    },
-    [cartItems, likedItems]
-  );
+   useEffect(() => {
+      init();
+   }, [init]);
 
-  const updateQuantity = useCallback(
-    async (itemId: number, type: "plus" | "minus") => {
+   const refreshCart = async () => {
+      try {
+         const updatedCartItems = (await getCartItems()).map(item =>
+            cartItemIds.has(item.id) ? { ...item, checked: false } : item,
+         );
+         setCartItems(updatedCartItems);
+      } catch (error) {
+         console.error('[ShoppingCartContext] 장바구니 아이템을 다시 불러오는 과정에서 오류가 발생했습니다:', error);
+      }
+   };
+
+   const toggleChecked = useCallback((id: number, type: 'cart' | 'like') => {
+      const setState = type === 'cart' ? setCartItems : setLikedItems;
+      setState(prev => prev.map(item => (item.id === id ? { ...item, checked: !item.checked } : item)));
+   }, []);
+
+   const toggleAllChecked = useCallback(
+      (type: 'cart' | 'like') => {
+         const [items, setState] = type === 'cart' ? [cartItems, setCartItems] : [likedItems, setLikedItems];
+         const isAllChecked = items.length > 0 && items.every(item => item.checked);
+         setState(prev => prev.map(item => ({ ...item, checked: !isAllChecked })));
+      },
+      [cartItems, likedItems],
+   );
+
+   // updateQuantity 함수 수정 (잘못된 로직 수정)
+   const updateQuantity = useCallback(
+      async (itemId: number, type: 'plus' | 'minus') => {
+         setCartItems(prev =>
+            prev.map(item => {
+               if (item.id === itemId) {
+                  const newNum = type === 'plus' ? item.num + 1 : Math.max(1, item.num - 1);
+                  return { ...item, num: newNum };
+               }
+               return item;
+            }),
+         );
+
+         // API 호출
+         const item = cartItems.find(i => i.id === itemId);
+         if (item) {
+            const newNum = type === 'plus' ? item.num + 1 : Math.max(1, item.num - 1);
+            await updateCartItems([{ product_id: itemId, product_num: newNum }]);
+         }
+      },
+      [cartItems],
+   );
+
+   // updateAllQuantities 함수 구현 (누락되어 있었음)
+   const updateAllQuantities = useCallback(async () => {
+      const payload = cartItems.map(item => ({
+         product_id: item.id,
+         product_num: item.num,
+      }));
+      await updateCartItems(payload);
+   }, [cartItems]);
+
+   // removeItem 함수 구현 (누락되어 있었음)
+   const removeItem = useCallback(async (itemId: number) => {
+      const isSuccess = await deleteCartItem(itemId);
+      if (isSuccess) {
+         setCartItems(prev => prev.filter(item => item.id !== itemId));
+      } else {
+         console.log('delete Cart Item failed');
+      }
+   }, []);
+
+   const clear = useCallback(async (type: string) => {
       switch (type) {
          case 'cart':
-            clearCart();
+            await clearCart();
             break;
          case 'like':
-            clearLikedItem();
+            await clearLikedItem();
             break;
          default:
             console.warn(
@@ -191,14 +201,12 @@ export function CartProvider({ children }: CartProviderProps) {
                : console.log('add(like) Liked Item failed');
          }
       },
-      [likedItems],
+      [isLiked],
    );
 
-   //장바구니 토글
    const toggleCart = useCallback(
       async (item: CartItem) => {
          if (isItemCart(item.id)) {
-            // 1. 이미 장바구니에 있으면 제거 (API 호출)
             const isSuccess = await deleteCartItem(item.id);
             if (isSuccess) {
                setCartItems(prev => prev.filter(i => i.id !== item.id));
@@ -206,8 +214,6 @@ export function CartProvider({ children }: CartProviderProps) {
                console.error('장바구니 삭제 실패');
             }
          } else {
-            // 2. 없으면 추가 (API 호출)
-            // API 포맷에 맞춰 payload 생성 (num은 기본 1)
             const payload = [{ product_id: item.id, product_num: 1 }];
             const isSuccess = await addCartItems(payload);
 
@@ -218,9 +224,8 @@ export function CartProvider({ children }: CartProviderProps) {
             }
          }
       },
-      [cartItems], // cartItems가 변경될 때마다 최신 상태 참조
+      [isItemCart],
    );
-   //
 
    const addLikedItemsToCart = useCallback(async () => {
       const itemsToAdd = likedItems.filter(item => item.checked);
@@ -242,17 +247,6 @@ export function CartProvider({ children }: CartProviderProps) {
       setLikedItems(prev => prev.map(item => ({ ...item, checked: false })));
    }, [likedItems, cartItems]);
 
-   //추가
-   const totalPrice = useMemo(() => {
-      return cartItems
-         .filter(item => item.checked)
-         .reduce((sum, item) => {
-            const itemPrice = item.price - item.discountAmount;
-            return sum + itemPrice * item.num;
-         }, 0);
-   }, [cartItems]);
-//
-
    const value = {
       cartItems,
       likedItems,
@@ -265,9 +259,9 @@ export function CartProvider({ children }: CartProviderProps) {
       toggleLike,
       addLikedItemsToCart,
       isLiked,
-      isItemCart, // 추가
-      toggleCart, // 추가
-      totalPrice, //추가
+      isItemCart,
+      toggleCart,
+      totalPrice,
    };
 
    return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
