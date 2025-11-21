@@ -2,6 +2,7 @@
 
 import { Text, Portal, CloseButton, Dialog, Button, Image, Flex, VStack, HStack, Box, Textarea } from "@chakra-ui/react";
 import { useState, useRef } from "react";
+import { fetchWithAuth } from "@/lib/minie/authAPI";
 
 interface reviewDialogProps {
     content: string;
@@ -62,7 +63,7 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
 
         /* REQUEST */
         try {
-            const res = await fetch("/api/reviews", {
+            const res = await fetchWithAuth("/api/reviews", {
                 method: "POST",
                 body: formData
             });
@@ -81,7 +82,7 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
     /* 삭제 */
     const handleDel = async () => {
         try {
-            const res = await fetch(`/api/reviews?id=${id}`, {
+            const res = await fetchWithAuth(`/api/reviews?id=${id}`, {
                 method: "DELETE",
             });
 
@@ -109,6 +110,7 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
 
             <Dialog.Trigger asChild>
                 <Text
+                    textAlign="left"
                     fontSize="12px"
                     color="#5C5C5C"
                     cursor="pointer"
