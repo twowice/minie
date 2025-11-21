@@ -12,6 +12,7 @@ export async function GET(req: Request) {
   const photo = url.searchParams.get("photo") === "true";
   const normal = url.searchParams.get("normal") === "true";
   const productId = url.searchParams.get("product_id");
+  const userId = url.searchParams.get("user_id");
 
   /* 전체 리뷰 가져오기 */
   let query = supabase
@@ -33,6 +34,7 @@ export async function GET(req: Request) {
         image
       )
     `);
+  if (userId) query = query.eq("user_id", userId)
   if (productId) query = query.eq("product_id", productId);
   const { data: allReviews, error: allError } = await query;
   if (allError) return Response.json({ message: "전체 리뷰 조회 실패", error: allError.message }, { status: 500 });
