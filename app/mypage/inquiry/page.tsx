@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Text,
   HStack,
@@ -26,8 +27,9 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [inquiry, setInquiry] = useState<any[]>([]);
   const [activeMonths, setActiveMonths] = useState<number | null>(null);
+  const router = useRouter();
   const { user, isAdmin } = useUser(); //관리자 여부
-
+  useEffect(() => { if (!user) router.push("/login"); })
   useEffect(() => { fetchInquiry(); }, []);
   useEffect(() => {
     if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); }
@@ -39,7 +41,7 @@ export default function Page() {
     resetFilters();
     setLoading(true);
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice`);
+      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice?is_admin=${isAdmin}`);
       const result = await res.json();
 
       if (res.ok && result.data) { console.log("응답:", result.data); setInquiry(result.data); }
