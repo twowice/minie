@@ -29,20 +29,9 @@ import { FaRegHeart } from 'react-icons/fa6';
 
 export default function ShoppingDetail() {
    const router = useRouter();
-   const params = useParams();
-   const id = params.id;
-
-   const {
-      toggleLike,
-      isLiked,
-      addToCart,
-
-      // 👇 [수정 1] removeItem 추가 (기존 수량 초기화용)
-      removeItem,
-
-      cartItems,
-      toggleChecked,
-   } = useCart();
+   const { id } = useParams();
+   // 👇 buyNow 함수 가져오기
+   const { addToCart, toggleLike, isLiked, buyNow } = useCart();
 
    const { open, onOpen, onClose } = useDisclosure();
 
@@ -99,40 +88,39 @@ export default function ShoppingDetail() {
       },
    ];
 
-   // [NaN 해결] 안전한 숫자 변환 함수
-   const safeNumber = (value: any) => {
-      if (value === null || value === undefined) return 0;
-      // 문자열인 경우 콤마 등 제거
-      const str = String(value);
-      const cleanStr = str.replace(/[^0-9]/g, '');
-      return Number(cleanStr) || 0;
+   // 👇 [NaN 방지] 안전한 숫자 변환 함수
+   const safeNumber = (val: any) => {
+      if (!val) return 0;
+      // 문자열에 포함된 콤마(,) 제거 후 숫자로 변환
+      const str = String(val).replace(/,/g, ''); // 콤마 제거
+      const num = Number(String(val).replace(/[^0-9.-]+/g, ''));
+      return isNaN(num) ? 0 : num;
    };
 
    const createCartItem = () => {
       if (!product) return null;
 
-      // [NaN 해결] 무조건 숫자로 변환
-      const safePrice = safeNumber(product.price);
-      const safeDiscount = safeNumber(product.discount_amount ?? product.discount);
+      // 가격과 할인을 미리 숫자로 정제
+      const cleanPrice = safeNumber(product.price);
+      const cleanDiscount = safeNumber(product.discount_amount ?? product.discount);
 
       return {
          id: product.id,
          title: product.name,
          name: product.name,
          brand: product.brand,
-
-         // [중요] 여기서 Number로 확실하게 보냅니다.
-         price: safePrice,
-
-         // [중요] Context가 계산할 때 쓰는 이름(discountAmount) 포함 모두 넣기
-         discount: safeDiscount,
-         discountAmount: safeDiscount,
-         discount_amount: safeDiscount,
-
          image: product.image,
+
+         // 👇 무조건 숫자로 들어감
+         price: cleanPrice,
+
+         // 👇 할인 필드명 통일 (Context가 알아먹을 수 있게 다 넣어줌)
+         discount: cleanDiscount,
+         discountAmount: cleanDiscount,
+         discount_amount: cleanDiscount,
+
          quantity: quantity,
-         num: quantity,
-         checked: true,
+         checked: true, // 바로 구매는 무조건 체크
       };
    };
 
@@ -229,7 +217,7 @@ export default function ShoppingDetail() {
       setLike(prev => !prev);
    };
 
-   const handleBuyClick = async (e: any) => {
+   const handleBuyClick = (e: any) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -238,36 +226,9 @@ export default function ShoppingDetail() {
       const item = createCartItem();
       if (!item) return;
 
-      // 1. 다른 상품 체크 해제 (Promise.all로 병렬 처리하여 속도 향상 및 누락 방지)
-      if (cartItems && cartItems.length > 0) {
-         const uncheckPromises = cartItems
-            .filter(c => c.id !== item.id && c.checked) // 현재 상품 제외하고 체크된 것만
-            .map(c => toggleChecked(c.id, 'cart', false)); // 강제로 false
-
-         await Promise.all(uncheckPromises);
-      }
-
-      // 2. 기존 상품 처리 (삭제 후 추가 vs 그냥 추가)
-      const existingItem = cartItems.find(i => i.id === item.id);
-
-      if (existingItem) {
-         // (1) 기존 상품 삭제
-         await removeItem(item.id);
-
-         // (2) [중요] 상태 업데이트가 반영될 시간을 줌 (0.1초)
-         setTimeout(async () => {
-            await addToCart(item); // 깨끗해진 상태에서 추가
-            await toggleChecked(item.id, 'cart', true); // 체크 확인
-            router.push(`/payment?products=${item.id}`);
-         }, 100);
-      } else {
-         // 기존에 없으면 바로 추가하고 이동
-         await addToCart(item);
-         await toggleChecked(item.id, 'cart', true);
-         router.push(`/payment?products=${item.id}`);
-      }
+      buyNow(item);
+      router.push('/payment');
    };
-
    return (
       <Container maxW={'7xl'}>
          <Box>
