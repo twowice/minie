@@ -54,6 +54,15 @@ interface CartProviderProps {
    initialCartItems?: CartItem[];
    initialLikedItems?: CartItem[];
 }
+// 초기설정
+const initializeState = (items: CartItem[]): CartItem[] => {
+  return items.map((item) => ({
+    ...item,
+    num: (item as any).num || 1,
+    checked: false,
+  }));
+};
+//
 
 export function CartProvider({ children }: CartProviderProps) {
    const [cartItems, setCartItems] = useState<CartItem[]>([]);

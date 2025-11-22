@@ -11,7 +11,6 @@ export type AdminOrder = {
         토스페이측에서 결제 요청 처리 후 다시 minie(server)쪽으로 요청을 전달하기에 서버용 인증이 필요없는 함수를 준비했습니다.
 
 */
-
 export async function getOrderAsAdmin(orderId: string): Promise<AdminOrder | null> {
     const supabase = getSupabaseAdminClient();
     try {
@@ -34,7 +33,7 @@ export async function getOrderAsAdmin(orderId: string): Promise<AdminOrder | nul
     }
 }
 
-export async function updateOrderStatusAsAdmin(orderId: string, paymentType: string, status: string) : Promise<boolean> {
+export async function updateOrderStatusAsAdmin(orderId: string, paymentType: string, status: string): Promise<boolean> {
     const supabase = getSupabaseAdminClient();
     try {
         console.log(`[Admin] Updating order: ${orderId} to status: ${status}`);
@@ -47,19 +46,19 @@ export async function updateOrderStatusAsAdmin(orderId: string, paymentType: str
             })
             .eq('order_number', orderId);
 
-       if(error){
+        if (error) {
             console.error("[Admin] Error updating order status:", error);
             return false;
-       }
-       console.log(`[Admin] Successfully updated order: ${orderId}`);
-       return true;
-    } catch(error) {
+        }
+        console.log(`[Admin] Successfully updated order: ${orderId}`);
+        return true;
+    } catch (error) {
         console.error("[Admin] Exception during order status update:", error);
         return false;
     }
 }
 
-export async function deleteOrderAsAdmin(orderId: string) : Promise<boolean> {
+export async function deleteOrderAsAdmin(orderId: string): Promise<boolean> {
     const supabase = getSupabaseAdminClient();
     try {
         console.log(`[Admin] Deleting order: ${orderId}`);
@@ -68,14 +67,14 @@ export async function deleteOrderAsAdmin(orderId: string) : Promise<boolean> {
             .delete()
             .eq('order_number', orderId);
 
-        if(error){
+        if (error) {
             console.error("[Admin] Error deleting order:", error);
             return false;
         }
-        
+
         console.log(`[Admin] Successfully deleted order: ${orderId}`);
         return true;
-    } catch(error) {
+    } catch (error) {
         console.error("[Admin] Exception during order deletion:", error);
         return false;
     }

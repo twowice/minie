@@ -28,11 +28,18 @@ export default function Page() {
     fetchOrders();
   }, []);
 
-  if (loading) return <Box color="black">주문 내역 로딩 중...</Box>;
-  if (error)
-    return <Box color="black">오류 발생: {error || "알 수 없는 오류"}</Box>;
-  if (orders.length === 0)
-    return <Box color="black">주문 내역이 없습니다.</Box>;
+  function content() {
+    if (loading) return <Box color="black">주문 내역 로딩 중...</Box>;
+    else if (error)
+      return <Box color="black">오류 발생: {error || "알 수 없는 오류"}</Box>;
+    else if (orders.length === 0)
+      return <Box color="black">주문 내역이 없습니다.</Box>;
+    else {
+      return orders.map((order, idx) => (
+        <TrackingOrderItem key={idx} order={order} />
+      ));
+    }
+  }
 
   console.log(orders);
 
@@ -129,9 +136,7 @@ export default function Page() {
       </Box>
 
       {/* Row */}
-      {orders.map((order, idx) => (
-        <TrackingOrderItem key={idx} order={order} />
-      ))}
+      {content()}
     </Box>
   );
 }

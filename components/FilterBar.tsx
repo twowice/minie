@@ -60,7 +60,6 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
    // --- 최종 데이터 ---
    // const [data, setData] = useState(list);
    const [sortOrder, setSortOrder] = useState('낮은 가격 순');
-   const [currentCount, setCurrentCount] = useState(0);
 
    const categoryItems = useMemo(() => {
       if (!list) return [];
@@ -101,7 +100,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
 
    //동작
    useEffect(() => {
-      const items = list.filter(item => item.category === category);
+      const items = list.filter(item => item.category === category)
       let selected = [...items];
 
       selected = selected.filter(p => {
@@ -124,38 +123,32 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
 
       // setData(selected);
       onDataFiltered(selected);
-      setCurrentCount(selected.length);
    }, [male, female, myType, price, sortOrder, skincare, use, type, style, list, category]);
 
    const filteredData = () => {
       let checked = [...categoryItems];
 
-      // 1. 마이타입 적용
       if (myType) {
          checked = checked.filter(p => p.mytype === '마이타입');
       }
 
-      // 2. 성별 필터 (로직 수정됨)
-      // 메인 로직과 동일하게 '남녀 무관(filterBoth)'일 때는 필터링을 하지 않고 통과시킵니다.
-      if (!filterBoth) {
-         const genderFilter = [];
-         if (filterMale) {
-            genderFilter.push('남성');
-         } else if (filterFemale) {
-            genderFilter.push('여성');
-         }
-
-         if (genderFilter.length > 0) {
-            checked = checked.filter(item => genderFilter.some(g => item.gender.includes(g)));
-         }
+      const genderFilter = [];
+      if (filterBoth || (!filterMale && !filterFemale)) {
+         genderFilter.push('남성', '여성');
+      } else if (filterMale) {
+         genderFilter.push('남성');
+      } else if (filterFemale) {
+         genderFilter.push('여성');
       }
 
-      // 3. 가격 필터
+      if (genderFilter.length > 0) {
+         checked = checked.filter(item => genderFilter.some(g => item.gender.includes(g)));
+      }
+
       if (filterPrice.length > 0) {
          checked = checked.filter(item => filterPrice.some(price => item.price <= price));
       }
 
-      // 4. 상세 옵션 필터들
       if (filterSkincare.length > 0) {
          checked = checked.filter(item => filterSkincare.includes(item.skincare));
       }
@@ -168,7 +161,6 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
       if (filterStyle.length > 0) {
          checked = checked.filter(item => filterStyle.includes(item.style));
       }
-
       return checked.length;
    };
 
@@ -309,7 +301,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
                </Button>
             </Box>
             <Box display={'flex'} gap={'16px'} fontSize={'12px'} alignItems={'center'} color={'rgba(0,0,0,0.4)'}>
-               <Text>총 {currentCount}개</Text>
+               <Text>총 {categoryItems.length}개</Text>
                <NativeSelect.Root
                   size={'xs'}
                   w={'90px'}

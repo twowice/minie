@@ -5,6 +5,10 @@ import { OrderDetail } from "../order";
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const orderId = searchParams.get('order-id')
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '5', 10);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit - 1;
 
     if (!orderId) {
         return NextResponse.json({ message: 'Order ID is required' }, { status: 400 })
@@ -22,6 +26,7 @@ export async function GET(request: NextRequest) {
                 products(name, image)
                 `)
             .eq('order_number', orderId)
+            .range(startIndex, endIndex)
 
         if (error) {
             console.error("Error fetching order details:", error);
