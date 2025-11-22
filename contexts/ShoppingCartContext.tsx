@@ -29,6 +29,7 @@ interface CartContextDataType {
    buyNow: (item: CartItem) => void; // 👈 추가
    totalDiscountAmount: number;
    totalCostPrice: number;
+   refreshCart: () => Promise<void>;
 }
 interface CartItem {
    id: string;
@@ -410,6 +411,7 @@ export function CartProvider({ children }: CartProviderProps) {
       buyNow, // 👈 내보내기
       totalDiscountAmount,
       totalCostPrice,
+      refreshCart,
    };
 
    return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
