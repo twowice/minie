@@ -6,88 +6,86 @@ import { addCartItems, deleteAllCartItems, deleteCartItem, getCartItems, updateC
 import { addLikedItem, deleteAllLikedItem, deleteLikedItem, getLikedItems } from '@/lib/minie/likeAPI';
 import { useContext, createContext, ReactNode, useState, useCallback, useMemo, useEffect } from 'react';
 
+// Context 내부용 확장 타입
+type ContextCartItem = CartItem & {
+   quantity?: number | string;
+   discount?: number | string;
+   discount_amount?: number | string;
+   [key: string]: any;
+};
+
 interface CartContextDataType {
    totalPrice: number;
    cartItems: CartItem[];
    likedItems: CartItem[];
-   toggleChecked: (id: string, type: 'cart' | 'like') => void; //number -> string
+   toggleChecked: (id: number, type: 'cart' | 'like') => void;
    toggleAllChecked: (type: 'cart' | 'like') => void;
-   updateQuantity: (itemId: string, type: 'plus' | 'minus') => void; //number -> string
+   updateQuantity: (itemId: number, type: 'plus' | 'minus') => void;
    updateAllQuantities: () => void;
-   removeItem: (itemId: string) => void; //number -> string
+   removeItem: (itemId: number) => void;
    clear: (type: string) => void;
    toggleLike: (item: CartItem) => void;
    toggleCart: (item: CartItem) => void;
    addLikedItemsToCart: () => void;
-   isLiked: (itemId: string) => boolean; //number -> string
-   isItemCart: (itemId: string) => boolean; //number -> string
-   addToCart: (itemId: CartItem) => Promise<void>;
-   buyDirectly: (item: CartItem) => void; //추가
-   paymentItems: CartItem[]; //추가
-   paymentTotal: number; //추가
-   resetDirectOrder: () => void; //추가
-   buyNow: (item: CartItem) => void; // 👈 추가
+   isLiked: (itemId: number) => boolean;
+   isItemCart: (itemId: number) => boolean;
+   addToCart: (item: ContextCartItem) => Promise<void>;
+   paymentItems: CartItem[];
+   paymentTotal: number;
+   buyNow: (item: CartItem) => void;
    totalDiscountAmount: number;
    totalCostPrice: number;
    refreshCart: () => Promise<void>;
+   resetDirectOrder: () => void;
 }
-interface CartItem {
-   id: string;
-   title: string;
-   price: number | string;
-   discount?: number | string;
-   discountAmount?: number | string;
-   discount_amount?: number | string; // DB 필드명
-   quantity: number | string;
-   num?: number | string;
-   checked: boolean;
-   [key: string]: any;
-}
+
 export const CartContext = createContext<CartContextDataType | undefined>(undefined);
 
 export function useCart() {
    const context = useContext(CartContext);
    if (context === undefined) {
-      throw new Error(
-         'useCart must be used within a CartProvider\nCartProvider로 자식 컴포넌트(useCart사용하실 컴포넌트) 감싼 채로 사용하셔야 합니다.',
-      );
+      throw new Error('useCart must be used within a CartProvider');
    }
    return context;
 }
 
 interface CartProviderProps {
    children: ReactNode;
-   initialCartItems: CartItem[];
-   initialLikedItems: CartItem[];
+   initialCartItems?: CartItem[];
+   initialLikedItems?: CartItem[];
 }
 
 export function CartProvider({ children }: CartProviderProps) {
    const [cartItems, setCartItems] = useState<CartItem[]>([]);
    const [likedItems, setLikedItems] = useState<CartItem[]>([]);
    const [cartDataLoading, setCartDataLoading] = useState(true);
+
+   // 바로구매 아이템 상태 (장바구니와 분리)
    const [directOrderItem, setDirectOrderItem] = useState<CartItem | null>(null);
+
    const { user, loading: userLoading } = useUser();
-   // 👇 [핵심] 안전한 숫자 변환 함수 (콤마 제거 및 NaN 방지)
+
+   // 안전한 숫자 변환 함수
    const getSafeNumber = (val: any) => {
       if (val === null || val === undefined) return 0;
-      // 문자열인 경우 콤마 제거
       const str = String(val).replace(/,/g, '');
       const num = Number(str);
       return isNaN(num) ? 0 : num;
    };
 
+   // 장바구니 총액 계산 (checked된 것만)
    const { totalCostPrice, totalDiscountAmount, totalPrice } = useMemo(() => {
       const checkedItems = cartItems.filter(item => item.checked);
 
       const cost = checkedItems.reduce((acc, item) => {
-         const price = Number(item.price) || 0;
-         const qty = Number(item.quantity) || 1;
+         const price = getSafeNumber(item.price);
+         const qty = getSafeNumber(item.num ?? 1);
          return acc + price * qty;
       }, 0);
 
       const discount = checkedItems.reduce((acc, item) => {
-         const val = Number(item.discount_amount ?? item.discountAmount ?? item.discount) || 0;
-         const qty = Number(item.quantity) || 1;
+         const val = getSafeNumber(item.discount_amount ?? 0);
+         const qty = getSafeNumber(item.num ?? 1);
          return acc + val * qty;
       }, 0);
 
@@ -98,79 +96,82 @@ export function CartProvider({ children }: CartProviderProps) {
       };
    }, [cartItems]);
 
-   // 👇 [핵심 기능] 바로 구매 함수
-   const buyNow = (newItem: CartItem) => {
-      setCartItems(prev => {
-         // 1. 기존 상품은 모두 체크 해제 (결제창에서 안 보이게)
-         const uncheckedPrev = prev.map(item => ({ ...item, checked: false }));
-         // 들어오는 데이터 정제 (숫자로 변환하여 저장)
-         const cleanItem = {
-            ...newItem,
-            price: getSafeNumber(newItem.price),
-            // Context는 주로 'num'을 쓰므로 'num'에도 값을 넣어줌
-            num: getSafeNumber(newItem.quantity ?? newItem.num ?? 1),
-            quantity: getSafeNumber(newItem.quantity ?? newItem.num ?? 1),
-            checked: true,
-         };
-         // 2. 새 상품이 이미 있는지 확인
-         const idx = uncheckedPrev.findIndex(item => item.id === newItem.id);
+   // 👇 [핵심 수정] 바로 구매 함수
+   // setCartItems를 호출하지 않고 directOrderItem만 업데이트합니다.
+   const buyNow = (newItem: ContextCartItem) => {
+      // 1. 데이터 정제
+      const cleanItem: ContextCartItem = {
+         ...newItem,
+         id: Number(newItem.id),
+         price: getSafeNumber(newItem.price),
+         // num과 quantity 둘 다 값을 채워줍니다.
+         num: getSafeNumber(newItem.quantity ?? newItem.num ?? 1),
+         quantity: getSafeNumber(newItem.quantity ?? newItem.num ?? 1),
+         checked: true, // 결제창에서는 무조건 체크
+         discount_amount: getSafeNumber(newItem.discount_amount),
+         title: newItem.title ?? newItem.name ?? '',
+         image: newItem.image ?? '',
+         brand: newItem.brand ?? '',
+      };
 
-         let updatedItems;
-         if (idx !== -1) {
-            // 기존 아이템 업데이트
-            uncheckedPrev[idx] = { ...uncheckedPrev[idx], ...cleanItem };
-            updatedItems = [...uncheckedPrev];
-         } else {
-            // 새 아이템 추가
-            updatedItems = [...uncheckedPrev, cleanItem];
-         }
+      // 2. 상태 업데이트 (장바구니 리스트는 건드리지 않음!)
+      setDirectOrderItem(cleanItem);
 
-         localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-         return updatedItems;
-      });
+      // 3. 로컬스토리지 저장 (새로고침 대비)
+      localStorage.setItem('buyNowItem', JSON.stringify(cleanItem));
    };
 
-   // // totalPrice 계산
-   // const totalPrice = useMemo(
-   //    () =>
-   //       cartItems.reduce((sum, item) => {
-   //          const price = Number(item.price) || 0;
-   //          const discount = Number(item.discountAmount) || 0;
-   //          const num = Number(item.num) || 1;
-   //          // checked가 true인 것만 계산
-   //          return sum + (item.checked ? (price - discount) * num : 0);
-   //       }, 0),
-   //    [cartItems],
-   // );
-
-   // likedItemIds
-   const likedItemIds = useMemo(() => new Set(likedItems.map(item => item.id)), [likedItems]);
-   const isLiked = (itemId: string) => likedItemIds.has(itemId);
-
-   // cartItemIds
-   const cartItemIds = useMemo(() => new Set(cartItems.map(item => item.id)), [cartItems]);
-   const isItemCart = (itemId: string) => cartItemIds.has(itemId);
-
-   const init = useCallback(async () => {
-      if (userLoading) {
-         return;
+   // 👇 [핵심] 페이지 로드 시 바로구매 데이터 복구
+   // init 함수와 별개로 실행되어야 결제 페이지 진입 시 즉시 데이터를 보여줍니다.
+   useEffect(() => {
+      const storedBuyNow = localStorage.getItem('buyNowItem');
+      if (storedBuyNow) {
+         try {
+            setDirectOrderItem(JSON.parse(storedBuyNow));
+         } catch (e) {
+            console.error('바로구매 데이터 파싱 실패', e);
+            localStorage.removeItem('buyNowItem');
+         }
       }
+   }, []);
+
+   // 결제 아이템 결정 로직
+   const paymentItems = useMemo(() => {
+      // 바로구매 데이터가 있으면 그것만 반환
+      if (directOrderItem) return [directOrderItem];
+      // 없으면 장바구니 체크된 항목 반환
+      return cartItems.filter(item => item.checked);
+   }, [directOrderItem, cartItems]);
+
+   // 결제 총액 계산
+   const paymentTotal = useMemo(() => {
+      return paymentItems.reduce((sum, item) => {
+         const price = getSafeNumber(item.price);
+         const discount = getSafeNumber(item.discount_amount);
+         const num = getSafeNumber(item.num ?? item.quantity ?? 1);
+         return sum + (price - discount) * num;
+      }, 0);
+   }, [paymentItems]);
+
+   // 초기화 로직 (서버 데이터 로드)
+   const init = useCallback(async () => {
+      if (userLoading) return;
 
       setCartDataLoading(true);
-
-      let initialCartItems: CartItem[] = [];
-      let initialLikedItems: CartItem[] = [];
-
       try {
          if (user) {
-            [initialCartItems, initialLikedItems] = await Promise.all([getCartItems(), getLikedItems()]);
+            const [initialCartItems, initialLikedItems] = await Promise.all([getCartItems(), getLikedItems()]);
 
-            const normalize = (item: any) => ({
+            const normalize = (item: any): ContextCartItem => ({
                ...item,
+               id: Number(item.id),
                price: getSafeNumber(item.price),
-               discountAmount: getSafeNumber(item.discountAmount ?? item.discount_amount ?? item.discount),
-               num: getSafeNumber(item.num ?? 1),
+               discountAmount: getSafeNumber(item.discount_amount),
+               num: getSafeNumber(item.num ?? item.product_num ?? 1),
                checked: Boolean(item.checked),
+               title: item.title ?? item.name ?? '',
+               brand: item.brand ?? '',
+               image: item.image ?? '',
             });
             setCartItems(initialCartItems.map(normalize));
             setLikedItems(initialLikedItems.map(normalize));
@@ -178,8 +179,9 @@ export function CartProvider({ children }: CartProviderProps) {
             setCartItems([]);
             setLikedItems([]);
          }
+         // *여기 있던 storedBuyNow 로직 제거됨 (위쪽 useEffect로 이동)*
       } catch (error) {
-         console.error('장바구니/좋아요 아이템 불러오기 실패:', error);
+         console.error('초기화 실패:', error);
          setCartItems([]);
          setLikedItems([]);
       } finally {
@@ -190,41 +192,58 @@ export function CartProvider({ children }: CartProviderProps) {
    useEffect(() => {
       init();
    }, [init]);
-   const buyDirectly = useCallback((newItem: CartItem) => {
-      setDirectOrderItem({ ...newItem, checked: true });
-   }, []);
-
-   const resetDirectOrder = useCallback(() => {
-      setDirectOrderItem(null);
-   }, []);
-
-   const paymentItems = useMemo(() => {
-      if (directOrderItem) return [directOrderItem];
-      return cartItems.filter(item => item.checked);
-   }, [directOrderItem, cartItems]);
-
-   const paymentTotal = useMemo(() => {
-      return paymentItems.reduce((sum, item) => {
-         const price = getSafeNumber(item.price);
-         const discount = getSafeNumber(item.discountAmount ?? item.discount_amount ?? item.discount);
-         const num = getSafeNumber(item.num ?? item.quantity ?? 1); // num과 quantity 모두 체크
-
-         return sum + (price - discount) * num;
-      }, 0);
-   }, [paymentItems]);
 
    const refreshCart = async () => {
       try {
-         const updatedCartItems = (await getCartItems()).map(item =>
-            cartItemIds.has(item.id) ? { ...item, checked: false } : item,
-         );
-         setCartItems(updatedCartItems);
+         const cartItemIds = new Set(cartItems.map(item => item.id));
+         const updatedCartItems = (await getCartItems()).map((item: any) => ({
+            ...item,
+            id: Number(item.id),
+            checked: cartItemIds.has(Number(item.id))
+               ? (cartItems.find(c => c.id === Number(item.id))?.checked ?? false)
+               : false,
+         }));
+         setCartItems(updatedCartItems as ContextCartItem[]);
       } catch (error) {
-         console.error('[ShoppingCartContext] 장바구니 아이템을 다시 불러오는 과정에서 오류가 발생했습니다:', error);
+         console.error('Refresh Error:', error);
       }
    };
 
-   const toggleChecked = useCallback((id: string, type: 'cart' | 'like') => {
+   // 바로 구매 초기화 (결제 완료/취소 후 호출)
+   const resetDirectOrder = useCallback(() => {
+      setDirectOrderItem(null);
+      localStorage.removeItem('buyNowItem');
+   }, []);
+
+   // 일반 장바구니 담기 (바로구매 상태 초기화 포함)
+   const addToCart = useCallback(
+      async (newItem: ContextCartItem) => {
+         setDirectOrderItem(null); // 장바구니 이용 시 바로구매 상태 해제
+
+         const targetId = Number(newItem.id);
+         const existing = cartItems.find(item => item.id === targetId);
+         const addQty = getSafeNumber(newItem.num ?? newItem.quantity ?? 1);
+
+         if (existing) {
+            const newQty = getSafeNumber(existing.num) + addQty;
+            setCartItems(prev => prev.map(i => (i.id === targetId ? { ...i, num: newQty } : i)));
+            await updateCartItems([{ product_id: targetId, product_num: newQty }]);
+         } else {
+            const itemToAdd: ContextCartItem = { ...newItem, id: targetId, num: addQty, checked: true };
+            setCartItems(prev => [itemToAdd, ...prev]);
+            await addCartItems([{ product_id: targetId, product_num: addQty }]);
+         }
+      },
+      [cartItems],
+   );
+
+   // ... (나머지 함수들은 기존 로직 유지) ...
+   const likedItemIds = useMemo(() => new Set(likedItems.map(item => item.id)), [likedItems]);
+   const isLiked = (itemId: number) => likedItemIds.has(itemId);
+   const cartItemIds = useMemo(() => new Set(cartItems.map(item => item.id)), [cartItems]);
+   const isItemCart = (itemId: number) => cartItemIds.has(itemId);
+
+   const toggleChecked = useCallback((id: number, type: 'cart' | 'like') => {
       const setState = type === 'cart' ? setCartItems : setLikedItems;
       setState(prev => prev.map(item => (item.id === id ? { ...item, checked: !item.checked } : item)));
    }, []);
@@ -238,86 +257,46 @@ export function CartProvider({ children }: CartProviderProps) {
       [cartItems, likedItems],
    );
 
-   // updateQuantity 함수
-   const updateQuantity = useCallback(
-      async (itemId: string, type: 'plus' | 'minus') => {
-         setCartItems(prev =>
-            prev.map(item => {
-               if (item.id === itemId) {
-                  const newNum = type === 'plus' ? item.num + 1 : Math.max(1, item.num - 1);
-                  return { ...item, num: newNum };
-               }
-               return item;
-            }),
-         );
+   const updateQuantity = useCallback(async (itemId: number, type: 'plus' | 'minus') => {
+      setCartItems(prev =>
+         prev.map(item => {
+            if (item.id === itemId) {
+               const currentNum = getSafeNumber(item.num);
+               const newNum = type === 'plus' ? currentNum + 1 : Math.max(1, currentNum - 1);
+               return { ...item, num: newNum };
+            }
+            return item;
+         }),
+      );
+      await updateCartItems([{ product_id: itemId, product_num: 1 }]);
+   }, []);
 
-         // API 호출
-         const item = cartItems.find(i => i.id === itemId);
-         if (item) {
-            const newNum = type === 'plus' ? item.num + 1 : Math.max(1, item.num - 1);
-            await updateCartItems([{ product_id: itemId, product_num: newNum }]);
-         }
-      },
-      [cartItems],
-   );
-
-   // updateAllQuantities 함수 구현
    const updateAllQuantities = useCallback(async () => {
-      const payload = cartItems.map(item => ({
-         product_id: item.id,
-         product_num: item.num,
-      }));
+      const payload = cartItems.map(item => ({ product_id: item.id, product_num: getSafeNumber(item.num) }));
       await updateCartItems(payload);
    }, [cartItems]);
 
-   // removeItem 함수 구현
-   const removeItem = useCallback(async (itemId: string) => {
+   const removeItem = useCallback(async (itemId: number) => {
       const isSuccess = await deleteCartItem(itemId);
-      if (isSuccess) {
-         setCartItems(prev => prev.filter(item => item.id !== itemId));
-      } else {
-         console.log('delete Cart Item failed');
-      }
+      if (isSuccess) setCartItems(prev => prev.filter(item => item.id !== itemId));
    }, []);
 
    const clear = useCallback(async (type: string) => {
-      switch (type) {
-         case 'cart':
-            await clearCart();
-            break;
-         case 'like':
-            await clearLikedItem();
-            break;
-         default:
-            console.warn(
-               `ShoppingCartContext의 clear 함수에서 알 수 없는 type(${type})이 입력됐습니다.\n탭 메뉴의 value가 cart, like인지 확인하세요.`,
-            );
-            break;
-      }
+      if (type === 'cart') await deleteAllCartItems().then(res => res && setCartItems([]));
+      if (type === 'like') await deleteAllLikedItem().then(res => res && setLikedItems([]));
    }, []);
-
-   const clearCart = async () => {
-      const isSuccess = await deleteAllCartItems();
-      isSuccess ? setCartItems([]) : console.log('delete All Cart Item failed');
-   };
-
-   const clearLikedItem = async () => {
-      const isSuccess = await deleteAllLikedItem();
-      isSuccess ? setLikedItems([]) : console.log('delete All Cart Item failed');
-   };
 
    const toggleLike = useCallback(
       async (item: CartItem) => {
-         if (isLiked(item.id)) {
-            const isSuccess = await deleteLikedItem(item.id);
-            isSuccess
-               ? setLikedItems(prev => prev.filter(i => i.id !== item.id))
-               : console.log('delete(unlike) Liked Item failed');
+         const targetId = Number(item.id);
+         if (isLiked(targetId)) {
+            await deleteLikedItem(targetId).then(
+               res => res && setLikedItems(prev => prev.filter(i => i.id !== targetId)),
+            );
          } else {
-            const isSuccess = await addLikedItem(item.id);
-            isSuccess
-               ? setLikedItems(prev => [{ ...item, checked: false }, ...prev])
-               : console.log('add(like) Liked Item failed');
+            await addLikedItem(targetId).then(
+               res => res && setLikedItems(prev => [{ ...item, checked: false }, ...prev]),
+            );
          }
       },
       [isLiked],
@@ -325,67 +304,30 @@ export function CartProvider({ children }: CartProviderProps) {
 
    const toggleCart = useCallback(
       async (item: CartItem) => {
-         if (isItemCart(item.id)) {
-            const isSuccess = await deleteCartItem(item.id);
-            if (isSuccess) {
-               setCartItems(prev => prev.filter(i => i.id !== item.id));
-            } else {
-               console.error('장바구니 삭제 실패');
-            }
+         const targetId = Number(item.id);
+         if (isItemCart(targetId)) {
+            await deleteCartItem(targetId).then(
+               res => res && setCartItems(prev => prev.filter(i => i.id !== targetId)),
+            );
          } else {
-            const payload = [{ product_id: item.id, product_num: 1 }];
-            const isSuccess = await addCartItems(payload);
-
-            if (isSuccess) {
-               setCartItems(prev => [{ ...item, checked: false, num: 1 }, ...prev]);
-            } else {
-               console.error('장바구니 추가 실패');
-            }
+            await addCartItems([{ product_id: targetId, product_num: 1 }]).then(
+               res => res && setCartItems(prev => [{ ...item, checked: false, num: 1 }, ...prev]),
+            );
          }
       },
       [isItemCart],
    );
 
-   const addToCart = useCallback(
-      async (newItem: CartItem) => {
-         setDirectOrderItem(null);
-         // 1. 이미 장바구니에 있는지 확인
-         const existingItem = cartItems.find(item => item.id === newItem.id);
-
-         if (existingItem) {
-            const newQuantity = existingItem.num + (newItem.num || newItem.quantity || 1);
-            setCartItems(prev => prev.map(item => (item.id === newItem.id ? { ...item, num: newQuantity } : item)));
-            // API 호출
-            await updateCartItems([{ product_id: newItem.id, product_num: newQuantity }]);
-         } else {
-            const initialNum = newItem.num || newItem.quantity || 1;
-            // State 선반영
-            setCartItems(prev => [{ ...newItem, num: initialNum, checked: true }, ...prev]);
-            // API 호출
-            await addCartItems([{ product_id: newItem.id, product_num: initialNum }]);
-         }
-      },
-      [cartItems],
-   );
-
    const addLikedItemsToCart = useCallback(async () => {
       const itemsToAdd = likedItems.filter(item => item.checked);
-      const cartItemIds = new Set(cartItems.map(i => i.id));
-      const newItems = itemsToAdd.filter(item => !cartItemIds.has(item.id));
-      const payload = newItems.map(item => ({
-         product_id: item.id,
-         product_num: item.num,
-      }));
-
+      const existingIds = new Set(cartItems.map(i => i.id));
+      const newItems = itemsToAdd.filter(item => !existingIds.has(item.id));
+      const payload = newItems.map(item => ({ product_id: item.id, product_num: getSafeNumber(item.num ?? 1) }));
       const isSuccess = await addCartItems(payload);
-
-      if (!isSuccess) {
-         console.log('delete Cart Item failed : ', payload);
-         return;
+      if (isSuccess) {
+         setCartItems(prev => [...newItems.map(i => ({ ...i, checked: false })), ...prev]);
+         setLikedItems(prev => prev.map(item => ({ ...item, checked: false })));
       }
-
-      setCartItems(prev => [...newItems.map(i => ({ ...i, checked: false })), ...prev]);
-      setLikedItems(prev => prev.map(item => ({ ...item, checked: false })));
    }, [likedItems, cartItems]);
 
    const value = {
@@ -398,20 +340,19 @@ export function CartProvider({ children }: CartProviderProps) {
       removeItem,
       clear,
       toggleLike,
+      addToCart,
       addLikedItemsToCart,
       isLiked,
       isItemCart,
       toggleCart,
       totalPrice,
-      addToCart,
-      buyDirectly,
       paymentItems,
       paymentTotal,
-      resetDirectOrder,
-      buyNow, // 👈 내보내기
+      buyNow,
       totalDiscountAmount,
       totalCostPrice,
       refreshCart,
+      resetDirectOrder,
    };
 
    return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
