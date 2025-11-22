@@ -1,5 +1,5 @@
 import { CartItem } from "@/app/api/cart/cart"
-import { Order, OrderDetail } from "@/app/api/order/order.d"
+import { Order, OrderDetail, PaginatedOrderDetailsResponse } from "@/app/api/order/order.d"
 import { fetchWithAuth } from "./authAPI"
 
 export async function addNewOrder(
@@ -104,24 +104,47 @@ export async function getOrderExcludeOrderDetail(orderId: string): Promise<Order
     }
 }
 
-export async function getOrderDetails(orderId: string): Promise<OrderDetail[]> {
+export async function getOrderDetails(orderId: string, page: number = 1, limit: number = 5): Promise<OrderDetail[]> {
     try {
-        const response = await fetch(`http://localhost:3000/api/order/order_detail?order-id=${orderId}`, {
+        const response = await fetchWithAuth(`/api/order/order_detail?order-id=${orderId}&page=${page}&limit=${limit}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         })
 
         if (!response.ok) {
-            console.error(`Failed to get order: ${response.status} ${response.statusText}`);
-            return [];
+            const errorData = await response.json();
+            console.error(`Failed to get order details for ID ${orderId}: ${response.status} ${response.statusText}`, errorData);
+            return []
         }
-        const order = await response.json()
 
-        return order
+        const data: OrderDetail[] = await response.json();
+        return data;
 
     } catch (error) {
-        console.error("Error during getting order:", error);
-        return []
+        console.error(`Error during getting order details for ID ${orderId}:`, error);
+        return []; // 에러 시 빈 응답 반환
+    }
+}
+
+export async function getOrderDetailsCount(orderId: string, limit: number = 5): Promise<{ totalCount: number, itemsPerPage: number, totalPages: number }> {
+    try {
+        const response = await fetchWithAuth(`/api/order/order_detail/${orderId}/count?limit=${limit}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error(`Failed to get order details count for ID ${orderId}: ${response.status} ${response.statusText}`, errorData);
+            return { totalCount: 0, itemsPerPage: limit, totalPages: 0 };
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error(`Error during getting order details count for ID ${orderId}:`, error);
+        return { totalCount: 0, itemsPerPage: limit, totalPages: 0 };
     }
 }
 
