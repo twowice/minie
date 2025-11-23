@@ -16,7 +16,8 @@ export interface OrderDetail {
     isDiscounted: boolean,
     discountAmount: number
     productName: string,
-    productImage: string
+    productImage: string,
+    has_review: boolean // Add by CKH
 }
 
 export interface OrdersForTracking {

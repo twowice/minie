@@ -3,6 +3,7 @@
 import { Text, Portal, CloseButton, Dialog, Button, Image, Flex, VStack, HStack, Box, Textarea } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { fetchWithAuth } from "@/lib/minie/authAPI";
+import { useParams } from "next/navigation";
 
 interface reviewAddDialogProps {
     productId: number;
@@ -13,6 +14,9 @@ interface reviewAddDialogProps {
 }
 
 export default function reviewDialogDialog({ productName, productImage, productId, onSuccess, onFail }: reviewAddDialogProps) {
+    const params = useParams<{ id: string }>();
+    const orderId = params.id;
+
     /* 별점 & 설명 & 리뷰사진 & 닫기 */
     const [rating, setRating] = useState("");
     const [contentContent, setcontentContent] = useState("");
@@ -59,6 +63,15 @@ export default function reviewDialogDialog({ productName, productImage, productI
 
             if (result.message === "리뷰 추가 성공") {
                 closeBtnRef.current?.click();
+
+                await fetchWithAuth("/api/order/updateReview", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ orderId })
+                })
+
                 onSuccess?.();
             }
         } catch (e) { console.error("에러:", e); onFail?.(); }

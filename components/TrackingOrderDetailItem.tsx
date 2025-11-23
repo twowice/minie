@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { OrderDetail } from "@/app/api/order/order";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import { Box, Flex, HStack, Image, Stack } from "@chakra-ui/react";
@@ -16,6 +17,7 @@ export default function TrackingOrderDetailItem({
   status: string;
 }) {
   /* 토스트 CKH */
+  const [localHasReview, setLocalHasReview] = useState(order.has_review);
   const showSaveSuccessToast = () => {
     toaster.create({
       type: "success",
@@ -53,14 +55,17 @@ export default function TrackingOrderDetailItem({
         {numberFormatter.format(order.price * order.productNum)}원
       </Box>
       <Stack flex="1" justifyContent={"center"} alignItems={"center"}>
-        <Box>{status === "주문완료" ? "배송완료" : status}</Box>
-        {status === "주문완료" && (
+        <Box>{status === "주문완료" ? (localHasReview ? "리뷰완료" : "배송완료") : status}</Box>
+        {status === "주문완료" && !localHasReview && (
           /* Add by CKH */
           <ReviewAddDialog
             productId={order.productId}
             productName={order.productName}
             productImage={order.productImage}
-            onSuccess={showSaveSuccessToast}
+            onSuccess={() => {
+              showSaveSuccessToast
+              setLocalHasReview(true);
+            }}
             onFail={showSaveFailToast}
           />
         )}
