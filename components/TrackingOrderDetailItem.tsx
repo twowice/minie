@@ -19,11 +19,11 @@ export default function TrackingOrderDetailItem({
   const showSaveSuccessToast = () => {
     toaster.create({
       type: "success",
-      title: "답변이 성공적으로 추가되었습니다!",
+      title: "리뷰가 성공적으로 추가되었습니다!",
     });
   };
   const showSaveFailToast = () => {
-    toaster.create({ type: "error", title: "답변 추가 실패!" });
+    toaster.create({ type: "error", title: "리뷰 추가 실패!" });
   };
 
   return (
