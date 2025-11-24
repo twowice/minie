@@ -37,6 +37,7 @@ interface CartContextDataType {
   totalPrice: number;
   totalDiscountAmount: number;
   totalCostPrice: number;
+  isLoading: boolean;
 
   // 상태 확인
   isLiked: (itemId: number) => boolean;
@@ -400,6 +401,7 @@ export function CartProvider({ children }: CartProviderProps) {
     totalPrice,
     totalDiscountAmount,
     totalCostPrice,
+    isLoading: cartDataLoading,
     isLiked,
     isItemCart,
     addToCart,
