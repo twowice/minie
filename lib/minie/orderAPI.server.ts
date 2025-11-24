@@ -1,5 +1,6 @@
 import 'server-only';
 import { getSupabaseAdminClient } from '@/lib/supabase';
+import { OrderDetail } from '@/app/api/order/order';
 
 export type AdminOrder = {
     order_number: string;
@@ -77,5 +78,55 @@ export async function deleteOrderAsAdmin(orderId: string): Promise<boolean> {
     } catch (error) {
         console.error("[Admin] Exception during order deletion:", error);
         return false;
+    }
+}
+
+export async function getOrderDetailsAsAdmin(orderId: string): Promise<OrderDetail[]> {
+    const supabase = getSupabaseAdminClient()
+    try {
+        const { data: orderDetails, error } = await supabase
+            .from('order_details')
+            .select(`
+                        product_id,
+                        product_num,
+                        price,
+                        is_discounted,
+                        discount_amount,
+                        products(name, image)
+                        `)
+            .eq('order_number', orderId)
+
+        if (error) {
+            console.error("Error fetching order details:", error);
+            if (error.code === 'PGRST116') {
+                throw new Error('order details not found:', error)
+            }
+            throw new Error(`Failed to fetch order details: ${error.message}`);
+        }
+
+        if (orderDetails === null || orderDetails.length === 0) {
+            return []
+        }
+
+        const typedOrderDetails: OrderDetail[] = orderDetails.map((item: any) => {
+            const product = item.products as { name: string; image: string; } | null;
+
+            return {
+                id: item.id,
+                productId: item.product_id,
+                productNum: item.product_num,
+                price: item.price,
+                isDiscounted: item.is_discounted,
+                discountAmount: item.discount_amount,
+                productName: product?.name || '알 수 없는 상품',
+                productImage: product?.image || "/images/review/product3.jpg",
+            }
+        });
+
+        return typedOrderDetails
+
+    } catch (error) {
+        console.error('[Admin] Exception during order details getting,', error)
+        return []
     }
 }

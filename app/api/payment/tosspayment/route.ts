@@ -1,5 +1,4 @@
-import { getOrderDetails } from '@/lib/minie/orderAPI';
-import { deleteOrderAsAdmin, getOrderAsAdmin, updateOrderStatusAsAdmin } from '@/lib/minie/orderAPI.server';
+import { deleteOrderAsAdmin, getOrderAsAdmin, getOrderDetailsAsAdmin, updateOrderStatusAsAdmin } from '@/lib/minie/orderAPI.server';
 import { deleteCartItemsAsAdmin } from '@/lib/minie/cartAPI.server';
 import { NextRequest, NextResponse } from 'next/server';
 import { OrderDetail } from '@/app/api/order/order.d';
@@ -52,14 +51,14 @@ export async function GET(request: NextRequest) {
 
         const isUpdateSuccess = await updateOrderStatusAsAdmin(orderId, json.easyPay?.provider || '카드', '주문완료')
 
-        if(!isUpdateSuccess){
+        if (!isUpdateSuccess) {
             console.error("결제 후 주문 데이터 업데이트 과정에서 문제 발생 ", orderId)
             await deleteOrderAsAdmin(orderId); // 실패 시 생성된 주문 삭제
             return NextResponse.redirect(new URL(`/payment/fail?message=Internal server error during updating order status&orderId=${orderId}`, request.nextUrl.origin))
         }
 
         console.log(`주문 ${orderId}의 장바구니 상품 삭제를 시작합니다.`);
-        
+
         const order = await getOrderAsAdmin(orderId);
         if (!order) {
             console.error(`[Fatal] Cannot find order ${orderId} to clear cart items. Proceeding without cart deletion.`);
@@ -67,7 +66,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.redirect(new URL(`/orderfinish?order-id=${orderId}`, request.nextUrl.origin));
         }
 
-        const orderDetails : OrderDetail[] = await getOrderDetails(orderId);
+        const orderDetails: OrderDetail[] = await getOrderDetailsAsAdmin(orderId);
         const productIdsToDelete = orderDetails.map(detail => detail.productId);
 
         const allItemsCleared = await deleteCartItemsAsAdmin(order.user_id, productIdsToDelete);
