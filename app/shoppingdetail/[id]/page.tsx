@@ -28,11 +28,6 @@ import { useEffect, useState } from 'react';
 import { AiFillMinusCircle, AiFillPlusCircle } from 'react-icons/ai';
 import { FaRegHeart } from 'react-icons/fa6';
 
-const MOCK_USER = {
-   isLoggedIn: true,
-   loginId: 'yebyn',
-   isAdmin: true,
-};
 export default function ShoppingDetail() {
    const router = useRouter();
    const params = useParams();
@@ -59,7 +54,11 @@ export default function ShoppingDetail() {
    //  관리자 계정
    //  const [isAdmin, setIsAdmin] = useState(true);
    //  const { user, isAdmin } = useUser();
-   const [user, setUser] = useState(MOCK_USER);
+   const [user, setUser] = useState({
+      isLoggedIn: false,
+      loginId: '',
+      isAdmin: false,
+   });
    const isAdmin = user.isAdmin;
 
    /* 전체 평균 점수 계산 (CKH) */
@@ -115,12 +114,30 @@ export default function ShoppingDetail() {
       };
    };
 
-   //  useEffect(() => {
-   //     const savedQna = localStorage.getItem(`qna_list_${id}`);
-   //     if (savedQna) {
-   //        setQnaList(JSON.parse(savedQna));
-   //     }
-   //  }, [id]);
+   (useEffect(() => {
+      const getUserSession = async () => {
+         const {
+            data: { user: currentUser },
+            error,
+         } = await supabase.auth.getUser();
+         if (currentUser) {
+            const emailId = currentUser.email ? currentUser.email.split('@')[0] : 'unknown';
+            setUser({
+               isLoggedIn: true,
+               loginId: emailId,
+               isAdmin: true,
+            });
+         } else {
+            setUser({
+               isLoggedIn: false,
+               loginId: '',
+               isAdmin: false,
+            });
+         }
+      };
+      getUserSession();
+   }),
+      []);
    useEffect(() => {
       if (!id) return;
       console.log('현재의 URL의 ID값:', id, '타입:', typeof id);
