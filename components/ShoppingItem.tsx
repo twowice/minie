@@ -1,15 +1,6 @@
-import {
-  Box,
-  Button,
-  Flex,
-  VStack,
-  Image,
-  Text,
-  HStack,
-  AspectRatio,
-} from "@chakra-ui/react";
-import TypeBadge from "./Badge";
-import { MdFavoriteBorder, MdOutlineShoppingCart } from "react-icons/md";
+import { Box, Button, Flex, VStack, Image, Text, HStack, AspectRatio } from '@chakra-ui/react';
+import TypeBadge from './Badge';
+import { MdFavoriteBorder, MdOutlineShoppingCart } from 'react-icons/md';
 // import { useEffect, useState } from 'react';
 import { getDiscountRate } from '@/utils/calculator/discountRateCalculator';
 import Link from 'next/link';
@@ -20,24 +11,24 @@ export default function ShoppingItem({ item }) {
    // const [isCartActivity, setIsCartActivity] = useState(false);
    // const [isLike, setIsLike] = useState(false);
 
-  //context
-  const { isItemCart, toggleCart, toggleLike, isLiked } = useCart();
+   //context
+   const { isItemCart, toggleCart, toggleLike, isLiked } = useCart();
 
    //좋아요/장바구니
    const isItemLike = isLiked(item.id);
    const isItemInCart = isItemCart(item.id);
 
-  //toggle
-  const handleCartClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleCart(item);
-  };
-  const handleLikeClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleLike(item);
-  };
+   //toggle
+   const handleCartClick = e => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleCart(item);
+   };
+   const handleLikeClick = e => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleLike(item);
+   };
 
    return (
       <Link href={`/shoppingdetail/${item.id}`} passHref>
@@ -51,7 +42,7 @@ export default function ShoppingItem({ item }) {
          >
             <AspectRatio ratio={1} w={'100%'}>
                <Box position={'relative'}>
-                  <Image src={'/images/image 18-1.png'} alt="test" objectFit="cover" w={'100%'} />
+                  <Image src={item.image} alt="product-item" objectFit="cover" w={'100%'} />
                   <HStack
                      justifyContent={'space-between'}
                      w={'100%'}
