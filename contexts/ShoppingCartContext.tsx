@@ -113,7 +113,17 @@ export function CartProvider({ children }: CartProviderProps) {
           getCartItems(),
           getLikedItems(),
         ]);
-        setCartItems(initialCartItems);
+
+        const savedStateJSON = localStorage.getItem(
+          `cart-checked-state-${user.id}`
+        );
+        const checkedMap = savedStateJSON ? JSON.parse(savedStateJSON) : {};
+        const updatedCartItems = initialCartItems.map((item) => ({
+          ...item,
+          checked: checkedMap[item.id] ?? true,
+        }));
+
+        setCartItems(updatedCartItems);
         setLikedItems(initialLikedItems);
       } else {
         setCartItems([]);
@@ -131,6 +141,19 @@ export function CartProvider({ children }: CartProviderProps) {
   useEffect(() => {
     init();
   }, [init]);
+
+  useEffect(() => {
+    if (user && !cartDataLoading) {
+      const checkedMap = cartItems.reduce((acc, item) => {
+        acc[item.id] = item.checked;
+        return acc;
+      }, {} as Record<number, boolean>);
+      localStorage.setItem(
+        `cart-checked-state-${user.id}`,
+        JSON.stringify(checkedMap)
+      );
+    }
+  }, [cartItems, user, cartDataLoading]);
 
   const refreshCart = async () => {
     try {

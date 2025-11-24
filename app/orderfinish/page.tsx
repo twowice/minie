@@ -27,7 +27,6 @@ export default function OrderFinishPage() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order-id");
 
-  const { refreshCart } = useCart();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +44,6 @@ export default function OrderFinishPage() {
         const fetchedOrder = await getOrderExcludeOrderDetail(orderId);
         if (fetchedOrder && fetchedOrder.status !== "주문취소") {
           setOrder(fetchedOrder);
-          refreshCart();
         } else {
           throw Error("이미 주문이 취소되거나 존재하지 않는 주문입니다.");
         }
