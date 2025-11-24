@@ -14,7 +14,6 @@ import { useUser } from "@/context/UserContext";
 export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useUser();
   const productsIds = new Set(
     searchParams
       .get("products")
@@ -38,8 +37,11 @@ export default function PaymentPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const clientKey = process.env.NEXT_PUBLIC_TOSS_TEST_KEY as string;
+  const safeEmail = user?.email?.replace(/[^\w@\-_=,]/g, "") ?? "";
   const customerKey =
-    (user?.id ? String(user.id) : "Unknown user" + user?.email) + "minie"; // user_id로 추후에 대체
+    !isUserLoading && user?.id
+      ? String(user.id) + "minie"
+      : "Unknown_user" + safeEmail + "minie";
 
   const orderId = nanoid(); //주문번호
   const orderName =
@@ -64,9 +66,11 @@ export default function PaymentPage() {
     }
   }, [isUserLoading, isCartLoading, checkedCartItems.length, router]);
 
-  // 위젯 초기화와 가격 업데이트 로직을 분리하여 UI 렌더링 오류를 방지합니다.
   useEffect(() => {
-    // 결제 위젯을 한 번만 초기화합니다.
+    if (isLoading) {
+      return;
+    }
+
     async function initializePaymentWidget() {
       try {
         const paymentWidget = await loadPaymentWidget(clientKey, customerKey);
@@ -74,7 +78,7 @@ export default function PaymentPage() {
 
         const paymentMethodsWidget = await paymentWidget.renderPaymentMethods(
           "#payment-methods-root",
-          { value: totalPrice }, // 초기 금액으로 렌더링
+          { value: totalPrice },
           { variantKey: "DEFAULT" }
         );
         paymentMethodsWidgetRef.current = paymentMethodsWidget;
@@ -98,9 +102,7 @@ export default function PaymentPage() {
         "클라이언트 키(NEXT_PUBLIC_TOSS_TEST_KEY)가 설정되지 않았습니다."
       );
     }
-    // totalPrice는 아래의 useEffect에서 별도로 처리하므로 의존성 배열에서 제외합니다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientKey, customerKey]);
+  }, [isLoading, clientKey, customerKey]);
 
   useEffect(() => {
     const paymentMethodsWidget = paymentMethodsWidgetRef.current;
