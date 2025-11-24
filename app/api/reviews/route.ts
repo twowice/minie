@@ -55,13 +55,14 @@ export async function GET(req: Request) {
   /* 평균 점수 및 그래프 */
   const totalRating = allReviews.reduce((acc, r) => acc + r.rating, 0);
   const rating = +(totalRating / allReviews.length).toFixed(1);
-  const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   allReviews.forEach(r => {
     const score = Math.round(r.rating);
     if (score >= 1 && score <= 5) distribution[score] += 1;
   });
   Object.keys(distribution).forEach(k => {
-    distribution[k] = Math.round((distribution[k] / allReviews.length) * 100);
+    const key = Number(k);
+    distribution[key] = Math.round((distribution[key] / allReviews.length) * 100);
   });
 
   return Response.json({
@@ -84,6 +85,7 @@ export async function POST(req: NextRequest) {
     const product_id = formData.get("product_id") as string;
     const image = formData.get("image") as File | null;
     const imageUrl = formData.get("imageUrl") as string;
+    const orderDetailId = formData.get("order_detail_id") as string;
     const uid = req.headers.get('X-User-ID');
     if (uid === null || uid === "") {
       return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
@@ -96,6 +98,7 @@ export async function POST(req: NextRequest) {
     console.log("user_id:", user_id);
     console.log("product_id:", product_id);
     console.log("imageUrl:", imageUrl);
+    console.log("orderDetailId:", orderDetailId);
     console.log("image:", image ? { name: image.name, size: image.size } : null);
 
     /* 예외 처리 */
@@ -183,7 +186,8 @@ export async function POST(req: NextRequest) {
             content,
             image_url: image_url || "",
             user_id: uid,
-            product_id: Number(product_id)
+            product_id: Number(product_id),
+            order_detail_id: Number(orderDetailId)
           }
         ])
         .select();

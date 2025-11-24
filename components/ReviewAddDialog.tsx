@@ -5,6 +5,7 @@ import { useState, useRef } from "react";
 import { fetchWithAuth } from "@/lib/minie/authAPI";
 
 interface reviewAddDialogProps {
+    id: number;
     productId: number;
     productName: string;
     productImage: string;
@@ -12,7 +13,8 @@ interface reviewAddDialogProps {
     onFail?: () => void;
 }
 
-export default function reviewDialogDialog({ productName, productImage, productId, onSuccess, onFail }: reviewAddDialogProps) {
+export default function reviewDialogDialog({ id, productName, productImage, productId, onSuccess, onFail }: reviewAddDialogProps) {
+
     /* 별점 & 설명 & 리뷰사진 & 닫기 */
     const [rating, setRating] = useState("");
     const [contentContent, setcontentContent] = useState("");
@@ -37,6 +39,7 @@ export default function reviewDialogDialog({ productName, productImage, productI
         formData.append("rating", rating.toString());
         formData.append("content", contentContent);
         formData.append("product_id", String(productId));
+        formData.append("order_detail_id", id.toString());
 
         /* 이미지 FILE */
         if (photo) formData.append("image", photo);
@@ -59,6 +62,15 @@ export default function reviewDialogDialog({ productName, productImage, productI
 
             if (result.message === "리뷰 추가 성공") {
                 closeBtnRef.current?.click();
+
+                await fetchWithAuth("/api/order/updateReview", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ id })
+                })
+
                 onSuccess?.();
             }
         } catch (e) { console.error("에러:", e); onFail?.(); }
