@@ -8,7 +8,7 @@ import { getUserIdByFirebaseUid } from './lib/minie/authAPI';
  * - 경로: [허용할 HTTP 메소드 배열]
  */
 const PUBLIC_API_CONFIG: Record<string, string[]> = {
-  "/api/product": ["GET", "POST", "PUT", "DELETE"],
+  "/api/products": ["GET", "POST", "PUT", "DELETE"],
   "/api/reviews": ["GET"],
   "/api/payment/tosspayment": ["POST", "GET", "PUT", "DELETE"],
   "/api/order/order_detail": ["GET", "POST"],
@@ -80,13 +80,13 @@ export async function middleware(request: NextRequest) {
     return jsonErrorResponse("Invalid Token or Verification Failure at Firebase\nCheck if the user is not registered in Firebase.", 401);
   }
 
-  const {data:dbUid, error:dbError} = await getUserIdByFirebaseUid(decodedUid)
+  const { data: dbUid, error: dbError } = await getUserIdByFirebaseUid(decodedUid)
   if (dbError || !dbUid) {
-        console.error("Supabase user profile not found or DB error for firebase_uid:", decodedUid, dbError);
-        // Supabase에 해당 유저가 없으면 인증 실패로 간주하거나, 사용자 등록을 유도하는 응답
-        return jsonErrorResponse("User profile not found in Supabase or DB error", 401);
-      }
-  
+    console.error("Supabase user profile not found or DB error for firebase_uid:", decodedUid, dbError);
+    // Supabase에 해당 유저가 없으면 인증 실패로 간주하거나, 사용자 등록을 유도하는 응답
+    return jsonErrorResponse("User profile not found in Supabase or DB error", 401);
+  }
+
   // 5. 요청 헤더에 X-User-UID 추가 -> api 폴더 안의 서버 부분 api에서 해당 값을 통해 user를 특정하시면 됩니다
   //request에 X-User-ID로 존재할 겁니다. 단, 추출 시 string임을 잊지 말아주세요.
   const requestHeaders = new Headers(request.headers);
