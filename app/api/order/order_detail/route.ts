@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
         const { data: orderDetails, error } = await supabase
             .from('order_details')
             .select(`
+                id,
                 product_id,
                 product_num,
                 price,

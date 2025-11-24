@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
             ])
             .select();
 
-        if (error) return Response.json({ message: "리뷰 추가 실패", error: error.message }, { status: 500 });
+        if (error) return Response.json({ message: "문의 추가 실패", error: error.message }, { status: 500 });
 
         result = data;
 

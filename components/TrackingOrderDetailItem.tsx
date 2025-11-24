@@ -59,11 +59,12 @@ export default function TrackingOrderDetailItem({
         {status === "주문완료" && !localHasReview && (
           /* Add by CKH */
           <ReviewAddDialog
+            id={order.id}
             productId={order.productId}
             productName={order.productName}
             productImage={order.productImage}
             onSuccess={() => {
-              showSaveSuccessToast
+              showSaveSuccessToast();
               setLocalHasReview(true);
             }}
             onFail={showSaveFailToast}

@@ -7,7 +7,14 @@ import { toaster } from "@/components/ui/toaster"
 import ReviewDialog from "@/components/ReviewDialog";
 import { useUser } from "@/context/UserContext";
 
-export default function ReviewChart({ productId, onSummaryChange }: { productId: any; onSummaryChange?: (summary: any) => void }) {
+export default function ReviewChart({
+  productId,
+  onSummaryChange,
+}: {
+  productId: any;
+  onSummaryChange?: (summary: any) => void
+}) {
+
   /* 관리자 여부 */
   const { user, isAdmin } = useUser();
 

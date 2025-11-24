@@ -4,11 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
 
     try {
-        const { orderId } = await req.json();
+        const { id } = await req.json();
         const { data, error } = await supabase
             .from("order_details")
             .update({ has_review: true })
-            .eq("order_number", orderId)
+            .eq("id", id)
 
         if (error) return NextResponse.json({ message: "업데이트 실패", error: error.message }, { status: 500 });
         return NextResponse.json({
