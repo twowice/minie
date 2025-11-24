@@ -1,6 +1,15 @@
-import { Box, Button, Flex, VStack, Image, Text, HStack, AspectRatio } from '@chakra-ui/react';
-import TypeBadge from './Badge';
-import { MdFavoriteBorder, MdOutlineShoppingCart } from 'react-icons/md';
+import {
+  Box,
+  Button,
+  Flex,
+  VStack,
+  Image,
+  Text,
+  HStack,
+  AspectRatio,
+} from "@chakra-ui/react";
+import TypeBadge from "./Badge";
+import { MdFavoriteBorder, MdOutlineShoppingCart } from "react-icons/md";
 // import { useEffect, useState } from 'react';
 import { getDiscountRate } from "@/utils/calculator/discountRateCalculator";
 import Link from "next/link";
@@ -11,92 +20,68 @@ export default function ShoppingItem({ item }: { item: any }) {
   // const [isCartActivity, setIsCartActivity] = useState(false);
   // const [isLike, setIsLike] = useState(false);
 
-   //context
-   const { isItemCart, toggleCart, toggleLike, isLiked } = useCart();
+  //context
+  const { isItemCart, toggleCart, toggleLike, isLiked } = useCart();
 
   //좋아요/장바구니
   const isItemLike = isLiked(item.id);
   const isItemInCart = isItemCart(item.id);
 
-   //toggle
-   const handleCartClick = e => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleCart(item);
-   };
-   const handleLikeClick = e => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleLike(item);
-   };
+  //toggle
+  const handleCartClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCart(item);
+  };
+  const handleLikeClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleLike(item);
+  };
 
-   return (
-      <Link href={`/shoppingdetail/${item.id}`} passHref>
-         <VStack
-            w={'100%'}
-            minW={0}
-            border={'1px solid black'}
-            justifyContent={'space-between'}
-            overflow={'hidden'}
-            h={'100%'}
-         >
-            <AspectRatio ratio={1} w={'100%'}>
-               <Box position={'relative'}>
-                  <Image src={item.image} alt="product-item" objectFit="cover" w={'100%'} />
-                  <HStack
-                     justifyContent={'space-between'}
-                     w={'100%'}
-                     alignItems={'center'}
-                     position={'absolute'}
-                     p={'4px 8px'}
-                     top={0}
-                  >
-                     <Box minW={'100px'}>
-                        <TypeBadge typeName={item.skin_type} />
-                     </Box>
-                     <Flex alignItems={'center'} gap={'8px'}>
-                        <Button
-                           size={'md'}
-                           width={'20px'}
-                           bgColor={'transparent'}
-                           cursor={'pointer'}
-                           aria-label="장바구니"
-                           onClick={handleCartClick}
-                           _hover={{ opacity: 0.5 }}
-                        >
-                           {isItemInCart ? (
-                              <MdOutlineShoppingCart color="#fa6d6d" />
-                           ) : (
-                              <MdOutlineShoppingCart color="#898989" />
-                           )}
-                        </Button>
-                        <Button
-                           size={'md'}
-                           bgColor={'transparent'}
-                           width={'20px'}
-                           cursor={'pointer'}
-                           aria-label="좋아요"
-                           onClick={handleLikeClick}
-                           _hover={{ opacity: 0.5 }}
-                        >
-                           {isItemLike ? <MdFavoriteBorder color="#fa6d6d" /> : <MdFavoriteBorder color="#898989" />}
-                        </Button>
-                     </Flex>
-                  </HStack>
-               </Box>
-            </AspectRatio>
-            <Box color={'black'} h={'100%'} p={'8px'} w={'100%'}>
-               <Flex
-                  display={'flex'}
-                  flexDirection={'row'}
-                  alignItems={'center'}
-                  justifyContent={'space-between'}
-                  gap={'4px'}
-               >
-                  {item.discount_amount > 0 && (
-                     <Text fontSize={'24px'} fontWeight={'700'}>
-                        {(item.price * (100 - getDiscountRate(item.price, item.discount_amount))) / 100}원
-                     </Text>
+  return (
+    <Link href={`/shoppingdetail/${item.id}`} passHref>
+      <VStack
+        w={"100%"}
+        minW={0}
+        border={"1px solid black"}
+        justifyContent={"space-between"}
+        overflow={"hidden"}
+        h={"100%"}
+      >
+        <AspectRatio ratio={1} w={"100%"}>
+          <Box position={"relative"}>
+            <Image
+              src={"/images/image 18-1.png"}
+              alt="test"
+              objectFit="cover"
+              w={"100%"}
+            />
+            <HStack
+              justifyContent={"space-between"}
+              w={"100%"}
+              alignItems={"center"}
+              position={"absolute"}
+              p={"4px 8px"}
+              top={0}
+            >
+              <Box minW={"100px"}>
+                <TypeBadge typeName={item.skin_type} />
+              </Box>
+              <Flex alignItems={"center"} gap={"8px"}>
+                <Button
+                  size={"md"}
+                  width={"20px"}
+                  bgColor={"transparent"}
+                  cursor={"pointer"}
+                  aria-label="장바구니"
+                  onClick={handleCartClick}
+                  _hover={{ opacity: 0.5 }}
+                >
+                  {isItemInCart ? (
+                    <MdOutlineShoppingCart color="#fa6d6d" />
+                  ) : (
+                    <MdOutlineShoppingCart color="#898989" />
                   )}
                 </Button>
                 <Button
