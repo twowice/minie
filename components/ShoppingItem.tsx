@@ -1,6 +1,15 @@
-import { Box, Button, Flex, VStack, Image, Text, HStack, AspectRatio } from '@chakra-ui/react';
-import TypeBadge from './Badge';
-import { MdFavoriteBorder, MdOutlineShoppingCart } from 'react-icons/md';
+import {
+  Box,
+  Button,
+  Flex,
+  VStack,
+  Image,
+  Text,
+  HStack,
+  AspectRatio,
+} from "@chakra-ui/react";
+import TypeBadge from "./Badge";
+import { MdFavoriteBorder, MdOutlineShoppingCart } from "react-icons/md";
 // import { useEffect, useState } from 'react';
 import { getDiscountRate } from '@/utils/calculator/discountRateCalculator';
 import Link from 'next/link';
@@ -11,24 +20,24 @@ export default function ShoppingItem({ item }: { item: any }) {
    // const [isCartActivity, setIsCartActivity] = useState(false);
    // const [isLike, setIsLike] = useState(false);
 
-   //context
-   const { isItemCart, toggleCart, toggleLike, isLiked } = useCart();
+  //context
+  const { isItemCart, toggleCart, toggleLike, isLiked } = useCart();
 
    //좋아요/장바구니
    const isItemLike = isLiked(item.id);
    const isItemInCart = isItemCart(item.id);
 
-   //toggle
-   const handleCartClick = e => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleCart(item);
-   };
-   const handleLikeClick = e => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleLike(item);
-   };
+  //toggle
+  const handleCartClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCart(item);
+  };
+  const handleLikeClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleLike(item);
+  };
 
    return (
       <Link href={`/shoppingdetail/${item.id}`} passHref>
