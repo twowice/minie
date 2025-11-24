@@ -21,7 +21,13 @@ export default function PaymentPage() {
       ?.split("-")
       .map((id) => Number(id))
   );
-  const { cartItems, totalPrice, totalDiscountAmount } = useCart();
+  const { user, loading: isUserLoading } = useUser();
+  const {
+    cartItems,
+    totalPrice,
+    totalDiscountAmount,
+    isLoading: isCartLoading,
+  } = useCart();
   const checkedCartItems = cartItems.filter((item) => productsIds.has(item.id));
   const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
   const paymentMethodsWidgetRef = useRef<any>(null);
@@ -46,13 +52,17 @@ export default function PaymentPage() {
       : "";
 
   useEffect(() => {
-    if (!checkedCartItems || checkedCartItems.length === 0) {
+    if (isUserLoading || isCartLoading) {
+      return;
+    }
+
+    if (checkedCartItems.length === 0) {
       alert("선택된 상품이 없어 메인 페이지로 돌아갑니다.");
       router.replace("/");
     } else {
       setIsLoading(false);
     }
-  }, [checkedCartItems.length, router]);
+  }, [isUserLoading, isCartLoading, checkedCartItems.length, router]);
 
   // 위젯 초기화와 가격 업데이트 로직을 분리하여 UI 렌더링 오류를 방지합니다.
   useEffect(() => {
@@ -62,14 +72,14 @@ export default function PaymentPage() {
         const paymentWidget = await loadPaymentWidget(clientKey, customerKey);
         paymentWidgetRef.current = paymentWidget;
 
-        const paymentMethodsWidget = paymentWidget.renderPaymentMethods(
+        const paymentMethodsWidget = await paymentWidget.renderPaymentMethods(
           "#payment-methods-root",
           { value: totalPrice }, // 초기 금액으로 렌더링
           { variantKey: "DEFAULT" }
         );
         paymentMethodsWidgetRef.current = paymentMethodsWidget;
 
-        const agreementWidget = paymentWidget.renderAgreement(
+        const agreementWidget = await paymentWidget.renderAgreement(
           "#agreement-root",
           { variantKey: "DEFAULT" }
         );
@@ -165,49 +175,55 @@ export default function PaymentPage() {
       color={"black"}
       px={{ base: 4, sm: 6, lg: 8 }}
     >
-      <Box
-        id="payment-methods-root"
-        style={{
-          border: "1px solid #eee",
-          padding: "15px",
-          borderRadius: "5px",
-          marginBottom: "20px",
-        }}
-      ></Box>
-      <Box
-        id="agreement-root"
-        style={{
-          border: "1px solid #eee",
-          padding: "15px",
-          borderRadius: "5px",
-          marginBottom: "20px",
-        }}
-      ></Box>
+      {isLoading ? (
+        <Box>결제 정보를 불러오는 중입니다...</Box>
+      ) : (
+        <>
+          <Box
+            id="payment-methods-root"
+            style={{
+              border: "1px solid #eee",
+              padding: "15px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+            }}
+          ></Box>
+          <Box
+            id="agreement-root"
+            style={{
+              border: "1px solid #eee",
+              padding: "15px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+            }}
+          ></Box>
 
-      <Button
-        onClick={handlePayment}
-        disabled={!isPaymentWidgetLoaded || isProcessingOrder}
-        style={{
-          width: "100%",
-          padding: "15px",
-          backgroundColor: "#0070f3",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          fontSize: "18px",
-          cursor:
-            isPaymentWidgetLoaded && !isProcessingOrder
-              ? "pointer"
-              : "not-allowed",
-          opacity: isPaymentWidgetLoaded && !isProcessingOrder ? 1 : 0.6,
-        }}
-      >
-        {isProcessingOrder
-          ? "주문 생성 중..."
-          : isPaymentWidgetLoaded
-          ? `${numberFormatter.format(totalPrice)}원 결제하기`
-          : "결제 시스템 로드 중..."}
-      </Button>
+          <Button
+            onClick={handlePayment}
+            disabled={!isPaymentWidgetLoaded || isProcessingOrder}
+            style={{
+              width: "100%",
+              padding: "15px",
+              backgroundColor: "#0070f3",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              fontSize: "18px",
+              cursor:
+                isPaymentWidgetLoaded && !isProcessingOrder
+                  ? "pointer"
+                  : "not-allowed",
+              opacity: isPaymentWidgetLoaded && !isProcessingOrder ? 1 : 0.6,
+            }}
+          >
+            {isProcessingOrder
+              ? "주문 생성 중..."
+              : isPaymentWidgetLoaded
+              ? `${numberFormatter.format(totalPrice)}원 결제하기`
+              : "결제 시스템 로드 중..."}
+          </Button>
+        </>
+      )}
     </Container>
   );
 }
