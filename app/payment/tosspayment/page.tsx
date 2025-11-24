@@ -14,14 +14,19 @@ import { useUser } from "@/context/UserContext";
 export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useUser();
   const productsIds = new Set(
     searchParams
       .get("products")
       ?.split("-")
       .map((id) => Number(id))
   );
-  const { cartItems, totalPrice, totalDiscountAmount } = useCart();
+  const { user, loading: isUserLoading } = useUser();
+  const {
+    cartItems,
+    totalPrice,
+    totalDiscountAmount,
+    isLoading: isCartLoading,
+  } = useCart();
   const checkedCartItems = cartItems.filter((item) => productsIds.has(item.id));
   const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
   const paymentMethodsWidgetRef = useRef<any>(null);
@@ -32,8 +37,11 @@ export default function PaymentPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const clientKey = process.env.NEXT_PUBLIC_TOSS_TEST_KEY as string;
+  const safeEmail = user?.email?.replace(/[^\w@\-_=,]/g, "") ?? "";
   const customerKey =
-    (user?.id ? String(user.id) : "Unknown user" + user?.email) + "minie"; // user_id로 추후에 대체
+    !isUserLoading && user?.id
+      ? String(user.id) + "minie"
+      : "Unknown_user" + safeEmail + "minie";
 
   const orderId = nanoid(); //주문번호
   const orderName =
@@ -46,30 +54,36 @@ export default function PaymentPage() {
       : "";
 
   useEffect(() => {
-    if (!checkedCartItems || checkedCartItems.length === 0) {
+    if (isUserLoading || isCartLoading) {
+      return;
+    }
+
+    if (checkedCartItems.length === 0) {
       alert("선택된 상품이 없어 메인 페이지로 돌아갑니다.");
       router.replace("/");
     } else {
       setIsLoading(false);
     }
-  }, [checkedCartItems.length, router]);
+  }, [isUserLoading, isCartLoading, checkedCartItems.length, router]);
 
-  // 위젯 초기화와 가격 업데이트 로직을 분리하여 UI 렌더링 오류를 방지합니다.
   useEffect(() => {
-    // 결제 위젯을 한 번만 초기화합니다.
+    if (isLoading) {
+      return;
+    }
+
     async function initializePaymentWidget() {
       try {
         const paymentWidget = await loadPaymentWidget(clientKey, customerKey);
         paymentWidgetRef.current = paymentWidget;
 
-        const paymentMethodsWidget = paymentWidget.renderPaymentMethods(
+        const paymentMethodsWidget = await paymentWidget.renderPaymentMethods(
           "#payment-methods-root",
-          { value: totalPrice }, // 초기 금액으로 렌더링
+          { value: totalPrice },
           { variantKey: "DEFAULT" }
         );
         paymentMethodsWidgetRef.current = paymentMethodsWidget;
 
-        const agreementWidget = paymentWidget.renderAgreement(
+        const agreementWidget = await paymentWidget.renderAgreement(
           "#agreement-root",
           { variantKey: "DEFAULT" }
         );
@@ -88,9 +102,7 @@ export default function PaymentPage() {
         "클라이언트 키(NEXT_PUBLIC_TOSS_TEST_KEY)가 설정되지 않았습니다."
       );
     }
-    // totalPrice는 아래의 useEffect에서 별도로 처리하므로 의존성 배열에서 제외합니다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientKey, customerKey]);
+  }, [isLoading, clientKey, customerKey]);
 
   useEffect(() => {
     const paymentMethodsWidget = paymentMethodsWidgetRef.current;
@@ -165,49 +177,55 @@ export default function PaymentPage() {
       color={"black"}
       px={{ base: 4, sm: 6, lg: 8 }}
     >
-      <Box
-        id="payment-methods-root"
-        style={{
-          border: "1px solid #eee",
-          padding: "15px",
-          borderRadius: "5px",
-          marginBottom: "20px",
-        }}
-      ></Box>
-      <Box
-        id="agreement-root"
-        style={{
-          border: "1px solid #eee",
-          padding: "15px",
-          borderRadius: "5px",
-          marginBottom: "20px",
-        }}
-      ></Box>
+      {isLoading ? (
+        <Box>결제 정보를 불러오는 중입니다...</Box>
+      ) : (
+        <>
+          <Box
+            id="payment-methods-root"
+            style={{
+              border: "1px solid #eee",
+              padding: "15px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+            }}
+          ></Box>
+          <Box
+            id="agreement-root"
+            style={{
+              border: "1px solid #eee",
+              padding: "15px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+            }}
+          ></Box>
 
-      <Button
-        onClick={handlePayment}
-        disabled={!isPaymentWidgetLoaded || isProcessingOrder}
-        style={{
-          width: "100%",
-          padding: "15px",
-          backgroundColor: "#0070f3",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          fontSize: "18px",
-          cursor:
-            isPaymentWidgetLoaded && !isProcessingOrder
-              ? "pointer"
-              : "not-allowed",
-          opacity: isPaymentWidgetLoaded && !isProcessingOrder ? 1 : 0.6,
-        }}
-      >
-        {isProcessingOrder
-          ? "주문 생성 중..."
-          : isPaymentWidgetLoaded
-          ? `${numberFormatter.format(totalPrice)}원 결제하기`
-          : "결제 시스템 로드 중..."}
-      </Button>
+          <Button
+            onClick={handlePayment}
+            disabled={!isPaymentWidgetLoaded || isProcessingOrder}
+            style={{
+              width: "100%",
+              padding: "15px",
+              backgroundColor: "#0070f3",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              fontSize: "18px",
+              cursor:
+                isPaymentWidgetLoaded && !isProcessingOrder
+                  ? "pointer"
+                  : "not-allowed",
+              opacity: isPaymentWidgetLoaded && !isProcessingOrder ? 1 : 0.6,
+            }}
+          >
+            {isProcessingOrder
+              ? "주문 생성 중..."
+              : isPaymentWidgetLoaded
+              ? `${numberFormatter.format(totalPrice)}원 결제하기`
+              : "결제 시스템 로드 중..."}
+          </Button>
+        </>
+      )}
     </Container>
   );
 }
