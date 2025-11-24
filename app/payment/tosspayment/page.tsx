@@ -9,10 +9,12 @@ import { Box, Button, Container } from "@chakra-ui/react";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import { useRouter, useSearchParams } from "next/navigation";
 import { addNewOrder, deleteOrder } from "@/lib/minie/orderAPI";
+import { useUser } from "@/context/UserContext";
 
 export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useUser();
   const productsIds = new Set(
     searchParams
       .get("products")
@@ -30,7 +32,8 @@ export default function PaymentPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const clientKey = process.env.NEXT_PUBLIC_TOSS_TEST_KEY as string;
-  const customerKey = "1" + "minie"; // user_id로 추후에 대체
+  const customerKey =
+    (user?.id ? String(user.id) : "Unknown user" + user?.email) + "minie"; // user_id로 추후에 대체
 
   const orderId = nanoid(); //주문번호
   const orderName =
@@ -51,7 +54,9 @@ export default function PaymentPage() {
     }
   }, [checkedCartItems.length, router]);
 
+  // 위젯 초기화와 가격 업데이트 로직을 분리하여 UI 렌더링 오류를 방지합니다.
   useEffect(() => {
+    // 결제 위젯을 한 번만 초기화합니다.
     async function initializePaymentWidget() {
       try {
         const paymentWidget = await loadPaymentWidget(clientKey, customerKey);
@@ -59,7 +64,7 @@ export default function PaymentPage() {
 
         const paymentMethodsWidget = paymentWidget.renderPaymentMethods(
           "#payment-methods-root",
-          { value: totalPrice },
+          { value: totalPrice }, // 초기 금액으로 렌더링
           { variantKey: "DEFAULT" }
         );
         paymentMethodsWidgetRef.current = paymentMethodsWidget;
@@ -83,7 +88,18 @@ export default function PaymentPage() {
         "클라이언트 키(NEXT_PUBLIC_TOSS_TEST_KEY)가 설정되지 않았습니다."
       );
     }
-  }, [clientKey, customerKey, totalPrice]);
+    // totalPrice는 아래의 useEffect에서 별도로 처리하므로 의존성 배열에서 제외합니다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientKey, customerKey]);
+
+  useEffect(() => {
+    const paymentMethodsWidget = paymentMethodsWidgetRef.current;
+
+    if (paymentMethodsWidget) {
+      // totalPrice가 변경될 때마다 위젯의 금액을 업데이트합니다.
+      paymentMethodsWidget.updateAmount(totalPrice);
+    }
+  }, [totalPrice]);
 
   const handlePayment = useCallback(async () => {
     if (!isPaymentWidgetLoaded || isProcessingOrder) {
