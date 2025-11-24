@@ -10,6 +10,7 @@ export interface Order {
 }
 
 export interface OrderDetail {
+    id: number, // Add by CKH
     productId: number,
     productNum: number,
     price: number,          //가격은 구매 당시 가격을 저장하기 위해 존재합니다. product에 저장된 가격은 판매처의 재량에 따라 바뀔 수 있음

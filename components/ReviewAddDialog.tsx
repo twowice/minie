@@ -3,9 +3,9 @@
 import { Text, Portal, CloseButton, Dialog, Button, Image, Flex, VStack, HStack, Box, Textarea } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { fetchWithAuth } from "@/lib/minie/authAPI";
-import { useParams } from "next/navigation";
 
 interface reviewAddDialogProps {
+    id: number;
     productId: number;
     productName: string;
     productImage: string;
@@ -13,9 +13,7 @@ interface reviewAddDialogProps {
     onFail?: () => void;
 }
 
-export default function reviewDialogDialog({ productName, productImage, productId, onSuccess, onFail }: reviewAddDialogProps) {
-    const params = useParams<{ id: string }>();
-    const orderId = params.id;
+export default function reviewDialogDialog({ id, productName, productImage, productId, onSuccess, onFail }: reviewAddDialogProps) {
 
     /* 별점 & 설명 & 리뷰사진 & 닫기 */
     const [rating, setRating] = useState("");
@@ -41,6 +39,7 @@ export default function reviewDialogDialog({ productName, productImage, productI
         formData.append("rating", rating.toString());
         formData.append("content", contentContent);
         formData.append("product_id", String(productId));
+        formData.append("order_detail_id", id.toString());
 
         /* 이미지 FILE */
         if (photo) formData.append("image", photo);
@@ -69,7 +68,7 @@ export default function reviewDialogDialog({ productName, productImage, productI
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ orderId })
+                    body: JSON.stringify({ id })
                 })
 
                 onSuccess?.();

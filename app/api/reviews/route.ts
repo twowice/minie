@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
     const product_id = formData.get("product_id") as string;
     const image = formData.get("image") as File | null;
     const imageUrl = formData.get("imageUrl") as string;
+    const orderDetailId = formData.get("order_detail_id") as string;
     const uid = req.headers.get('X-User-ID');
     if (uid === null || uid === "") {
       return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
@@ -97,6 +98,7 @@ export async function POST(req: NextRequest) {
     console.log("user_id:", user_id);
     console.log("product_id:", product_id);
     console.log("imageUrl:", imageUrl);
+    console.log("orderDetailId:", orderDetailId);
     console.log("image:", image ? { name: image.name, size: image.size } : null);
 
     /* 예외 처리 */
@@ -184,7 +186,8 @@ export async function POST(req: NextRequest) {
             content,
             image_url: image_url || "",
             user_id: uid,
-            product_id: Number(product_id)
+            product_id: Number(product_id),
+            order_detail_id: Number(orderDetailId)
           }
         ])
         .select();
