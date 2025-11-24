@@ -303,7 +303,13 @@ export default function ShoppingDetail() {
          <Box>
             <Flex gap={'40px'} paddingBottom={'40px'} borderBottom={'1px solid rgba(204,204,204,0.8)'}>
                <Box maxW={'540px'} maxH={'540px'} w={'50%'}>
-                  <Image src={product.image} alt={product.name} w={'100%'} h={'100%'} objectFit={'cover'} />
+                  <Image
+                     src={`/${encodeURI(product.image)}`}
+                     alt={product.name}
+                     w={'100%'}
+                     h={'100%'}
+                     objectFit={'cover'}
+                  />
                </Box>
                <Flex direction={'column'} gap={'16px'} flex={1}>
                   <Flex justifyContent={'space-between'} alignItems={'center'} color={'black'}>
