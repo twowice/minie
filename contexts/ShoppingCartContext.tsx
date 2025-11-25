@@ -209,37 +209,53 @@ export function CartProvider({ children }: CartProviderProps) {
         await updateCartItems([normItem]);
       } else {
         setCartItems((prev) => [{ ...normItem, checked: true }, ...prev]);
-        await addCartItems([{ product_id: targetId, product_num: addQty }]);
+        try {
+          await addCartItems([{ product_id: targetId, product_num: addQty }]);
+        } catch (error) {
+          console.log("장바구니 중복 에러 감지됨. 무시하고 진행합니다.");
+        }
       }
     },
     [cartItems]
   );
 
-  const buyNow = useCallback(async (newItem: any) => {
-    const normItem = normalizeItem(newItem);
-    const targetId = normItem.id;
-    const addQty = normItem.num;
-    setCartItems((prev) => {
-      const exists = prev.find((i) => i.id === targetId);
+  const buyNow = useCallback(
+    async (newItem: any) => {
+      const normItem = normalizeItem(newItem);
+      const targetId = normItem.id;
+      const addQty = normItem.num;
+
+      const exists = cartItems.find((i) => i.id === targetId);
+
       if (exists) {
         const newQty = exists.num + addQty;
-        updateCartItems([normItem]);
-        return prev.map((item) => ({
-          ...item,
-          num: item.id === targetId ? newQty : item.num,
-          checked: item.id === targetId,
-        }));
-      } else {
-        addCartItem({ product_id: targetId, product_num: addQty }).catch(
-          console.error
+
+        updateCartItems([normItem]).catch((err) =>
+          console.error("Update failed:", err)
         );
-        return [
+
+        setCartItems((prev) =>
+          prev.map((item) => ({
+            ...item,
+            num: item.id === targetId ? newQty : item.num,
+            checked: item.id === targetId, // 이 상품만 체크 true
+          }))
+        );
+      } else {
+        setCartItems((prev) => [
           { ...normItem, checked: true },
-          ...prev.map((item) => ({ ...item, checked: false })),
-        ];
+          ...prev.map((item) => ({ ...item, checked: false })), // 나머지는 체크 해제
+        ]);
+
+        try {
+          await addCartItem({ product_id: targetId, product_num: addQty });
+        } catch (error) {
+          console.log("바로구매 중복 에러(이미 서버에 존재함). 무시하고 진행.");
+        }
       }
-    });
-  }, []);
+    },
+    [cartItems]
+  );
 
   const resetDirectOrder = useCallback(() => {
     setDirectOrderItem(null);
@@ -260,10 +276,7 @@ export function CartProvider({ children }: CartProviderProps) {
           item.id === itemId
             ? {
                 ...item,
-                num:
-                  type === "plus"
-                    ? item.num + 1
-                    : Math.max(1, item.num - 1),
+                num: type === "plus" ? item.num + 1 : Math.max(1, item.num - 1),
               }
             : item
         )
@@ -338,7 +351,8 @@ export function CartProvider({ children }: CartProviderProps) {
         type === "cart"
           ? [cartItems, setCartItems]
           : [likedItems, setLikedItems];
-      const isAllChecked = items.length > 0 && items.every((item) => item.checked);
+      const isAllChecked =
+        items.length > 0 && items.every((item) => item.checked);
       setState((prev) =>
         prev.map((item) => ({ ...item, checked: !isAllChecked }))
       );
