@@ -1,4 +1,16 @@
-import { Box, Button, Flex, VStack, Image, Text, HStack, AspectRatio, Skeleton, SkeletonText } from '@chakra-ui/react';
+import {
+   Box,
+   Button,
+   Flex,
+   VStack,
+   Image,
+   Text,
+   HStack,
+   AspectRatio,
+   Skeleton,
+   SkeletonText,
+   IconButton,
+} from '@chakra-ui/react';
 import TypeBadge from './Badge';
 import { MdFavoriteBorder, MdOutlineShoppingCart } from 'react-icons/md';
 // import { useEffect, useState } from 'react';
@@ -6,22 +18,34 @@ import { getDiscountRate } from '@/utils/calculator/discountRateCalculator';
 import Link from 'next/link';
 import { useCart } from '@/contexts/ShoppingCartContext';
 import { useEffect, useState } from 'react';
+import HeartFilledIcon from './ui/HeartIcon';
 
 const ShoppingItemSkeleton = () => {
    return (
-      <VStack minW={0} overflow={'hidden'} h={'100%'} bg={'white'} borderRadius={'lg'} boxShadow={'sm'} gap={0}>
+      <VStack
+         minW={0}
+         overflow={'hidden'}
+         h={'100%'}
+         bg={'white'}
+         borderRadius={'lg'}
+         boxShadow={'sm'}
+         gap={0}
+         justifyContent={'space-between'}
+      >
          <AspectRatio ratio={1} w={'100%'}>
             <Skeleton w={'100%'} h={'100%'} />
          </AspectRatio>
-         <Box p={4} w={'100%'}>
-            <Flex justifyContent={'space-between'} alignItems={'center'} mb={2}>
-               <Skeleton h={'28px'} w={'50%'} />
-               <Skeleton h={'20px'} w={'30px'} borderRadius={'full'} />
+         <Box p={4} w={'100%'} h={'100%'}>
+            <Flex justifyContent={'space-between'} alignItems={'center'} mb={1}>
+               <Skeleton h={'30px'} w={'50%'} borderRadius={'4px'} />
+               <Skeleton h={'20px'} w={'20%'} borderRadius={'4px'} />
             </Flex>
             <Flex justifyContent={'space-between'} alignItems={'center'} mb={'8px'}>
-               <Skeleton h={'18px'} w={'40%'} mb={2} />
+               <Skeleton h={'26px'} w={'40%'} borderRadius={'4px'} />
+               <Skeleton h={'24px'} w={'40px'} borderRadius={'full'} />
             </Flex>
-            <SkeletonText mt={4} noOfLines={2} gap={3} h={'40px'} />
+            <Skeleton h={'22px'} w={'80%'} borderRadius={'4px'} />
+            <Skeleton h={'18px'} w={'100%'} borderRadius={'4px'} />
          </Box>
       </VStack>
    );
@@ -116,20 +140,24 @@ export default function ShoppingItem({ item }: { item: any }) {
                               <MdOutlineShoppingCart color="#898989" />
                            )}
                         </Button>
-                        <Button
+                        <IconButton
+                           onClick={handleLikeClick}
                            size={'sm'}
                            width={'32px'}
                            h={'32px'}
                            p={0}
                            bgColor={'rgba(255, 255, 255, 0.8)'}
-                           cursor={'pointer'}
-                           aria-label="좋아요"
-                           onClick={handleLikeClick}
-                           _hover={{ bgColor: 'white', transform: 'scale(1.1)' }}
+                           backdropFilter={'blur(4px)'}
+                           borderRadius={'4px'}
                            boxShadow={'sm'}
+                           _hover={{ bgColor: 'white', transform: 'scale(1.1)' }}
+                           cursor={'pointer'}
                         >
-                           {isItemLike ? <MdFavoriteBorder color="#fa6d6d" /> : <MdFavoriteBorder color="#898989" />}
-                        </Button>
+                           <HeartFilledIcon
+                              filledColor={isItemLike ? '#FA6D6D' : 'none'}
+                              strokeColor={isItemLike ? '#FA6D6D' : '#CCCCCC'}
+                           />
+                        </IconButton>
                      </Flex>
                   </HStack>
                </Box>

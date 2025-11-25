@@ -2,6 +2,7 @@
 import TypeBadge from '@/components/Badge';
 import ReviewChart from '@/components/ReviewChart';
 import { useUser } from '@/context/UserContext';
+import HeartFilledIcon from '@/components/ui/HeartIcon';
 
 import { useCart } from '@/contexts/ShoppingCartContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -79,8 +80,8 @@ export default function ShoppingDetail() {
    const { isItemCart, toggleCart, toggleLike, isLiked, addToCart, buyNow } = useCart();
 
    //좋아요/장바구니
-   // const isItemLike = isLiked(item.id);
-   // const isItemInCart = isItemCart(item.id);
+   const isItemLike = product ? isLiked(product.id) : false;
+   // const isItemInCart = product ? isItemCart(product.id) : false;
 
    // 안전한 숫자 변환 함수 (콤마 제거 및 NaN 방지)
    const safeNumber = (val: any) => {
@@ -203,7 +204,6 @@ export default function ShoppingDetail() {
       const item = createCartItem();
       if (item) {
          toggleLike(item);
-         if (!like) alert('좋아요에 담겼습니다.');
       }
       setLike(prev => !prev);
    };
@@ -302,9 +302,25 @@ export default function ShoppingDetail() {
                      <Text fontSize={'24px'} fontWeight={'700'}>
                         {product.brand}
                      </Text>
-                     <Button aria-label="like" bgColor={'white'} p={2} borderRadius="50%" onClick={handleLikeClick}>
-                        <FaRegHeart color={like ? '#FA6D6D' : '#cccccc'} size={18} />
-                     </Button>
+                     <IconButton
+                        onClick={handleLikeClick}
+                        size={'sm'}
+                        width={'32px'}
+                        h={'32px'}
+                        p={0}
+                        aria-label="like"
+                        bgColor={'rgba(255, 255, 255, 0.8)'}
+                        backdropFilter={'blur(4px)'}
+                        borderRadius={'4px'}
+                        boxShadow={'sm'}
+                        _hover={{ bgColor: 'white', transform: 'scale(1.1)' }}
+                        cursor={'pointer'}
+                     >
+                        <HeartFilledIcon
+                           filledColor={isItemLike ? '#FA6D6D' : 'none'}
+                           strokeColor={isItemLike ? '#FA6D6D' : '#CCCCCC'}
+                        />
+                     </IconButton>
                   </Flex>
                   <Text fontSize={'24px'} color={'rgba(0,0,0,0.6)'} fontWeight={'500'}>
                      {product.name}
@@ -535,7 +551,7 @@ export default function ShoppingDetail() {
                <Tabs.Indicator bgColor={'#FA6D6D'} h={'1px'} bottom={'0'} zIndex={2} boxShadow={'none'} />
             </Tabs.List>
             <Tabs.Content value="productDetail">
-               <Image src={`/${encodeURI(product.image)}`} w={'100%'} alt="" p={'40px 0 20px 0 '} />
+               <Image src={product.detail_image} w={'100%'} alt="" p={'40px 0 20px 0 '} />
             </Tabs.Content>
             <Tabs.Content value="payInfo">
                <Box pb={'20px'}>
