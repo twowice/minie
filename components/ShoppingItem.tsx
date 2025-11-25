@@ -38,14 +38,13 @@ const ShoppingItemSkeleton = () => {
          <Box p={4} w={'100%'} h={'100%'}>
             <Flex justifyContent={'space-between'} alignItems={'center'} mb={1}>
                <Skeleton h={'30px'} w={'50%'} borderRadius={'4px'} />
-               <Skeleton h={'20px'} w={'20%'} borderRadius={'4px'} />
+               <Skeleton h={'30px'} w={'40%'} borderRadius={'4px'} />
             </Flex>
             <Flex justifyContent={'space-between'} alignItems={'center'} mb={'8px'}>
-               <Skeleton h={'26px'} w={'40%'} borderRadius={'4px'} />
-               <Skeleton h={'24px'} w={'40px'} borderRadius={'full'} />
+               <Skeleton h={'24px'} w={'40%'} borderRadius={'4px'} />
+               <Skeleton h={'24px'} w={'30%'} borderRadius={'full'} />
             </Flex>
-            <Skeleton h={'22px'} w={'80%'} borderRadius={'4px'} />
-            <Skeleton h={'18px'} w={'100%'} borderRadius={'4px'} />
+            <Skeleton h={'40px'} w={'100%'} borderRadius={'4px'} mb={2} />
          </Box>
       </VStack>
    );
