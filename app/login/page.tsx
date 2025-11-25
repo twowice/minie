@@ -65,6 +65,7 @@ export default function LoginPage() {
 
   // EMAIL/PW 로그인 비동기 함수
   const handleEmailLogin = async () => {
+    setError("");
     try {
       // 1. Firebase 로그인
       const userCredential = await signInWithEmailAndPassword(
@@ -105,6 +106,7 @@ export default function LoginPage() {
 
   // 2025-11-19 Google login 비동기 함수
   const handleGoogleLogin = async () => {
+    setError("");
     try {
       const firebaseUser = await signInWithGoogle(); // 수정
 
@@ -119,8 +121,11 @@ export default function LoginPage() {
       alert(`반갑습니다 ${firebaseUser.displayName || "구글 사용자"}님`);
       router.push("/");
     } catch (err: any) {
+      if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
+      return; // 여기서 팝업 닫은 오류 무시
+    }
       console.error("Google 로그인 오류", err);
-      setError("Google 로그인에 실패했습니다.");
+      setError(getErrorMessage(err.code));
     }
   };
 
