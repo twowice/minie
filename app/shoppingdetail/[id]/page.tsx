@@ -1,6 +1,7 @@
 'use client';
 import TypeBadge from '@/components/Badge';
 import ReviewChart from '@/components/ReviewChart';
+import { useUser } from '@/context/UserContext';
 
 import { useCart } from '@/contexts/ShoppingCartContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -36,6 +37,8 @@ export default function ShoppingDetail() {
    const { open, onOpen, onClose } = useDisclosure();
    const { open: replyOpen, onOpen: onReplyOpen, onClose: onReplyClose } = useDisclosure();
 
+   const [isSubmitting, setIsSubmitting] = useState(false);
+
    const [productAsk, setProductAsk] = useState(true);
    const [orderAsk, setOrderAsk] = useState(false);
    const [product, setProduct] = useState(null);
@@ -52,14 +55,15 @@ export default function ShoppingDetail() {
    const [like, setLike] = useState(false);
 
    //  관리자 계정
+   const { user, isAdmin, loading: userLoading } = useUser();
+   const loginId = user?.email ? user.email.split('@')[0] : 'unknown';
    //  const [isAdmin, setIsAdmin] = useState(true);
-   //  const { user, isAdmin } = useUser();
-   const [user, setUser] = useState({
-      isLoggedIn: false,
-      loginId: '',
-      isAdmin: false,
-   });
-   const isAdmin = user.isAdmin;
+   //  const [user, setUser] = useState({
+   //     isLoggedIn: false,
+   //     loginId: '',
+   //     isAdmin: false,
+   //  });
+   //  const isAdmin = user.isAdmin;
 
    /* 전체 평균 점수 계산 (CKH) */
    const [reviewSummary, setReviewSummary] = useState({
@@ -114,30 +118,6 @@ export default function ShoppingDetail() {
       };
    };
 
-   (useEffect(() => {
-      const getUserSession = async () => {
-         const {
-            data: { user: currentUser },
-            error,
-         } = await supabase.auth.getUser();
-         if (currentUser) {
-            const emailId = currentUser.email ? currentUser.email.split('@')[0] : 'unknown';
-            setUser({
-               isLoggedIn: true,
-               loginId: emailId,
-               isAdmin: true,
-            });
-         } else {
-            setUser({
-               isLoggedIn: false,
-               loginId: '',
-               isAdmin: false,
-            });
-         }
-      };
-      getUserSession();
-   }),
-      []);
    useEffect(() => {
       if (!id) return;
       console.log('현재의 URL의 ID값:', id, '타입:', typeof id);
@@ -163,26 +143,38 @@ export default function ShoppingDetail() {
    }, [id]);
 
    const handleSaveQna = async () => {
+      if (isSubmitting) return;
       if (!qnaContent.trim()) {
          alert('문의 내용을 입력해주세요.');
          return;
       }
-      const { error } = await supabase.from('product_qna').insert([
-         {
-            product_id: Number(id),
-            user_id: user.loginId,
-            type: qnaType,
-            content: qnaContent,
-         },
-      ]);
-      if (error) {
-         console.error('Supabase 저장 에러:', error);
+      if (!user) {
+         alert('로그인이 필요한 서비스입니다.');
+         return;
+      }
+      setIsSubmitting(true);
+      try {
+         const { error } = await supabase.from('product_qna').insert([
+            {
+               product_id: Number(id),
+               user_id: loginId,
+               type: qnaType,
+               content: qnaContent,
+            },
+         ]);
+         if (error) {
+            console.error('Supabase 저장 에러:', error);
 
-         alert(`오류가 발생했습니다. : ${error.message}`);
-      } else {
-         await fetchQnaList();
-         setQnaContent('');
-         onClose();
+            alert(`오류가 발생했습니다. : ${error.message}`);
+         } else {
+            await fetchQnaList();
+            setQnaContent('');
+            onClose();
+         }
+      } catch (e) {
+         console.error(e);
+      } finally {
+         setIsSubmitting(false);
       }
    };
    const handleCancelQna = () => {
@@ -746,45 +738,41 @@ export default function ShoppingDetail() {
                               value={String(item.id)}
                               p={'16px 32px'}
                               borderBottom={'1px solid #cccccc'}
+                              position={'relative'}
+                              overflow={'visible'}
                            >
-                              <Box position={'relative'}>
-                                 <Flex justifyContent={'flex-end'}>
-                                    {isAdmin && (
-                                       <Box position={'absolute'} top={'16px'} right={'60px'} zIndex={10}>
-                                          <Button
-                                             w={'100px'}
-                                             p={'0'}
-                                             fontSize={'12px'}
-                                             bgColor={'#FA6D6D'}
-                                             h={'30px'}
-                                             onClick={e => handleOpenReply(e, item)}
-                                          >
-                                             {item.answer ? '답변수정' : '답변'}
-                                          </Button>
-                                       </Box>
-                                    )}
-                                 </Flex>
-                                 <Accordion.ItemTrigger justifyContent={'space-between'} w={'100%'} borderRadius={0}>
-                                    <Flex direction={'column'} gap={'8px'} w={'100%'}>
-                                       <Flex justifyContent={'space-between'}>
-                                          <Text color={'#5c5c5c'} fontSize={'16px'}>
-                                             {item.type === 'productAsk' ? '상품문의' : '주문 상품문의'}
-                                          </Text>
-                                       </Flex>
-                                       <Text color={'black'} fontSize={'20px'}>
-                                          {item.content.length > 20
-                                             ? item.content.substring(0, 20) + '...'
-                                             : item.content}
+                              <Accordion.ItemTrigger justifyContent={'space-between'} w={'100%'} borderRadius={0}>
+                                 <Flex direction={'column'} gap={'8px'} w={'100%'}>
+                                    <Flex justifyContent={'space-between'}>
+                                       <Text color={'#5c5c5c'} fontSize={'16px'}>
+                                          {item.type === 'productAsk' ? '상품문의' : '주문 상품문의'}
                                        </Text>
-                                       <Flex gap={'10px'} color={'#5c5c5c'} fontSize={'12px'} fontWeight={'500'}>
-                                          <Text w={'80px'}>{item.answer ? '답변 완료' : '답변 대기중'}</Text>
-                                          <Text color={'black'}>{item.user_id}</Text>
-                                          <Text>{new Date(item.created_at).toLocaleString()}</Text>
-                                       </Flex>
                                     </Flex>
-                                    <Accordion.ItemIndicator color={'black'} />
-                                 </Accordion.ItemTrigger>
-                              </Box>
+                                    <Text color={'black'} fontSize={'20px'}>
+                                       {item.content.length > 20 ? item.content.substring(0, 20) + '...' : item.content}
+                                    </Text>
+                                    <Flex gap={'10px'} color={'#5c5c5c'} fontSize={'12px'} fontWeight={'500'}>
+                                       <Text w={'80px'}>{item.answer ? '답변 완료' : '답변 대기중'}</Text>
+                                       <Text color={'black'}>{item.user_id}</Text>
+                                       <Text>{new Date(item.created_at).toLocaleString()}</Text>
+                                    </Flex>
+                                 </Flex>
+                                 <Accordion.ItemIndicator color={'black'} />
+                              </Accordion.ItemTrigger>
+                              {isAdmin && (
+                                 <Box position={'absolute'} top={'16px'} right={'60px'} zIndex={100}>
+                                    <Button
+                                       w={'100px'}
+                                       p={'0'}
+                                       fontSize={'12px'}
+                                       bgColor={'#FA6D6D'}
+                                       h={'30px'}
+                                       onClick={e => handleOpenReply(e, item)}
+                                    >
+                                       {item.answer ? '답변수정' : '답변'}
+                                    </Button>
+                                 </Box>
+                              )}
                               <Accordion.ItemContent
                                  bgColor={'rgba(204,204,204,0.5)'}
                                  borderRadius={0}
@@ -839,9 +827,7 @@ export default function ShoppingDetail() {
                                  size={'sm'}
                                  color={'black'}
                                  bgColor={'white'}
-                                 onClick={() => {
-                                    handleSaveQna();
-                                 }}
+                                 onClick={onClose}
                                  position={'static'}
                               />
                            </Dialog.CloseTrigger>
