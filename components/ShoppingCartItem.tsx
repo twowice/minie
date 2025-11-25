@@ -128,7 +128,7 @@ export default function ShoppingCartItem({
               >
                 <HeartFilledIcon
                   filledColor={isLiked ? "#FA6D6D" : "none"}
-                  strokeColor={isLiked ? "#FA6D6D" : "#CCCCCC"}
+                  strokeColor={isLiked ? "#FA6D6D" : "#A6A6A6"}
                 />
               </IconButton>
               <Box display={"flex"} gap={"2px"}>
