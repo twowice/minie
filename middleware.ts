@@ -8,7 +8,7 @@ import { getUserIdByFirebaseUid } from './lib/minie/authAPI';
  * - 경로: [허용할 HTTP 메소드 배열]
  */
 const PUBLIC_API_CONFIG: Record<string, string[]> = {
-  "/api/products": ["GET", "POST", "PUT", "DELETE"],
+  "/api/products": ["GET"],
   "/api/reviews": ["GET"],
   "/api/payment/tosspayment": ["POST", "GET", "PUT", "DELETE"],
   "/api/order/order_detail": ["GET", "POST"],
