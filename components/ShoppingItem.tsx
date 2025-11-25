@@ -1,4 +1,16 @@
-import { Box, Button, Flex, VStack, Image, Text, HStack, AspectRatio, Skeleton, SkeletonText } from '@chakra-ui/react';
+import {
+   Box,
+   Button,
+   Flex,
+   VStack,
+   Image,
+   Text,
+   HStack,
+   AspectRatio,
+   Skeleton,
+   SkeletonText,
+   IconButton,
+} from '@chakra-ui/react';
 import TypeBadge from './Badge';
 import { MdFavoriteBorder, MdOutlineShoppingCart } from 'react-icons/md';
 // import { useEffect, useState } from 'react';
@@ -6,6 +18,7 @@ import { getDiscountRate } from '@/utils/calculator/discountRateCalculator';
 import Link from 'next/link';
 import { useCart } from '@/contexts/ShoppingCartContext';
 import { useEffect, useState } from 'react';
+import HeartFilledIcon from './ui/HeartIcon';
 
 const ShoppingItemSkeleton = () => {
    return (
@@ -116,20 +129,24 @@ export default function ShoppingItem({ item }: { item: any }) {
                               <MdOutlineShoppingCart color="#898989" />
                            )}
                         </Button>
-                        <Button
+                        <IconButton
+                           onClick={handleLikeClick}
                            size={'sm'}
                            width={'32px'}
                            h={'32px'}
                            p={0}
                            bgColor={'rgba(255, 255, 255, 0.8)'}
-                           cursor={'pointer'}
-                           aria-label="좋아요"
-                           onClick={handleLikeClick}
-                           _hover={{ bgColor: 'white', transform: 'scale(1.1)' }}
+                           backdropFilter={'blur(4px)'}
+                           borderRadius={'4px'}
                            boxShadow={'sm'}
+                           _hover={{ bgColor: 'white', transform: 'scale(1.1)' }}
+                           cursor={'pointer'}
                         >
-                           {isItemLike ? <MdFavoriteBorder color="#fa6d6d" /> : <MdFavoriteBorder color="#898989" />}
-                        </Button>
+                           <HeartFilledIcon
+                              filledColor={isItemLike ? '#FA6D6D' : 'none'}
+                              strokeColor={isItemLike ? '#FA6D6D' : '#CCCCCC'}
+                           />
+                        </IconButton>
                      </Flex>
                   </HStack>
                </Box>
