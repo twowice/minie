@@ -75,11 +75,11 @@ export default function Header() {
     // { href: "/shoppingdetail", label: "쇼핑상세" }, // 이 링크를 추가합니다. -> 다시 삭제
     { href: "/skincare", label: "스킨케어" },
     { href: "/cleansing", label: "클렌징" },
-    { href: "/suncare", label: "선케어" },
     { href: "/makeup", label: "메이크업" },
-    { href: "/beauty", label: "뷰티소품" },
+    { href: "/suncare", label: "선케어" },
     { href: "/bodycare", label: "바디케어" },
     { href: "/haircare", label: "헤어케어" },
+    { href: "/beauty", label: "뷰티소품" },
   ];
 
   /* 기존 Header
