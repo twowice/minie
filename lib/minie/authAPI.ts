@@ -186,10 +186,16 @@ export const signInWithGoogle = async () => {
     } 
 
     return firebaseUser;
-  }catch(error){
-    console.error("Google 로그인 오류", error);
-    throw error;
-  }
+  } catch (error: any) {
+      // 팝업 닫기는 에러 로그 안 남김
+      if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
+        throw error;
+      }
+      
+      // 실제 에러만 로그 출력
+      console.error("Google 로그인 오류", error);
+      throw error;
+    }
 }
 
 
