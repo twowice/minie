@@ -19,7 +19,7 @@ import {
   Heading,
   IconButton,
   Collapsible,
-  Button,  // 2025-11-19(박영준)
+  Button, // 2025-11-19(박영준)
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 
@@ -28,8 +28,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-  const router = useRouter();  // 2025-11-19(박영준)
-  const { user, logout } = useUser();  // 2025-11-19(박영준)
+  const router = useRouter(); // 2025-11-19(박영준)
+  const { user, logout } = useUser(); // 2025-11-19(박영준)
 
   // 'payment/tosspayment일 때 장바구니 변경을 방지 하기 위해서 장바구니 아이콘을 해당 값에 따라 비활성화합니다.
   const hideCart = pathname.startsWith("/payment/tosspayment");
@@ -61,7 +61,7 @@ export default function Header() {
     { href: "/haircare", label: "헤어케어" },
   ];
 
-/* 기존 Header
+  /* 기존 Header
   const topBarLinks = [
     { href: "/login", label: "로그인" },
     { href: "/signup", label: "회원가입" }, // 2025월 11월 10일 수정 (박영준)
@@ -73,11 +73,10 @@ export default function Header() {
   ];
 */
 
- // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 시작 (박영준)
+  // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 시작 (박영준)
   const topBarLinks = user
     ? [
         // 로그인 상태일 때
-        { href: "/orders", label: "주문조회" },
         { href: "/mypage", label: "마이페이지" },
         { href: "/reviews", label: "리뷰" },
         { href: "/payment", label: "결제" },
@@ -87,7 +86,6 @@ export default function Header() {
         // 로그아웃 상태일 때
         { href: "/login", label: "로그인" },
         { href: "/signup", label: "회원가입" },
-        { href: "/orders", label: "주문조회" },
         { href: "/mypage", label: "마이페이지" },
         { href: "/reviews", label: "리뷰" },
         { href: "/payment", label: "결제" },
@@ -97,7 +95,7 @@ export default function Header() {
     await logout();
     router.push("/");
   };
- // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 끝 (박영준)
+  // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 끝 (박영준)
 
   return (
     <Box as="header" ref={headerRef} flexShrink={0} bg="white">
@@ -220,7 +218,6 @@ export default function Header() {
             {" "}
             {/* Wrap content */}
             <Box display={{ lg: "none" }} borderTopWidth="1px" py={4}>
-              
               {/* 모바일에서도 로그인 상태 표시 시작 2025-11-19 (박영준) */}
               {user && (
                 <Box mb={4} pb={4} borderBottomWidth="1px">
