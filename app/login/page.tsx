@@ -28,6 +28,41 @@ export default function LoginPage() {
   const router = useRouter(); // 라우터 변수
   const { setUser } = useUser(); // 2025-11-19
 
+  // 에러 메시지 한국어 변환
+  const getErrorMessage = (errorCode: string): string => {
+    const errorMessages: { [key: string]: string } = {
+      // 로그인
+      "auth/invalid-email": "올바른 이메일 형식이 아닙니다.",
+      "auth/user-disabled": "비활성화된 계정입니다.",
+      "auth/user-not-found": "존재하지 않는 계정입니다.",
+      "auth/wrong-password": "비밀번호가 일치하지 않습니다.",
+      "auth/invalid-credential": "이메일 또는 비밀번호가 일치하지 않습니다.",
+      
+      // 회원가입
+      "auth/email-already-in-use": "이미 사용중인 이메일입니다.",
+      "auth/weak-password": "비밀번호는 최소 6자 이상이어야 합니다.",
+      "auth/operation-not-allowed": "이 로그인 방법은 현재 사용할 수 없습니다.",
+      
+      // 네트워크/시스템
+      "auth/network-request-failed": "네트워크 연결을 확인해주세요.",
+      "auth/too-many-requests": "로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.",
+      "auth/internal-error": "내부 오류가 발생했습니다.",
+      
+      // 토큰/세션
+      "auth/expired-action-code": "인증 코드가 만료되었습니다.",
+      "auth/invalid-action-code": "유효하지 않은 인증 코드입니다.",
+      "auth/user-token-expired": "로그인 세션이 만료되었습니다. 다시 로그인해주세요.",
+      "auth/requires-recent-login": "보안을 위해 다시 로그인이 필요합니다.",
+      
+      // 기타
+      "auth/popup-closed-by-user": "로그인 창이 닫혔습니다.",
+      "auth/cancelled-popup-request": "로그인 요청이 취소되었습니다.",
+      "auth/account-exists-with-different-credential": "다른 로그인 방법으로 가입된 이메일입니다.",
+    };
+
+    return errorMessages[errorCode] || "로그인 중 오류가 발생했습니다.";
+  };
+
   // EMAIL/PW 로그인 비동기 함수
   const handleEmailLogin = async () => {
     try {
@@ -52,7 +87,7 @@ export default function LoginPage() {
       // 5. 홈으로 이동
       router.push("/");
     } catch (err: any) {
-      setError(err.message);
+       setError(getErrorMessage(err.code));
     }
   };
 
