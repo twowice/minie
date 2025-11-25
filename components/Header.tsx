@@ -27,6 +27,8 @@ export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
+  const mobileMenuContentRef = useRef<HTMLDivElement>(null);
+  const moblieMenuHamburgerButtonRef = useRef<HTMLButtonElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   const router = useRouter(); // 2025-11-19(박영준)
   const { user, logout } = useUser(); // 2025-11-19(박영준)
@@ -49,6 +51,25 @@ export default function Header() {
       resizeObserver.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        mobileMenuContentRef.current &&
+        !(
+          mobileMenuContentRef.current.contains(event.target as Node) ||
+          moblieMenuHamburgerButtonRef.current?.contains(event.target as Node)
+        )
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [mobileMenuContentRef, moblieMenuHamburgerButtonRef]);
 
   const navLinks = [
     // { href: "/shoppingdetail", label: "쇼핑상세" }, // 이 링크를 추가합니다. -> 다시 삭제
@@ -78,8 +99,6 @@ export default function Header() {
     ? [
         // 로그인 상태일 때
         { href: "/mypage", label: "마이페이지" },
-        { href: "/reviews", label: "리뷰" },
-        { href: "/payment", label: "결제" },
         { href: "/inquiry", label: "1:1문의" },
       ]
     : [
@@ -87,8 +106,6 @@ export default function Header() {
         { href: "/login", label: "로그인" },
         { href: "/signup", label: "회원가입" },
         { href: "/mypage", label: "마이페이지" },
-        { href: "/reviews", label: "리뷰" },
-        { href: "/payment", label: "결제" },
         { href: "/inquiry", label: "1:1문의" },
       ];
   const handleLogout = async () => {
@@ -121,6 +138,7 @@ export default function Header() {
                 variant="ghost"
                 size="xs"
                 color="black"
+                bg={"white"}
                 onClick={handleLogout}
                 _hover={{ bg: "transparent", color: "gray.600" }}
                 _focus={{ boxShadow: "none", outline: "none" }}
@@ -199,10 +217,11 @@ export default function Header() {
           {/* Icon Menus including mobileNavigationMenu */}
           <HStack gap={{ base: 3, md: 4 }} color="black">
             <IconButton
+              ref={moblieMenuHamburgerButtonRef}
               aria-label="메뉴"
               display={{ base: "flex", lg: "none" }}
               color={isMobileMenuOpen ? "#FA6D6D" : "black"}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             >
               <HamburgerIcon />
             </IconButton>
@@ -211,16 +230,19 @@ export default function Header() {
         </Flex>
 
         {/* Mobile Navigation Menu */}
-        <Collapsible.Root open={isMobileMenuOpen}>
+        <Collapsible.Root open={isMobileMenuOpen} boxShadow={"sm"} px={"16px"}>
           {" "}
           {/* Collapse -> Collapsible.Root, in -> open */}
-          <Collapsible.Content>
+          <Collapsible.Content
+            ref={mobileMenuContentRef}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
             {" "}
             {/* Wrap content */}
-            <Box display={{ lg: "none" }} borderTopWidth="1px" py={4}>
+            <Box display={{ lg: "none" }} py={4}>
               {/* 모바일에서도 로그인 상태 표시 시작 2025-11-19 (박영준) */}
               {user && (
-                <Box mb={4} pb={4} borderBottomWidth="1px">
+                <Box mb={4} pb={4} borderBottom="1px solid #CCCCCC">
                   <Flex justify="space-between" align="center">
                     <Text color="black" fontWeight="medium">
                       {user.name}님
@@ -228,6 +250,10 @@ export default function Header() {
                     <Button
                       size="sm"
                       variant="outline"
+                      color={"black"}
+                      bg={"white"}
+                      fontWeight={"normal"}
+                      border={"1px solid #CCCCCC"}
                       onClick={handleLogout}
                       colorScheme="gray"
                     >
@@ -256,28 +282,6 @@ export default function Header() {
                     _focus={{ boxShadow: "none", outline: "none" }}
                     _hover={{ color: "gray.600" }}
                     py={2}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </VStack>
-              <VStack
-                mt={4}
-                pt={4}
-                borderTopWidth="1px"
-                gap={3} // spacing -> gap
-                align="stretch"
-                fontSize="sm"
-                color="gray.600"
-              >
-                {topBarLinks.map((link) => (
-                  <Link
-                    as={NextLink}
-                    key={link.href}
-                    href={link.href}
-                    color={"black"}
-                    _focus={{ boxShadow: "none", outline: "none" }}
-                    _hover={{ color: "black" }}
                   >
                     {link.label}
                   </Link>
