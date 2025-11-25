@@ -22,19 +22,30 @@ import HeartFilledIcon from './ui/HeartIcon';
 
 const ShoppingItemSkeleton = () => {
    return (
-      <VStack minW={0} overflow={'hidden'} h={'100%'} bg={'white'} borderRadius={'lg'} boxShadow={'sm'} gap={0}>
+      <VStack
+         minW={0}
+         overflow={'hidden'}
+         h={'100%'}
+         bg={'white'}
+         borderRadius={'lg'}
+         boxShadow={'sm'}
+         gap={0}
+         justifyContent={'space-between'}
+      >
          <AspectRatio ratio={1} w={'100%'}>
             <Skeleton w={'100%'} h={'100%'} />
          </AspectRatio>
-         <Box p={4} w={'100%'}>
-            <Flex justifyContent={'space-between'} alignItems={'center'} mb={2}>
-               <Skeleton h={'28px'} w={'50%'} />
-               <Skeleton h={'20px'} w={'30px'} borderRadius={'full'} />
+         <Box p={4} w={'100%'} h={'100%'}>
+            <Flex justifyContent={'space-between'} alignItems={'center'} mb={1}>
+               <Skeleton h={'30px'} w={'50%'} borderRadius={'4px'} />
+               <Skeleton h={'20px'} w={'20%'} borderRadius={'4px'} />
             </Flex>
             <Flex justifyContent={'space-between'} alignItems={'center'} mb={'8px'}>
-               <Skeleton h={'18px'} w={'40%'} mb={2} />
+               <Skeleton h={'26px'} w={'40%'} borderRadius={'4px'} />
+               <Skeleton h={'24px'} w={'40px'} borderRadius={'full'} />
             </Flex>
-            <SkeletonText mt={4} noOfLines={2} gap={3} h={'40px'} />
+            <Skeleton h={'22px'} w={'80%'} borderRadius={'4px'} />
+            <Skeleton h={'18px'} w={'100%'} borderRadius={'4px'} />
          </Box>
       </VStack>
    );
