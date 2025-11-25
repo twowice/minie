@@ -30,7 +30,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
    // --- 상단 버튼 필터 State ---
    const [male, setMale] = useState(false);
    const [female, setFemale] = useState(false);
-   const [myType, setMyType] = useState(false);
+   // const [myType, setMyType] = useState(false);
    const [price, setPrice] = useState([]);
 
    // --- 다이얼로그 ---
@@ -51,7 +51,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
    //style
    const [style, setStyle] = useState([]);
 
-   // 임시 상세옵션
+   // 필터 상세옵션
    const [filterSkincare, setFilterSkincare] = useState([]);
    const [filterUse, setFilterUse] = useState([]);
    const [filterType, setFilterType] = useState([]);
@@ -71,7 +71,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
       //상단필터
       setMale(false);
       setFemale(false);
-      setMyType(false);
+      // setMyType(false);
       setPrice([]);
 
       //상세필터
@@ -100,13 +100,13 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
 
    //동작
    useEffect(() => {
-      const items = list.filter(item => item.category === category)
+      const items = list.filter(item => item.category === category);
       let selected = [...items];
 
       selected = selected.filter(p => {
          if (female && !male && !p.gender.includes('여성')) return false;
          if (male && !female && !p.gender.includes('남성')) return false;
-         if (myType && p.mytype !== '마이타입') return false;
+         // if (myType && p.mytype !== '마이타입') return false;
          if (price.length > 0 && !price.some(priceCeiling => p.price <= priceCeiling)) return false;
          if (skincare.length > 0 && !skincare.includes(p.skincare)) return false;
          if (use.length > 0 && !use.includes(p.use)) return false;
@@ -115,22 +115,28 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
          return true;
       });
 
-      if (sortOrder === '낮은 가격 순') {
-         selected.sort((a, b) => a.price - b.price);
-      } else if (sortOrder === '높은 가격 순') {
-         selected.sort((a, b) => b.price - a.price);
-      }
+      selected.sort((a, b) => {
+         const realPriceA = a.is_discounted ? a.price - a.discount_amount : a.price;
+         const realPriceB = b.is_discounted ? b.price - b.discount_amount : b.price;
+
+         if (sortOrder === '낮은 가격 순') {
+            return realPriceA - realPriceB;
+         } else if (sortOrder === '높은 가격 순') {
+            return realPriceB - realPriceA;
+         }
+         return 0;
+      });
 
       // setData(selected);
       onDataFiltered(selected);
-   }, [male, female, myType, price, sortOrder, skincare, use, type, style, list, category]);
+   }, [male, female, price, sortOrder, skincare, use, type, style, list, category]);
 
    const filteredData = () => {
       let checked = [...categoryItems];
 
-      if (myType) {
-         checked = checked.filter(p => p.mytype === '마이타입');
-      }
+      // if (myType) {
+      //    checked = checked.filter(p => p.mytype === '마이타입');
+      // }
 
       const genderFilter = [];
       if (filterBoth || (!filterMale && !filterFemale)) {
@@ -284,7 +290,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
                >
                   여
                </Button>
-               <Button
+               {/* <Button
                   color={myType ? 'white' : 'rgba(0,0,0,0.32)'}
                   bg={myType ? '#fa6d6d' : 'white'}
                   border={myType ? 'transparent' : '1px solid rgba(0,0,0,0.32)'}
@@ -298,7 +304,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
                   }}
                >
                   마이타입
-               </Button>
+               </Button> */}
             </Box>
             <Box display={'flex'} gap={'16px'} fontSize={'12px'} alignItems={'center'} color={'rgba(0,0,0,0.4)'}>
                <Text>총 {categoryItems.length}개</Text>
