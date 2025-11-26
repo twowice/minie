@@ -148,19 +148,32 @@ export function CartProvider({ children }: CartProviderProps) {
   // 3.3. 데이터 정규화 및 헬퍼 (Data Normalization & Helpers)
   // -------------------------------------------------------------------------------
 
-  const normalizeItem = (item: any): CartItem => ({
-    id: Number(item.id),
-    title: item.name || "",
-    brand: item.brand || "",
-    image:
-      item.image || "https://cdn.imweb.me/thumbnail/20220924/2f7f6930fd5c3.png",
-    price: item.price || 0,
-    num: item.num || 1,
-    discountAmount: item.discount_amount,
-    isDiscounted: !!item.is_discounted,
-    checked: item.checked ?? true,
-    isUpdated: false,
-  });
+  const normalizeItem = (item: any): CartItem => {
+    // console.log(item);
+    // console.log(
+    //   "[shoppingCartContext] normalizeItem item's isDiscounted:",
+    //   item.is_discounted
+    // );
+
+    const norm = {
+      id: Number(item.id),
+      title: item.name || "",
+      brand: item.brand || "",
+      image:
+        item.image ||
+        "https://cdn.imweb.me/thumbnail/20220924/2f7f6930fd5c3.png",
+      price: item.price || 0,
+      num: item.num || 1,
+      discountAmount: item.discount_amount,
+      isDiscounted: item.discount_amount > 0, //shoppingdetail/[id] 페이지에서 넘어오는 정보에 isDiscounted 정보가 없어 대체
+      checked: item.checked ?? true,
+      isUpdated: false,
+    };
+
+    //console.log("[shoppingCartContext] normalizeItem", norm);
+
+    return norm;
+  };
 
   const isLiked = (itemId: number) =>
     likedItems.some((item) => item.id === itemId);
