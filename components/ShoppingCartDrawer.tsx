@@ -112,6 +112,7 @@ export default function ShoppingCartDrawer({
                       boxShadow: "none",
                       focusRing: "none",
                     }}
+                    borderRadius={"0px"}
                   >
                     <Drawer.Title
                       w={"100%"}
@@ -134,6 +135,7 @@ export default function ShoppingCartDrawer({
                       boxShadow: "none",
                       focusRing: "none",
                     }}
+                    borderRadius={"0px"}
                   >
                     <Drawer.Title
                       w={"100%"}

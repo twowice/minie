@@ -49,19 +49,13 @@ export default function ShoppingCartItem({
         <Checkbox.Control />
       </Checkbox.Root>
       <Image src={item.image} w={"130px"} h={"130px"} fit={"contain"} />
-      <Box
+      <Flex
         flex={1}
-        display={"flex"}
         flexDirection={"column"}
         justifyContent={"space-between"}
-        h={"130px"}
+        h={"100%"}
       >
-        <Box
-          display={"flex"}
-          flex={1}
-          justifyContent={"space-between"}
-          alignItems={"start"}
-        >
+        <Flex flex={1} justifyContent={"space-between"} alignItems={"start"}>
           <Box>
             <Box fontWeight={"medium"}>{item.title}</Box>
             <Box color={"#808080"}>{item.brand}</Box>
@@ -69,8 +63,8 @@ export default function ShoppingCartItem({
           <IconButton onClick={handleCartDelete} bg={"white"}>
             <MdClose color={"black"} />
           </IconButton>
-        </Box>
-        <Flex flex={1} flexDirection={"column"}>
+        </Flex>
+        <Flex gap={0} flex={1} flexDirection={"column"}>
           <Box
             display={"flex"}
             flexDirection={"row"}
@@ -149,7 +143,7 @@ export default function ShoppingCartItem({
             </Box>
           </Box>
         </Flex>
-      </Box>
+      </Flex>
     </Box>
   );
 }
