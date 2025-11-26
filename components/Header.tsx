@@ -228,7 +228,6 @@ export default function Header() {
               <HamburgerIcon />
             </IconButton>
             {!hideCart && <ShoppingCartDrawer headerHeight={headerHeight} />}
-            <ColorModeButton />
           </HStack>
         </Flex>
 
