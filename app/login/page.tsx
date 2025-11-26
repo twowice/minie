@@ -184,49 +184,53 @@ export default function LoginPage() {
 
           {/* 두 번째 책꽃이(ID,PW) */}
           <Box w="full">
-            <VStack gap={0} align="stretch">
-              <Input
-                placeholder="이메일 형식의 아이디를 입력해주세요."
-                borderTopRadius={4}
-                borderBottomRadius={0} // 아래 모서리 각지게
-                color="#000000" // 텍스트 색상
-                borderColor="rgba(0, 0, 0, 0.3)" // 바깥 선 검정색에 투명도 30%
-                height="56px"
-                fontSize="16px"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                _focus={{
-                  // 차크라 ui의 클릭시 스타일 변경 문법 _focus={{, , ,}}
-                  borderColor: "#FA6D6D", // 클릭시 외곽 색상 변경
-                  outline: "none", // 기본 회색 그림자 없애기
-                  borderWidth: "2px", // 테두리 굵기
-                }}
-              />
-              <Input
-                type="password"
-                placeholder="비밀번호 (8~12자, 영문+숫자+특수문자)"
-                borderBottomRadius={4}
-                borderTopRadius={0}
-                borderTop="none"
-                color="#000000"
-                borderColor="rgba(0, 0, 0, 0.3)"
-                height="56px"
-                fontSize="16px"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                _focus={{
-                  borderColor: "#FA6D6D",
-                  outline: "none",
-                  borderWidth: "2px",
-                  borderTop: "2px solid #FA6D6D",
-                }}
-              />
-              {error && (
-                <Text fontSize="sm" color="red.500">
-                  {error}
-                </Text>
-              )}
-            </VStack>
+            {/* from 안에서 enter는 submit 이벤트를 발생시킴, 기본적으로 새로고침 되는 로직을 막아서 데이터를 지킴 */}
+            <form onSubmit={(e) => {e.preventDefault(); handleEmailLogin();}}>
+              <VStack gap={0} align="stretch">
+                <Input
+                  placeholder="이메일 형식의 아이디를 입력해주세요."
+                  borderTopRadius={4}
+                  borderBottomRadius={0} // 아래 모서리 각지게
+                  color="#000000" // 텍스트 색상
+                  borderColor="rgba(0, 0, 0, 0.3)" // 바깥 선 검정색에 투명도 30%
+                  height="56px"
+                  fontSize="16px"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  _focus={{
+                    // 차크라 ui의 클릭시 스타일 변경 문법 _focus={{, , ,}}
+                    borderColor: "#FA6D6D", // 클릭시 외곽 색상 변경
+                    outline: "none", // 기본 회색 그림자 없애기
+                    borderWidth: "2px", // 테두리 굵기
+                  }}
+                />
+                <Input
+                  type="password"
+                  placeholder="비밀번호 (8~12자, 영문+숫자+특수문자)"
+                  borderBottomRadius={4}
+                  borderTopRadius={0}
+                  borderTop="none"
+                  color="#000000"
+                  borderColor="rgba(0, 0, 0, 0.3)"
+                  height="56px"
+                  fontSize="16px"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  _focus={{
+                    borderColor: "#FA6D6D",
+                    outline: "none",
+                    borderWidth: "2px",
+                    borderTop: "2px solid #FA6D6D",
+                  }}
+                />
+                {error && (
+                  <Text fontSize="sm" color="red.500">
+                    {error}
+                  </Text>
+                )}
+              </VStack>
+               <button type="submit" style={{ display: "none" }} />
+            </form>
           </Box>
 
           {/* 세 번째 책꽃이(회원가입 버튼) */}
