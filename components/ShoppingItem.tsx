@@ -97,7 +97,7 @@ export default function ShoppingItem({ item }: { item: Product }) {
          >
             <AspectRatio ratio={1} w={'100%'}>
                <Box position={'relative'}>
-                  <Image src={item.image} alt={item.title} objectFit="cover" w={'100%'} />
+                  <Image src={item.image} alt={item.name} objectFit="cover" w={'100%'} />
                   <HStack
                      justifyContent={'space-between'}
                      w={'100%'}
@@ -201,7 +201,7 @@ export default function ShoppingItem({ item }: { item: Product }) {
                   textOverflow={'ellipsis'}
                   mb={'4px'}
                >
-                  {item.title}
+                  {item.name}
                </Text>
                <Text fontSize={'12px'} fontWeight={'300'} color={'rgba(0,0,0,0.6)'} h={'100%'}>
                   {item.description}

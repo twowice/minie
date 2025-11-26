@@ -294,7 +294,7 @@ export default function ShoppingDetail() {
          <Box>
             <Flex gap={'40px'} paddingBottom={'40px'} borderBottom={'1px solid rgba(204,204,204,0.8)'}>
                <Box maxW={'540px'} maxH={'540px'} w={'50%'}>
-                  <Image src={product.image} alt={product.title} w={'100%'} h={'100%'} objectFit={'cover'} />
+                  <Image src={product.image} alt={product.name} w={'100%'} h={'100%'} objectFit={'cover'} />
                </Box>
                <Flex direction={'column'} gap={'16px'} flex={1}>
                   <Flex justifyContent={'space-between'} alignItems={'center'} color={'black'}>
@@ -321,7 +321,7 @@ export default function ShoppingDetail() {
                      </IconButton>
                   </Flex>
                   <Text fontSize={'24px'} color={'rgba(0,0,0,0.6)'} fontWeight={'500'}>
-                     {product.title}
+                     {product.name}
                   </Text>
 
                   <Spacer />
@@ -567,7 +567,7 @@ export default function ShoppingDetail() {
                            제품명
                         </Text>
                         <Text p={'10px 20px'} bgColor={'rgba(204,204,204,0.3)'} w={'100%'}>
-                           {product.title}
+                           {product.name}
                         </Text>
                      </Flex>
                      <Flex textAlign={'left'} borderBottom={'1px solid #cccccc'}>
@@ -875,7 +875,7 @@ export default function ShoppingDetail() {
                               </Box>
                               <Box>
                                  <Text fontWeight={'500'} fontSize={'16px'} pb={'8px'} textAlign={'left'}>
-                                    {product.title}
+                                    {product.name}
                                  </Text>
                                  <Textarea
                                     placeholder="Q&A 게시판에서는 고객님의 정보 확인이 어려우므로 배송 문의 등은 1:1 문의를 이용 부탁드립니다."
@@ -965,7 +965,7 @@ export default function ShoppingDetail() {
                                     color={'black'}
                                  >
                                     <Text fontWeight={'700'} pb={'8px'}>
-                                       {product.title}
+                                       {product.name}
                                     </Text>
                                     <Text>{selectedQna?.content}</Text>
                                  </Box>
