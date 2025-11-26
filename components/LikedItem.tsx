@@ -31,7 +31,7 @@ export default function LikedItem({
       py={"10px"}
       mx={"40px"}
       px={0}
-      h={"152px"}
+      h={"162px"}
     >
       <Checkbox.Root
         variant={"outline"}

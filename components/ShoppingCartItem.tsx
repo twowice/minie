@@ -36,7 +36,7 @@ export default function ShoppingCartItem({
       color={"black"}
       borderBottom={"1px solid #CCCCCC"}
       py={"10px"}
-      h={"152px"}
+      h={"162px"}
     >
       <Checkbox.Root
         variant={"outline"}
