@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 // 2025-11-19 session 관리를 위해 추가 (박영준)
 import { UserProvider } from "@/context/UserContext";
+import LayoutController from "@/components/LayoutController";
 
 export const metadata: Metadata = {
   title: "Minié",
@@ -40,19 +41,7 @@ export default async function RootLayout({
             <CartProvider>
               {" "}
               {/* 2025-11-19 ession 관리를 위해 수정 (박영준) */}
-              <Box
-                display="flex"
-                flexDirection="column"
-                minH="100vh"
-                bg="white"
-                fontSmooth="antialiased"
-              >
-                <Header />
-                <Box as="main" display="flex" flexDirection="column" flex="1">
-                  {children}
-                </Box>
-                <Footer />
-              </Box>
+              <LayoutController>{children}</LayoutController>
             </CartProvider>
           </UserProvider>
         </Provider>
