@@ -49,28 +49,22 @@ export default function ShoppingCartItem({
         <Checkbox.Control />
       </Checkbox.Root>
       <Image src={item.image} w={"130px"} h={"130px"} fit={"contain"} />
-      <Box
+      <Flex
         flex={1}
-        display={"flex"}
         flexDirection={"column"}
         justifyContent={"space-between"}
-        h={"130px"}
+        h={"100%"}
       >
-        <Box
-          display={"flex"}
-          flex={1}
-          justifyContent={"space-between"}
-          alignItems={"start"}
-        >
+        <Flex flex={1} justifyContent={"space-between"} alignItems={"start"}>
           <Box>
             <Box fontWeight={"medium"}>{item.title}</Box>
             <Box color={"#808080"}>{item.brand}</Box>
           </Box>
-          <IconButton onClick={handleCartDelete}>
-            <MdClose />
+          <IconButton onClick={handleCartDelete} bg={"white"}>
+            <MdClose color={"black"} />
           </IconButton>
-        </Box>
-        <Flex flex={1} flexDirection={"column"}>
+        </Flex>
+        <Flex gap={0} flex={1} flexDirection={"column"}>
           <Box
             display={"flex"}
             flexDirection={"row"}
@@ -82,14 +76,18 @@ export default function ShoppingCartItem({
               color={item.num === 1 ? "#CCCCCC" : ""}
               onClick={() => handleNumChanged("minus")}
               disabled={item.num === 1}
+              bg={"white"}
             >
               <AiFillMinusCircle />
             </IconButton>
             <Box fontWeight={"medium"} fontSize={"16px"}>
               {item.num}
             </Box>
-            <IconButton onClick={() => handleNumChanged("plus")}>
-              <AiFillPlusCircle />
+            <IconButton
+              bg={"transparent"}
+              onClick={() => handleNumChanged("plus")}
+            >
+              <AiFillPlusCircle color="black" />
             </IconButton>
           </Box>
           {item.isDiscounted && (
@@ -122,6 +120,7 @@ export default function ShoppingCartItem({
               justifyContent={"space-between"}
             >
               <IconButton
+                bg={"white"}
                 onClick={() => {
                   isLiked ? handleLike("unlike") : handleLike("like");
                 }}
@@ -144,7 +143,7 @@ export default function ShoppingCartItem({
             </Box>
           </Box>
         </Flex>
-      </Box>
+      </Flex>
     </Box>
   );
 }

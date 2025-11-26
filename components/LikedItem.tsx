@@ -101,6 +101,7 @@ export default function LikedItem({
             justifyContent={"space-between"}
           >
             <IconButton
+              bg={"transparent"}
               onClick={() => {
                 handleLike("unlike");
               }}

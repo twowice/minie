@@ -82,6 +82,7 @@ export default function ShoppingCartDrawer({
             <Tabs.Root
               value={currentTabsValue}
               onValueChange={(e) => setCurrentTabsValue(e.value)}
+              variant={"plain"}
               display="flex"
               w={"100%"}
               flexDirection="column"
@@ -104,7 +105,14 @@ export default function ShoppingCartDrawer({
                     flex={1}
                     borderBottom={"1px solid #B2B2B2"}
                     bottom={"-1px"}
-                    _selected={{ color: "#FA6D6D", bottom: "0px" }}
+                    _selected={{
+                      color: "#FA6D6D",
+                      bottom: "0px",
+                      borderColor: "white",
+                      boxShadow: "none",
+                      focusRing: "none",
+                    }}
+                    borderRadius={"0px"}
                   >
                     <Drawer.Title
                       w={"100%"}
@@ -120,7 +128,14 @@ export default function ShoppingCartDrawer({
                     flex={1}
                     borderBottom={"1px solid #B2B2B2"}
                     bottom={"-1px"}
-                    _selected={{ color: "#FA6D6D", bottom: "0px" }}
+                    _selected={{
+                      color: "#FA6D6D",
+                      bottom: "0px",
+                      borderColor: "white",
+                      boxShadow: "none",
+                      focusRing: "none",
+                    }}
+                    borderRadius={"0px"}
                   >
                     <Drawer.Title
                       w={"100%"}
