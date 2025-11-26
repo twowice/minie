@@ -78,7 +78,6 @@ async function getFirebaseIdToken(): Promise<string | null> {
   const user = auth.currentUser
   if (user) {
     const token = await user.getIdToken()
-    console.log("token:", )
     return token;
   }
   return null
@@ -93,8 +92,8 @@ export const createUser = async (userData: {
   phone: string;
   birth_date: { year: string; month: string; day: string };
   gender?: string;
-  profile_image?: string | null; 
-  
+  profile_image?: string | null;
+
 }) => {
   // data = 결과, error = 오류를 반환해주는 supabase 변수
   const { data, error } = await authSupabase
@@ -114,9 +113,9 @@ export const createUser = async (userData: {
     .select() // 방금 추가한거 다시 가져와
     .single(); // 배열말고 객체 1개로 { email: , name:, phone: }
 
-  if(error){
+  if (error) {
     // console.error = 콘솔 에러를 빨간색으로 출력
-    console.error("supabase 사용자 생성 오류:", error); 
+    console.error("supabase 사용자 생성 오류:", error);
     // error 메세지를 보내고 에러가 발생된 곳으로 보냄
     throw error;
   }
@@ -164,7 +163,7 @@ export const signInWithGoogle = async () => {
   // new GoogleAuthProvider()란 구글 로그인 정보를 담은 객체를 새로 생성해줌.
   const provider = new GoogleAuthProvider();
 
-  try{
+  try {
     // 구글 popup으로 로그인
     const result = await signInWithPopup(auth, provider);
     // .user 안에는 uid, email, displayName, photoURL등 사용자의 정보가 담겨있다
@@ -173,29 +172,29 @@ export const signInWithGoogle = async () => {
     // supabase에 이미 있는 사용자인지 확인.
     const { data: existingUser } = await getUserByFirebaseUid(firebaseUser.uid);
 
-    if(!existingUser){
+    if (!existingUser) {
       await createUser({
         firebase_uid: firebaseUser.uid,
         email: firebaseUser.email || "",
         name: firebaseUser.displayName || "구글 사용자",
         phone: "", // 구글은 전화번호 안 줌
-        birth_date: { year: "", month: "", day: ""}, // 구글은 생년월일 안 줌
+        birth_date: { year: "", month: "", day: "" }, // 구글은 생년월일 안 줌
         profile_image: firebaseUser.photoURL
       });
       alert("환영합니다 " + (firebaseUser.displayName || "구글 사용자") + "님!");
-    } 
+    }
 
     return firebaseUser;
   } catch (error: any) {
-      // 팝업 닫기는 에러 로그 안 남김
-      if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
-        throw error;
-      }
-      
-      // 실제 에러만 로그 출력
-      console.error("Google 로그인 오류", error);
+    // 팝업 닫기는 에러 로그 안 남김
+    if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
       throw error;
     }
+
+    // 실제 에러만 로그 출력
+    console.error("Google 로그인 오류", error);
+    throw error;
+  }
 }
 
 
@@ -208,7 +207,7 @@ export const uploadProfileImage = async (file: File, userId: string) => {
     const fileExt = file.name.split('.').pop();
     // 고유한 파일명 생성 (userId + 현재시간)
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    
+
     // Supabase Storage에 업로드
     const { data, error } = await supabaseStorage
       .from('profile-images')

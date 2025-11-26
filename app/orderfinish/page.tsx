@@ -14,7 +14,7 @@ import {
 import { MdOutlineArrowForwardIos } from "react-icons/md";
 import {
   getOrderExcludeOrderDetail,
-  updateOrderStatus,
+  updateOrderStatusAndPaymentType,
 } from "../../lib/minie/orderAPI";
 import { Order } from "../api/order/order";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
@@ -85,7 +85,7 @@ export default function OrderFinishPage() {
   }
 
   const handleCancel = async () => {
-    const isSuccess = await updateOrderStatus(
+    const isSuccess = await updateOrderStatusAndPaymentType(
       orderId,
       order?.paymentType ? order.paymentType : "취소 에러",
       "주문취소"

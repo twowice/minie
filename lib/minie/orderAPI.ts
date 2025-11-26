@@ -1,5 +1,5 @@
 import { CartItem } from "@/app/api/cart/cart"
-import { Order, OrderDetail, PaginatedOrderDetailsResponse } from "@/app/api/order/order.d"
+import { Order, OrderDetail, OrderForManage, PaginatedOrderDetailsResponse } from "@/app/api/order/order.d"
 import { fetchWithAuth } from "./authAPI"
 
 export async function addNewOrder(
@@ -38,7 +38,7 @@ export async function addNewOrder(
 
 }
 
-export async function updateOrderStatus(orderId: string, paymentType: string, status: string): Promise<boolean> {
+export async function updateOrderStatusAndPaymentType(orderId: string, paymentType: string, status: string): Promise<boolean> {
     try {
         console.log(`[client] orderid: ${orderId}\tpaymentType: ${paymentType}]\tstatus: ${status}`)
         const response = await fetchWithAuth("http://localhost:3000/api/order", {
@@ -53,7 +53,7 @@ export async function updateOrderStatus(orderId: string, paymentType: string, st
             return false
         }
 
-        console.log("[client] updateOrderStatus success")
+        console.log("[client] updateOrderStatusAndPaymentType success")
 
         return true
     } catch (error) {
@@ -102,6 +102,10 @@ export async function getOrderExcludeOrderDetail(orderId: string): Promise<Order
         console.error("Error during getting order:", error);
         return null
     }
+}
+
+export async function updateOrderStatus(orderId: string) {
+
 }
 
 export async function getOrderDetails(orderId: string, page: number = 1, limit: number = 5): Promise<OrderDetail[]> {
@@ -169,3 +173,86 @@ export async function getOrdersForTracking() {
     }
 }
 
+export async function getAllOrders(
+    filters: {
+        orderId?: string,
+        userName?: string,
+        status?: string,
+        startDate?: string,
+        endDate?: string,
+    },
+    page: number = 1,
+    limit: number = 5
+): Promise<OrderForManage[]> {
+    try {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+
+        if (filters.orderId) params.append('order-id', filters.orderId);
+        if (filters.userName) params.append('name', filters.userName);
+        if (filters.status) params.append('status', filters.status);
+        if (filters.startDate) params.append('start_date', filters.startDate);
+        if (filters.endDate) params.append('end_date', filters.endDate);
+
+        const response = await fetchWithAuth(`/api/order/all?${params.toString()}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error(`Failed to get orders for managing at delivery page for admin: ${response.status} ${response.statusText}`, errorBody);
+            throw new Error(`Failed to get orders: ${response.statusText}`);
+        }
+
+        const orders = await response.json();
+        return orders;
+    } catch (error) {
+        console.error("Error during getting orders for managing at delivery page for admin:", error);
+        return [];
+    }
+}
+
+export async function getAllOrdersCount(
+    filters: {
+        orderId?: string,
+        userName?: string,
+        status?: string,
+        startDate?: string,
+        endDate?: string,
+    },
+    limit: number = 5
+): Promise<{ totalCount: number, itemsPerPage: number, totalPages: number }> {
+    try {
+        const params = new URLSearchParams({
+            limit: limit.toString(),
+        });
+
+        if (filters.orderId) params.append('order-id', filters.orderId);
+        if (filters.userName) params.append('name', filters.userName);
+        if (filters.status) params.append('status', filters.status);
+        if (filters.startDate) params.append('start_date', filters.startDate);
+        if (filters.endDate) params.append('end_date', filters.endDate);
+
+        const response = await fetchWithAuth(`/api/order/all/count?${params.toString()}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error(`Failed to get orders count for admin: ${response.status} ${response.statusText}`, errorBody);
+            throw new Error(`Failed to get orders count: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error during getting orders count for admin:", error);
+        return { totalCount: 0, itemsPerPage: limit, totalPages: 0 };
+    }
+}
