@@ -20,46 +20,47 @@ import { MdFilterListAlt } from 'react-icons/md';
 import Segment from './ui/Segment';
 // import items from '@/data/items.json'; //더미데이터
 import { RiResetLeftFill } from 'react-icons/ri';
+import { FilterBarProps } from '@/app/api/products/product';
 
-const priceLabels = {
+const priceLabels: Record<number, string> = {
    10000: '10,000원 이하',
    15000: '15,000원 이하',
    20000: '20,000원 이하',
 };
-export default function FilterBar({ onDataFiltered, category, list = [] }) {
+export default function FilterBar({ onDataFiltered, category, list = [] }: FilterBarProps) {
    // --- 상단 버튼 필터 State ---
-   const [male, setMale] = useState(false);
-   const [female, setFemale] = useState(false);
+   const [male, setMale] = useState<boolean>(false);
+   const [female, setFemale] = useState<boolean>(false);
    // const [myType, setMyType] = useState(false);
-   const [price, setPrice] = useState([]);
+   const [price, setPrice] = useState<number[]>([]);
 
    // --- 다이얼로그 ---
    const { open, onOpen, onClose } = useDisclosure();
-   const [dialog, setDialog] = useState(false);
-   const [filterMale, setFilterMale] = useState(true);
-   const [filterFemale, setFilterFemale] = useState(true);
-   const [filterBoth, setFilterBoth] = useState(true);
-   const [filterPrice, setFilterPrice] = useState([]);
+   const [dialog, setDialog] = useState<boolean>(false);
+   const [filterMale, setFilterMale] = useState<boolean>(true);
+   const [filterFemale, setFilterFemale] = useState<boolean>(true);
+   const [filterBoth, setFilterBoth] = useState<boolean>(true);
+   const [filterPrice, setFilterPrice] = useState<number[]>([]);
 
    // ---상세옵션 ---
    //skincare
-   const [skincare, setSkincare] = useState([]);
+   const [skincare, setSkincare] = useState<string[]>([]);
    //use
-   const [use, setUse] = useState([]);
+   const [use, setUse] = useState<string[]>([]);
    //type
-   const [type, setType] = useState([]);
+   const [type, setType] = useState<string[]>([]);
    //style
-   const [style, setStyle] = useState([]);
+   const [style, setStyle] = useState<string[]>([]);
 
    // 필터 상세옵션
-   const [filterSkincare, setFilterSkincare] = useState([]);
-   const [filterUse, setFilterUse] = useState([]);
-   const [filterType, setFilterType] = useState([]);
-   const [filterStyle, setFilterStyle] = useState([]);
+   const [filterSkincare, setFilterSkincare] = useState<string[]>([]);
+   const [filterUse, setFilterUse] = useState<string[]>([]);
+   const [filterType, setFilterType] = useState<string[]>([]);
+   const [filterStyle, setFilterStyle] = useState<string[]>([]);
 
    // --- 최종 데이터 ---
    // const [data, setData] = useState(list);
-   const [sortOrder, setSortOrder] = useState('낮은 가격 순');
+   const [sortOrder, setSortOrder] = useState<string>('낮은 가격 순');
 
    const categoryItems = useMemo(() => {
       if (!list) return [];
@@ -108,10 +109,10 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
          if (male && !female && !p.gender.includes('남성')) return false;
          // if (myType && p.mytype !== '마이타입') return false;
          if (price.length > 0 && !price.some(priceCeiling => p.price <= priceCeiling)) return false;
-         if (skincare.length > 0 && !skincare.includes(p.skincare)) return false;
-         if (use.length > 0 && !use.includes(p.use)) return false;
-         if (type.length > 0 && !type.includes(p.type)) return false;
-         if (style.length > 0 && !style.includes(p.style)) return false;
+         if (skincare.length > 0 && p.skincare && !skincare.includes(p.skincare)) return false;
+         if (use.length > 0 && p.use && !use.includes(p.use)) return false;
+         if (type.length > 0 && p.type && !type.includes(p.type)) return false;
+         if (style.length > 0 && p.style && !style.includes(p.style)) return false;
          return true;
       });
 
@@ -131,15 +132,15 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
       onDataFiltered(selected);
    }, [male, female, price, sortOrder, skincare, use, type, style, list, category]);
 
-   const filteredData = () => {
+   const filteredData = (): number => {
       let checked = [...categoryItems];
 
       // if (myType) {
       //    checked = checked.filter(p => p.mytype === '마이타입');
       // }
 
-      const genderFilter = [];
-      if (filterBoth || (!filterMale && !filterFemale)) {
+      const genderFilter: string[] = [];
+      if (filterBoth || (filterMale && filterFemale) || (!filterMale && !filterFemale)) {
          genderFilter.push('남성', '여성');
       } else if (filterMale) {
          genderFilter.push('남성');
@@ -212,7 +213,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
       setFilterStyle([]);
    };
 
-   const removeFilterTag = (type, value) => {
+   const removeFilterTag = (type: string, value: string | number) => {
       if (type === 'gender') {
          if (value === 'both') setFilterBoth(false);
          if (value === 'male') setFilterMale(false);
@@ -235,7 +236,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
       }
    };
 
-   const togglePrice = price => {
+   const togglePrice = (price: number) => {
       setFilterPrice(prev => (prev.includes(price) ? prev.filter(p => p !== price) : [...prev, price]));
    };
 
@@ -514,7 +515,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
                                  w={'full'}
                                  checked={filterBoth}
                                  onCheckedChange={e => {
-                                    setFilterBoth(e.checked);
+                                    setFilterBoth(!!e.checked);
                                     if (e.checked) {
                                        setFilterMale(false);
                                        setFilterFemale(false);
@@ -531,7 +532,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
                                  colorPalette={'red'}
                                  checked={filterMale}
                                  onCheckedChange={e => {
-                                    setFilterMale(e.checked);
+                                    setFilterMale(!!e.checked);
                                     if (e.checked) {
                                        setFilterBoth(false);
                                     }
@@ -547,7 +548,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }) {
                                  w={'full'}
                                  checked={filterFemale}
                                  onCheckedChange={e => {
-                                    setFilterFemale(e.checked);
+                                    setFilterFemale(!!e.checked);
                                     if (e.checked) {
                                        setFilterBoth(false);
                                     }

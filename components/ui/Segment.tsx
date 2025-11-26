@@ -1,16 +1,28 @@
 import { Box, Checkbox, HStack, Tabs, VStack } from '@chakra-ui/react';
+import { Dispatch, SetStateAction } from 'react';
 
-export default function Segment({ skincare, use, type, style, setSkincare, setUse, setType, setStyle }) {
-   const checkSkincare = value => {
+interface SegmentProps {
+   skincare: string[];
+   setSkincare: Dispatch<SetStateAction<string[]>>;
+   use: string[];
+   setUse: Dispatch<SetStateAction<string[]>>;
+   type: string[];
+   setType: Dispatch<SetStateAction<string[]>>;
+   style: string[];
+   setStyle: Dispatch<SetStateAction<string[]>>;
+}
+
+export default function Segment({ skincare, use, type, style, setSkincare, setUse, setType, setStyle }: SegmentProps) {
+   const checkSkincare = (value: string) => {
       setSkincare(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]));
    };
-   const checkUse = value => {
+   const checkUse = (value: string) => {
       setUse(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]));
    };
-   const checkType = value => {
+   const checkType = (value: string) => {
       setType(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]));
    };
-   const checkStyle = value => {
+   const checkStyle = (value: string) => {
       setStyle(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]));
    };
 
