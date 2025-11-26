@@ -30,7 +30,7 @@ export default function TrackingOrderItem({
       </Link>
       <Box flex="1">{numberFormatter.format(order.totalPrice)}원</Box>
       <Stack flex="1" justifyContent={"center"} alignItems={"center"}>
-        <Box>{order.status === "주문완료" ? "배송완료" : order.status}</Box>
+        <Box>{order.status}</Box>
         {order.status === "주문취소" && (
           <Box>{order.updatedAt.split("T")[0]}</Box>
         )}

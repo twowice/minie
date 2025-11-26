@@ -17,6 +17,8 @@ export default function Page() {
   let prevPay = 0;
   let afterPay = 0;
   let cancelOrder = 0;
+  let duringDelivery = 0;
+  let finishedDelivery = 0;
 
   useEffect(() => {
     async function fetchOrders() {
@@ -69,6 +71,12 @@ export default function Page() {
       case "주문취소":
         cancelOrder++;
         break;
+      case "배송중":
+        duringDelivery++;
+        break;
+      case "배송완료":
+        finishedDelivery++;
+        break;
     }
   }
 
@@ -103,27 +111,27 @@ export default function Page() {
         <Box color="#696868">▶</Box>
         <VStack>
           <Box fontSize="48px" fontWeight="medium">
-            0
+            {afterPay}
           </Box>
-          <Box>결제 완료</Box>
+          <Box>주문 완료</Box>
         </VStack>
         <Box color="#696868">▶</Box>
         <VStack>
           <Box fontSize="48px" fontWeight="medium">
-            0
+            {duringDelivery}
           </Box>
           <Box>배송 중</Box>
         </VStack>
         <Box color="#696868">▶</Box>
         <VStack>
           <Box fontSize="48px" fontWeight="medium">
-            {afterPay}
+            {finishedDelivery}
           </Box>
           <Box>배송 완료</Box>
         </VStack>
       </HStack>
 
-      <VStack align="start" color="#000000" fontSize="12px">
+      <VStack align="start" color="#000000" fontSize="12px" py={"8px"}>
         <Text>
           • 2017년 4월 1일 이후 내역만 조회가 가능하며, 이전의 주문내역은 Minié
           주문내역에서 확인하실 수 있습니다.

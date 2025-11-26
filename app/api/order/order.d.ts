@@ -43,5 +43,5 @@ export type OrderForManage = {
     date: string;
     orderName: string;
     totalPrice: number;
-    status: "주문완료" | "배송중" | "배송완료" | "주문취소";
+    status: "주문완료" | "배송중" | "배송완료" | "주문취소" | "결제 전";
 }
