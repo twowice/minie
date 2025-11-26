@@ -22,6 +22,7 @@ import {
   Button, // 2025-11-19(박영준)
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
+import { ColorModeButton } from "./ui/color-mode";
 
 export default function Header() {
   const pathname = usePathname();
@@ -219,6 +220,7 @@ export default function Header() {
             <IconButton
               ref={moblieMenuHamburgerButtonRef}
               aria-label="메뉴"
+              bg={"white"}
               display={{ base: "flex", lg: "none" }}
               color={isMobileMenuOpen ? "#FA6D6D" : "black"}
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
@@ -226,6 +228,7 @@ export default function Header() {
               <HamburgerIcon />
             </IconButton>
             {!hideCart && <ShoppingCartDrawer headerHeight={headerHeight} />}
+            <ColorModeButton />
           </HStack>
         </Flex>
 

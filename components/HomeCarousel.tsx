@@ -66,6 +66,7 @@ export default function HomeCarousel() {
           shadow="xl"
           transition="all 0.2s"
           zIndex="docked"
+          color={"black"}
         >
           <ChevronLeftIcon
             w={{ base: 4, sm: 5, md: 6 }}
@@ -88,6 +89,7 @@ export default function HomeCarousel() {
           shadow="xl"
           transition="all 0.2s"
           zIndex="docked"
+          color={"black"}
         >
           <ChevronRightIcon
             w={{ base: 4, sm: 5, md: 6 }}

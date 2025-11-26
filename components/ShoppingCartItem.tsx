@@ -66,8 +66,8 @@ export default function ShoppingCartItem({
             <Box fontWeight={"medium"}>{item.title}</Box>
             <Box color={"#808080"}>{item.brand}</Box>
           </Box>
-          <IconButton onClick={handleCartDelete}>
-            <MdClose />
+          <IconButton onClick={handleCartDelete} bg={"white"}>
+            <MdClose color={"black"} />
           </IconButton>
         </Box>
         <Flex flex={1} flexDirection={"column"}>
@@ -82,14 +82,18 @@ export default function ShoppingCartItem({
               color={item.num === 1 ? "#CCCCCC" : ""}
               onClick={() => handleNumChanged("minus")}
               disabled={item.num === 1}
+              bg={"white"}
             >
               <AiFillMinusCircle />
             </IconButton>
             <Box fontWeight={"medium"} fontSize={"16px"}>
               {item.num}
             </Box>
-            <IconButton onClick={() => handleNumChanged("plus")}>
-              <AiFillPlusCircle />
+            <IconButton
+              bg={"transparent"}
+              onClick={() => handleNumChanged("plus")}
+            >
+              <AiFillPlusCircle color="black" />
             </IconButton>
           </Box>
           {item.isDiscounted && (
@@ -122,6 +126,7 @@ export default function ShoppingCartItem({
               justifyContent={"space-between"}
             >
               <IconButton
+                bg={"white"}
                 onClick={() => {
                   isLiked ? handleLike("unlike") : handleLike("like");
                 }}
