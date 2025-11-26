@@ -15,9 +15,14 @@ import {
 import { useState, useEffect, ChangeEvent } from "react";
 import PlainPagination from "@/components/Pagination";
 import { OrderForManage } from "../api/order/order";
-import { getAllOrders, getAllOrdersCount } from "@/lib/minie/orderAPI";
+import {
+  getAllOrders,
+  getAllOrdersCount,
+  updateOrderStatus,
+} from "@/lib/minie/orderAPI";
 import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import OrderItemForManage from "@/components/OrderItemForManage";
+import { toaster } from "@/components/ui/toaster";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -54,7 +59,7 @@ export default function Delivery() {
       try {
         const [fetchedOrders, countData] = await Promise.all([
           getAllOrders(apiFilters, currentPage, ITEMS_PER_PAGE),
-          getAllOrdersCount(apiFilters, ITEMS_PER_PAGE),
+          getAllOrdersCount(apiFilters),
         ]);
 
         setOrders(fetchedOrders);
@@ -105,16 +110,41 @@ export default function Delivery() {
     }
   };
 
-  const handleStatusChange = (
+  const handleStatusChange = async (
     orderId: string,
     newStatus: OrderForManage["status"]
   ) => {
-    console.log(`Order ${orderId} status changed to ${newStatus}`);
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+    try {
+      const result = await updateOrderStatus(orderId, newStatus);
+      if (result.success) {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === orderId ? { ...order, status: newStatus } : order
+          )
+        );
+        toaster.create({
+          title: "주문 상태 변경.",
+          description: `주문(${orderId})의 상태가 ${newStatus}(으)로 변경되었습니다.`,
+          type: "success",
+          duration: 3000,
+          closable: true,
+        });
+      } else {
+        throw new Error("API에서 상태 변경에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error(`주문(${orderId})의 상태 변경에 실패했습니다.:`, error);
+      toaster.create({
+        title: "상태 변경 실패.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "주문 상태를 변경할 수 없습니다.",
+        type: "error",
+        duration: 3000,
+        closable: true,
+      });
+    }
   };
   return (
     <Box color={"black"} mt={8}>
@@ -216,8 +246,14 @@ export default function Delivery() {
         </Table.Header>
         <Table.Body>
           {isLoading ? (
-            <Box color="black">주문 목록을 불러오는 중...</Box>
-          ) : (
+            <Table.Row>
+              <Table.Cell colSpan={7}>
+                <Box textAlign="center" py={10}>
+                  주문 목록을 불러오는 중...
+                </Box>
+              </Table.Cell>
+            </Table.Row>
+          ) : orders.length > 0 ? (
             orders.map((order, idx) => (
               <OrderItemForManage
                 key={idx}
@@ -225,6 +261,14 @@ export default function Delivery() {
                 handleStatusChange={handleStatusChange}
               />
             ))
+          ) : (
+            <Table.Row>
+              <Table.Cell colSpan={7}>
+                <Box textAlign="center" py={10}>
+                  표시할 주문이 없습니다.
+                </Box>
+              </Table.Cell>
+            </Table.Row>
           )}
         </Table.Body>
       </Table.Root>

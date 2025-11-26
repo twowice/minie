@@ -104,8 +104,28 @@ export async function getOrderExcludeOrderDetail(orderId: string): Promise<Order
     }
 }
 
-export async function updateOrderStatus(orderId: string) {
+export async function updateOrderStatus(orderId: string, status: string): Promise<{ success: boolean }> {
+    try {
+        const response = await fetchWithAuth('/api/order/all', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ order_id: orderId, order_status: status }),
+        });
 
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Failed to update order status:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("An unknown error occurred while updating order status.");
+    }
 }
 
 export async function getOrderDetails(orderId: string, page: number = 1, limit: number = 5): Promise<OrderDetail[]> {
