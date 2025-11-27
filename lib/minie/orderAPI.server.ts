@@ -92,7 +92,8 @@ export async function getOrderDetailsAsAdmin(orderId: string): Promise<OrderDeta
                         price,
                         is_discounted,
                         discount_amount,
-                        products(name, image)
+                        products(name, image),
+                        has_review
                         `)
             .eq('order_number', orderId)
 
@@ -120,6 +121,7 @@ export async function getOrderDetailsAsAdmin(orderId: string): Promise<OrderDeta
                 discountAmount: item.discount_amount,
                 productName: product?.name || '알 수 없는 상품',
                 productImage: product?.image || "/images/review/product3.jpg",
+                has_review: item.has_review
             }
         });
 
