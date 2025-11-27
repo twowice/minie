@@ -6,18 +6,19 @@ import { AspectRatio, Box, Container, SimpleGrid, Text } from '@chakra-ui/react'
 // import items from '@/data/items.json'; //더미데이터
 import { useEffect, useState } from 'react';
 import PlainPagination from '@/components/Pagination';
+import { Product } from '../api/products/product';
 
 const ITEMS_PER_PAGE = 8;
 export default function Suncare() {
-   const [filterItem, setFilterItem] = useState([]);
-   const [item, setItem] = useState([]);
+   const [filterItem, setFilterItem] = useState<Product[]>([]);
+   const [item, setItem] = useState<Product[]>([]);
 
-   const [currentCategory, setCurrentCategory] = useState('선케어');
+   const [currentCategory, setCurrentCategory] = useState<string>('선케어');
 
-   const [currentPage, setCurrentPage] = useState(1);
+   const [currentPage, setCurrentPage] = useState<number>(1);
 
-   const [isLoading, setIsLoading] = useState(true);
-   const [error, setError] = useState(null);
+   const [isLoading, setIsLoading] = useState<boolean>(true);
+   const [error, setError] = useState<string | null>(null);
 
    useEffect(() => {
       const fetchProducts = async () => {
@@ -28,10 +29,10 @@ export default function Suncare() {
             }
             const data = await response.json();
 
-            const productList = data.products || [];
+            const productList: Product[] = data.products || [];
             setItem(productList);
             setFilterItem(productList);
-         } catch (err: any) {
+         } catch (err) {
             setError(err.message);
          } finally {
             setIsLoading(false);
@@ -52,7 +53,7 @@ export default function Suncare() {
 
    const emptySlots = Array.from({ length: ITEMS_PER_PAGE - currentItem.length });
 
-   const handlePageChange = (pages: any) => {
+   const handlePageChange = (pages: number) => {
       setCurrentPage(pages);
       window.scrollTo({ top: 0, behavior: 'smooth' });
    };
@@ -65,7 +66,7 @@ export default function Suncare() {
          <FilterBar category={currentCategory} onDataFiltered={setFilterItem} list={item} />
          <SimpleGrid m={'0 auto'} minChildWidth={'250px'} gap={'8px'} minH={'500px'} mt={4}>
             {currentItem.length > 0 ? (
-               currentItem.map((product: any) => (
+               currentItem.map(product => (
                   <Box key={product.id} h={'100%'}>
                      <ShoppingItem item={product} />
                   </Box>

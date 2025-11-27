@@ -21,12 +21,27 @@ import { signInWithGoogle } from "@/lib/minie/authAPI"; // 구글로 로그인 �
 
 import { useUser } from "@/context/UserContext"; // 2025-11-19
 
+import { useRef } from "react"
+import ReCAPTCHA from "react-google-recaptcha"; // 2025-11-26 reCAPTCHA
+
 export default function LoginPage() {
   const [email, setEmail] = useState(""); // 아이디
   const [password, setPassword] = useState(""); // 비밀번호
   const [error, setError] = useState(""); // 에러 메세지 출력을 위한 상태
   const router = useRouter(); // 라우터 변수
   const { setUser } = useUser(); // 2025-11-19
+
+  // reCAPTCHA 관련 상태 및 ref 추가
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+  // CAPTCHA 검증 완료 시 호출되는 함수 추가
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
+    if (token) {
+      setError(""); // CAPTCHA 통과 시 에러 메시지 제거
+    }
+  };
 
   // 에러 메시지 한국어 변환
   const getErrorMessage = (errorCode: string): string => {
@@ -66,6 +81,13 @@ export default function LoginPage() {
   // EMAIL/PW 로그인 비동기 함수
   const handleEmailLogin = async () => {
     setError("");
+
+    // CAPTCHA 검증 확인 추가
+    if (!captchaToken) {
+      setError("로봇이 아님을 인증해주세요.");
+      return;
+    }
+    
     try {
       // 1. Firebase 로그인
       const userCredential = await signInWithEmailAndPassword(
@@ -143,7 +165,7 @@ export default function LoginPage() {
       {/* 로그인 컨테이너 */}
       <Container maxW="md">
         {/* 세로형 책장 */}
-        <VStack gap={4}>
+        <VStack gap={6}>
           {/* 첫 번째 책꽃이(제목) */}
           <Box display="flex" alignItems="center" justifyContent="center">
             <Heading
@@ -162,49 +184,53 @@ export default function LoginPage() {
 
           {/* 두 번째 책꽃이(ID,PW) */}
           <Box w="full">
-            <VStack gap={0} align="stretch">
-              <Input
-                placeholder="이메일 형식의 아이디를 입력해주세요."
-                borderTopRadius={4}
-                borderBottomRadius={0} // 아래 모서리 각지게
-                color="#000000" // 텍스트 색상
-                borderColor="rgba(0, 0, 0, 0.3)" // 바깥 선 검정색에 투명도 30%
-                height="56px"
-                fontSize="16px"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                _focus={{
-                  // 차크라 ui의 클릭시 스타일 변경 문법 _focus={{, , ,}}
-                  borderColor: "#FA6D6D", // 클릭시 외곽 색상 변경
-                  outline: "none", // 기본 회색 그림자 없애기
-                  borderWidth: "2px", // 테두리 굵기
-                }}
-              />
-              <Input
-                type="password"
-                placeholder="비밀번호 (8~12자, 영문+숫자+특수문자)"
-                borderBottomRadius={4}
-                borderTopRadius={0}
-                borderTop="none"
-                color="#000000"
-                borderColor="rgba(0, 0, 0, 0.3)"
-                height="56px"
-                fontSize="16px"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                _focus={{
-                  borderColor: "#FA6D6D",
-                  outline: "none",
-                  borderWidth: "2px",
-                  borderTop: "2px solid #FA6D6D",
-                }}
-              />
-              {error && (
-                <Text fontSize="sm" color="red.500">
-                  {error}
-                </Text>
-              )}
-            </VStack>
+            {/* from 안에서 enter는 submit 이벤트를 발생시킴, 기본적으로 새로고침 되는 로직을 막아서 데이터를 지킴 */}
+            <form onSubmit={(e) => {e.preventDefault(); handleEmailLogin();}}>
+              <VStack gap={0} align="stretch">
+                <Input
+                  placeholder="이메일 형식의 아이디를 입력해주세요."
+                  borderTopRadius={4}
+                  borderBottomRadius={0} // 아래 모서리 각지게
+                  color="#000000" // 텍스트 색상
+                  borderColor="rgba(0, 0, 0, 0.3)" // 바깥 선 검정색에 투명도 30%
+                  height="56px"
+                  fontSize="16px"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  _focus={{
+                    // 차크라 ui의 클릭시 스타일 변경 문법 _focus={{, , ,}}
+                    borderColor: "#FA6D6D", // 클릭시 외곽 색상 변경
+                    outline: "none", // 기본 회색 그림자 없애기
+                    borderWidth: "2px", // 테두리 굵기
+                  }}
+                />
+                <Input
+                  type="password"
+                  placeholder="비밀번호 (8~12자, 영문+숫자+특수문자)"
+                  borderBottomRadius={4}
+                  borderTopRadius={0}
+                  borderTop="none"
+                  color="#000000"
+                  borderColor="rgba(0, 0, 0, 0.3)"
+                  height="56px"
+                  fontSize="16px"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  _focus={{
+                    borderColor: "#FA6D6D",
+                    outline: "none",
+                    borderWidth: "2px",
+                    borderTop: "2px solid #FA6D6D",
+                  }}
+                />
+                {error && (
+                  <Text fontSize="sm" color="red.500">
+                    {error}
+                  </Text>
+                )}
+              </VStack>
+               <button type="submit" style={{ display: "none" }} />
+            </form>
           </Box>
 
           {/* 세 번째 책꽃이(회원가입 버튼) */}
@@ -225,6 +251,18 @@ export default function LoginPage() {
                 </Text>
               </Link>
             </Flex>
+          </Box>
+
+          {/* reCAPTCHA 추가 */}
+          <Box w="full" display="flex" justifyContent="center">
+            <Box transform="scale(1.27)" transformOrigin="center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                onChange={handleCaptchaChange}
+                onExpired={() => setCaptchaToken(null)}
+              />
+            </Box>
           </Box>
 
           {/* 네 번째 책꽃이(로그인 버튼) */}
@@ -277,42 +315,6 @@ export default function LoginPage() {
                 <FcGoogle style={{ width: "24px", height: "24px" }} />
               </Box>
               Google 로그인
-            </Button>
-          </Box>
-
-          {/* 일곱 번째 책꽃이(카카오 로그인) */}
-          <Box w="full">
-            <Button
-              w="full"
-              bg="#FEE500"
-              borderRadius="4px"
-              fontSize="16px"
-              color="rgba(0, 0, 0, 0.8)"
-              height="48px"
-              fontWeight="bold"
-            >
-              <Box position="absolute" left="16px">
-                <RiKakaoTalkFill style={{ width: "24px", height: "24px" }} />
-              </Box>
-              Kakao 로그인
-            </Button>
-          </Box>
-
-          {/* 여덟 번째 책꽃이(네이버 로그인) */}
-          <Box w="full">
-            <Button
-              w="full"
-              bg="#03C75A"
-              borderRadius="4px"
-              fontSize="16px"
-              color="#ffffff"
-              height="48px"
-              fontWeight="bold"
-            >
-              <Box position="absolute" left="20px">
-                <SiNaver style={{ width: "16px", height: "16px" }} />
-              </Box>
-              Naver 로그인
             </Button>
           </Box>
         </VStack>

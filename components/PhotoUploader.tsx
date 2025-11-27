@@ -8,7 +8,10 @@ interface PhotoUploaderProps {
   onChange?: (file: File | null) => void;
 }
 
-export default function PhotoUploader({ initialPhotoURL = null, onChange }: PhotoUploaderProps) {
+export default function PhotoUploader({
+  initialPhotoURL = null,
+  onChange,
+}: PhotoUploaderProps) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoURL, setPhotoURL] = useState<string | null>(initialPhotoURL);
 
@@ -64,6 +67,7 @@ export default function PhotoUploader({ initialPhotoURL = null, onChange }: Phot
         </Box>
       ) : (
         <Button
+          bg={"white"}
           w="80px"
           h="80px"
           border="1px solid #B5B5B5"

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     const uid = request.headers.get('X-User-ID');
 
-    if(uid === null || uid === ""){
+    if (uid === null || uid === "") {
         return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
     }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         if (error) {
             console.error("Error fetching order:", error);
             if (error.code === 'PGRST116') {
-              return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+                return NextResponse.json({ message: 'Order not found' }, { status: 404 });
             }
             throw new Error(`Failed to fetch order: ${error.message}`);
         }
@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
             paymentType: order.payment_type,
             totalPrice: order.total_price,
             totalDiscountAmount: order.total_discount_amount,
-            status : order.status,
-            createdAt : order.created_at
+            status: order.status,
+            createdAt: order.created_at
         }, { status: 200 });
 
     } catch (error) {
@@ -58,9 +58,9 @@ export async function POST(request: Request) {
         const { order_id, order_name, payment_type, total_price, total_discount_amount, cart_items } = await request.json();
         const uid = request.headers.get('X-User-ID');
 
-    if(uid === null || uid === ""){
-        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
-    }
+        if (uid === null || uid === "") {
+            return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+        }
 
         if (!order_id || !total_price || !cart_items || cart_items.length === 0) {
             return NextResponse.json({ message: 'Missing required order details' }, { status: 400 });
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
         //상세 상품 정보 삽입
         const orderDetailsToInsert = cart_items.map((item: CartItem) => ({
             order_number: order_id,
-            product_id: item.id, 
+            product_id: item.id,
             product_num: item.num,
             price: item.price,
             is_discounted: item.isDiscounted,
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
             throw new Error(`Failed to create order details: ${orderDetailsError.message}`);
         }
 
-        return NextResponse.json({success: true})
+        return NextResponse.json({ success: true })
 
     } catch (error) {
         console.error("API /api/orders POST Error:", error);
@@ -116,17 +116,17 @@ export async function POST(request: Request) {
     }
 }
 
-export async function PATCH(request: NextRequest){
-    try{
+export async function PATCH(request: NextRequest) {
+    try {
         const uid = request.headers.get('X-User-ID');
 
         console.log(`[server] api/order PATCH \tuid: ${uid}`)
 
-        if(uid === null || uid === ""){
-        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
-    }
+        if (uid === null || uid === "") {
+            return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+        }
 
-        const {order_id: orderId, payment_type: paymentType, order_status: status} = await request.json() 
+        const { order_id: orderId, payment_type: paymentType, order_status: status } = await request.json()
 
         console.log(`[server] api/order PATCH \torder_id : ${orderId}\tpayment_type: ${paymentType}\torder_status: ${status}`)
 
@@ -135,38 +135,38 @@ export async function PATCH(request: NextRequest){
             .update({
                 status: status,
                 payment_type: paymentType,
-                updated_at:new Date().toISOString()
+                updated_at: new Date().toISOString()
             })
             .eq('order_number', orderId);
 
-       if(updateError){
+        if (updateError) {
             console.error("Error pathing order details:", updateError);
             throw new Error(`Failed to update order details: ${updateError}`);
-       }
+        }
 
-       return NextResponse.json({success: true})
-    }catch(error){
+        return NextResponse.json({ success: true })
+    } catch (error) {
         console.error("API /api/orders PATCH Error:", error);
         return NextResponse.json({ message: error || 'Internal server error' }, { status: 500 });
     }
 }
 
 export async function DELETE(request: NextRequest) {
-    try{
-        const {order_id: orderId} = await request.json()
+    try {
+        const { order_id: orderId } = await request.json()
 
-        const {error} = await supabase
-        .from('orders')
-        .delete()
-        .eq('order_number', orderId)
+        const { error } = await supabase
+            .from('orders')
+            .delete()
+            .eq('order_number', orderId)
 
-        if(error){
+        if (error) {
             console.error("Error pathing order details:", error);
             throw new Error(`Failed to update order details: ${error}`);
         }
-        
-        return NextResponse.json({success: true})
-    }catch(error){
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
         console.error("API /api/orders Delete Error:", error);
         return NextResponse.json({ message: error || 'Internal server error' }, { status: 500 });
     }
