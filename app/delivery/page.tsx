@@ -160,6 +160,12 @@ export default function Delivery() {
         <HStack gap={4}>
           <NativeSelect.Root size="sm" flex={1}>
             <NativeSelect.Field
+              css={{
+                "& option": {
+                  backgroundColor: "white",
+                  color: "black",
+                },
+              }}
               name="status"
               value={filters.status}
               onChange={handleFilterChange}
@@ -195,6 +201,12 @@ export default function Delivery() {
         <HStack gap={4}>
           <NativeSelect.Root size="sm" w="120px">
             <NativeSelect.Field
+              css={{
+                "& option": {
+                  backgroundColor: "white",
+                  color: "black",
+                },
+              }}
               name="searchType"
               value={filters.searchType}
               onChange={handleFilterChange}
