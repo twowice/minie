@@ -42,11 +42,6 @@ export default function Page() {
       const timer = setTimeout(() => { router.push("/login") }, 1000)
       return () => clearTimeout(timer);
     }
-
-    if (!isAdmin) {
-      alert("해당 페이지에 대한 접근 권한이 없습니다.\n메인페이지로 돌아갑니다.");
-      router.replace("/");
-    }
     setLoading(false);
   }, [user, isAdmin && true]);
 

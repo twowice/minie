@@ -101,12 +101,14 @@ export default function Header() {
       ? [
           //로그인 상태인 관리자일 때
           { href: "/mypage", label: "마이페이지" },
+          { href: "/reviews", label: "리뷰" },
           { href: "/inquiry", label: "1:1문의" },
           { href: "/delivery", label: "배송관리" },
         ]
       : [
           // 로그인 상태인 일반 회원일 때
           { href: "/mypage", label: "마이페이지" },
+          { href: "/reviews", label: "리뷰" },
           { href: "/inquiry", label: "1:1문의" },
         ]
     : [
@@ -114,6 +116,7 @@ export default function Header() {
         { href: "/login", label: "로그인" },
         { href: "/signup", label: "회원가입" },
         { href: "/mypage", label: "마이페이지" },
+        { href: "/reviews", label: "리뷰" },
         { href: "/inquiry", label: "1:1문의" },
       ];
   const handleLogout = async () => {
