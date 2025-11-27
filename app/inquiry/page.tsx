@@ -16,6 +16,7 @@ import {
   NativeSelectIndicator,
   Flex,
   Box,
+  Spinner
 } from "@chakra-ui/react";
 import { useUser } from "@/context/UserContext";
 
@@ -30,12 +31,33 @@ export default function Page() {
   const [contentError, setContentError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   /* 관리자 여부 */
   const { user, isAdmin } = useUser();
   useEffect(() => {
-    if (!user) router.push("/login");
-  });
+    if (user === undefined) return;
+    if (user === null) {
+      setLoading(true);
+      const timer = setTimeout(() => { router.push("/login") }, 1000)
+      return () => clearTimeout(timer);
+    }
+
+    if (!isAdmin) {
+      alert("해당 페이지에 대한 접근 권한이 없습니다.\n메인페이지로 돌아갑니다.");
+      router.replace("/");
+    }
+    setLoading(false);
+  }, [user, isAdmin && true]);
+
+  if (loading) {
+    return (
+      <VStack colorPalette="pink">
+        <Spinner color="colorPalette.600" />
+        <Text color="colorPalette.600">Loading...</Text>
+      </VStack>
+    );
+  }
 
   /* REQUEST */
   const handleSend = async () => {
@@ -276,10 +298,10 @@ export default function Page() {
                     naver.com
                   </option>
                   <option
-                    value="hanmail.net"
+                    value="gmail.com"
                     style={{ backgroundColor: "#F3F3F3" }}
                   >
-                    hanmail.net
+                    gmail.com
                   </option>
                   <option
                     value="daum.net"
