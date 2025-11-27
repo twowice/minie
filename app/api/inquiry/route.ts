@@ -3,11 +3,12 @@ import { supabase } from "@/lib/supabase";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
 import { NextRequest } from "next/server";
+import { sendMail } from "@/lib/mail";
 
 export async function POST(req: NextRequest) {
     try {
         const uid = req.headers.get('X-User-ID');
-        if(uid === null || uid === ""){
+        if (uid === null || uid === "") {
             return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
         }
         const formData = await req.formData();
@@ -38,19 +39,8 @@ export async function POST(req: NextRequest) {
             await writeFile(filePath, buffer);
             image_url = `/images/inquiry/${fileName}`;
         }
-
-        const transport = nodemailer.createTransport({
-            host: "smtp.naver.com",
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
-
+        /* 이메일 전송 */
         let attachments: any[] = [];
-
         if (file && typeof (file as File).arrayBuffer === "function") {
             const arrayBuffer = await (file as File).arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
@@ -62,20 +52,26 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: process.env.EMAIL_USER,
-            subject: `[1:1 문의] ${category}`,
-            html: `
-                <h2>📩새로운 문의가 도착했습니다</h2>
+        try {
+            await sendMail(
+                process.env.EMAIL_USER,
+                `[1:1 문의] ${category}`,
+                `
+                <h2>📩 새로운 문의가 도착했습니다</h2>
                 <p><strong>카테고리:</strong> ${category}</p>
-                <p><strong>내용:</strong><br>${content}</p>
-                <p><strong>사용자 이메일:</strong> ${email}</p>
-            `,
-            attachments,
-        };
+                <p><strong>내용:</strong></p>
+                <div style="padding: 15px; background: #f6f6f6; border-radius: 8px;">
+                    ${content}
+                </div>
+                <p><strong>사용자 이메일:</strong>${email}</p>
+                `,
+                attachments
+            );
 
-        await transport.sendMail(mailOptions);
+            console.log("이메일 발송 완료");
+        } catch (e: any) {
+            console.error("이메일 전송 실패:", e)
+        }
 
         // DB INSERT
         let result;
