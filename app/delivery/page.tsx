@@ -3,7 +3,6 @@
 import {
   Box,
   Table,
-  Badge,
   Heading,
   NativeSelect,
   Input,
@@ -20,7 +19,6 @@ import {
   getAllOrdersCount,
   updateOrderStatus,
 } from "@/lib/minie/orderAPI";
-import { numberFormatter } from "@/utils/formatter/numberFomatter";
 import OrderItemForManage from "@/components/OrderItemForManage";
 import { toaster } from "@/components/ui/toaster";
 
@@ -75,7 +73,6 @@ export default function Delivery() {
 
     fetchOrdersAndCount();
   }, [currentPage, searchTrigger]);
-
   const handleFilterChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
