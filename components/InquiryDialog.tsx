@@ -43,7 +43,7 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
             const result = await res.json();
             console.log("서버 응답:", result);
 
-            if (result.message === "답변 저장 성공") {
+            if (result.message === "답변 저장 및 이메일 발송 완료") {
                 closeBtnRef.current?.click();
                 onSuccess?.();
                 onUpdate?.();
