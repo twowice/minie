@@ -4,6 +4,7 @@ import { Box, Container, Flex, Heading, Link, Spinner } from "@chakra-ui/react";
 import { useUser } from "@/context/UserContext";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ColorModeButton } from "@/components/ui/color-mode";
 
 export default function DeliveryLayout({
   children,
@@ -73,6 +74,8 @@ export default function DeliveryLayout({
             배송처리
           </Box>
         </Link>
+
+        <ColorModeButton />
         <Link
           href="/"
           bg={"white"}

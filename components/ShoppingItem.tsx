@@ -23,18 +23,48 @@ const ShoppingItemSkeleton = () => {
          justifyContent={'space-between'}
       >
          <AspectRatio ratio={1} w={'100%'}>
-            <Skeleton w={'100%'} h={'100%'} />
+            <Skeleton
+               w={'100%'}
+               h={'100%'}
+               style={{ '--start-color': '#F7FAFC', '--end-color': '#EDF2F7' } as React.CSSProperties}
+            />
          </AspectRatio>
          <Box p={4} w={'100%'} h={'100%'}>
             <Flex justifyContent={'space-between'} alignItems={'center'} mb={1}>
-               <Skeleton h={'30px'} w={'50%'} borderRadius={'4px'} />
-               <Skeleton h={'30px'} w={'40%'} borderRadius={'4px'} />
+               <Skeleton
+                  h={'30px'}
+                  w={'50%'}
+                  borderRadius={'4px'}
+                  style={{ '--start-color': '#F7FAFC', '--end-color': '#EDF2F7' } as React.CSSProperties}
+               />
+               <Skeleton
+                  h={'30px'}
+                  w={'40%'}
+                  borderRadius={'4px'}
+                  style={{ '--start-color': '#F7FAFC', '--end-color': '#EDF2F7' } as React.CSSProperties}
+               />
             </Flex>
             <Flex justifyContent={'space-between'} alignItems={'center'} mb={'8px'}>
-               <Skeleton h={'24px'} w={'40%'} borderRadius={'4px'} />
-               <Skeleton h={'24px'} w={'30%'} borderRadius={'full'} />
+               <Skeleton
+                  h={'24px'}
+                  w={'40%'}
+                  borderRadius={'4px'}
+                  style={{ '--start-color': '#F7FAFC', '--end-color': '#EDF2F7' } as React.CSSProperties}
+               />
+               <Skeleton
+                  h={'24px'}
+                  w={'30%'}
+                  borderRadius={'full'}
+                  style={{ '--start-color': '#F7FAFC', '--end-color': '#EDF2F7' } as React.CSSProperties}
+               />
             </Flex>
-            <Skeleton h={'40px'} w={'100%'} borderRadius={'4px'} mb={2} />
+            <Skeleton
+               h={'40px'}
+               w={'100%'}
+               borderRadius={'4px'}
+               mb={2}
+               style={{ '--start-color': '#F7FAFC', '--end-color': '#EDF2F7' } as React.CSSProperties}
+            />
          </Box>
       </VStack>
    );

@@ -42,6 +42,12 @@ export default function OrderItemForManage({
       <Table.Cell>
         <NativeSelect.Root size="sm">
           <NativeSelect.Field
+            css={{
+              "& option": {
+                backgroundColor: "white",
+                color: "black",
+              },
+            }}
             value={order.status}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               handleStatusChange(
