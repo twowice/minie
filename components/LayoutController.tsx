@@ -33,7 +33,7 @@ export default function LayoutController({
       <Box as="main" display="flex" flexDirection="column" flex="1">
         {children}
       </Box>
-      <BottomBtn />
+      {/* <BottomBtn /> */}
       {!shouldHide && <Footer />}
     </Flex>
   );
