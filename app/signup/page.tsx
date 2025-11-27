@@ -569,6 +569,7 @@ const handleSignUP = async () => {
                 fontSize="16px"
                 height="48px"
                 onClick={() => router.push("/login")} // 취소 클릭 시 로그인 화면으로 이동
+                color="#000000"
               >
                 취소
               </Button>
