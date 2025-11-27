@@ -16,7 +16,7 @@ import {
    useDisclosure,
 } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
-import { MdFilterListAlt } from 'react-icons/md';
+import { TiFilter } from 'react-icons/ti';
 import Segment from './ui/Segment';
 // import items from '@/data/items.json'; //더미데이터
 import { RiResetLeftFill } from 'react-icons/ri';
@@ -259,7 +259,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }: Filte
                      setDialog(prev => !prev);
                   }}
                >
-                  <MdFilterListAlt />
+                  <TiFilter />
                </Button>
                <Button
                   color={male ? 'white' : 'rgba(0,0,0,0.32)'}
