@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import BottomBtn from "@/components/BottomBtn";
 
 export default function LayoutController({
   children,
@@ -32,6 +33,7 @@ export default function LayoutController({
       <Box as="main" display="flex" flexDirection="column" flex="1">
         {children}
       </Box>
+      <BottomBtn />
       {!shouldHide && <Footer />}
     </Flex>
   );

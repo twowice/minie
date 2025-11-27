@@ -5,7 +5,6 @@ import { Croissant_One } from "next/font/google";
 import { Provider } from "../components/ui/provider";
 import { CartProvider } from "@/contexts/ShoppingCartContext";
 import { Toaster } from "@/components/ui/toaster";
-
 // 2025-11-19 session 관리를 위해 추가 (박영준)
 import { UserProvider } from "@/context/UserContext";
 import LayoutController from "@/components/LayoutController";

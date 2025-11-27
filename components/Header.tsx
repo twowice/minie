@@ -101,7 +101,7 @@ export default function Header() {
       ? [
           //로그인 상태인 관리자일 때
           { href: "/mypage", label: "마이페이지" },
-          { href: "/mypage/inquiry", label: "1:1문의" },
+          { href: "/inquiry", label: "1:1문의" },
           { href: "/delivery", label: "배송관리" },
         ]
       : [

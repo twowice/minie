@@ -5,37 +5,59 @@ import { useRouter } from 'next/navigation';
 import PhotoUploader from '../../components/PhotoUploader';
 import { fetchWithAuth } from '@/lib/minie/authAPI';
 import {
-   Container,
-   Text,
-   HStack,
-   VStack,
-   Textarea,
-   Button,
-   Input,
-   NativeSelect,
-   NativeSelectIndicator,
-   Flex,
-   Box,
-} from '@chakra-ui/react';
-import { useUser } from '@/context/UserContext';
+  Container,
+  Text,
+  HStack,
+  VStack,
+  Textarea,
+  Button,
+  Input,
+  NativeSelect,
+  NativeSelectIndicator,
+  Flex,
+  Box,
+  Spinner
+} from "@chakra-ui/react";
+import { useUser } from "@/context/UserContext";
 
 export default function Page() {
-   const [photo, setPhoto] = useState<File | null>(null);
-   const [photoURL, setPhotoURL] = useState<string | null>(null);
-   const [category, setCategory] = useState('');
-   const [content, setContent] = useState('');
-   const [email, setEmail] = useState('');
-   const [domain, setDomain] = useState('');
-   const [categoryError, setCategoryError] = useState(false);
-   const [contentError, setContentError] = useState(false);
-   const [emailError, setEmailError] = useState(false);
-   const router = useRouter();
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
+  const [category, setCategory] = useState("");
+  const [content, setContent] = useState("");
+  const [email, setEmail] = useState("");
+  const [domain, setDomain] = useState("");
+  const [categoryError, setCategoryError] = useState(false);
+  const [contentError, setContentError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-   /* 관리자 여부 */
-   const { user, isAdmin } = useUser();
-   useEffect(() => {
-      if (!user) router.push('/login');
-   });
+  /* 관리자 여부 */
+  const { user, isAdmin } = useUser();
+  useEffect(() => {
+    if (user === undefined) return;
+    if (user === null) {
+      setLoading(true);
+      const timer = setTimeout(() => { router.push("/login") }, 1000)
+      return () => clearTimeout(timer);
+    }
+
+    if (!isAdmin) {
+      alert("해당 페이지에 대한 접근 권한이 없습니다.\n메인페이지로 돌아갑니다.");
+      router.replace("/");
+    }
+    setLoading(false);
+  }, [user, isAdmin && true]);
+
+  if (loading) {
+    return (
+      <VStack colorPalette="pink">
+        <Spinner color="colorPalette.600" />
+        <Text color="colorPalette.600">Loading...</Text>
+      </VStack>
+    );
+  }
 
    /* REQUEST */
    const handleSend = async () => {
