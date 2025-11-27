@@ -22,7 +22,12 @@ export default function DeliveryLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (user !== null && !user.is_admin) {
+    if (user === null) {
+      alert(
+        "해당 페이지에 대한 접근 권한이 없습니다.\n메인페이지로 돌아갑니다."
+      );
+      router.replace("/");
+    } else if (user !== null && !user.is_admin) {
       alert(
         `${user?.name}님께서는 해당 페이지에 대한 접근 권한이 없습니다.\n메인페이지로 돌아갑니다.`
       );
