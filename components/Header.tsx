@@ -97,11 +97,18 @@ export default function Header() {
 
   // 로그인 상태에 따라 다른 링크 보여주기 2025-11-19 시작 (박영준)
   const topBarLinks = user
-    ? [
-        // 로그인 상태일 때
-        { href: "/mypage", label: "마이페이지" },
-        { href: "/inquiry", label: "1:1문의" },
-      ]
+    ? user.is_admin
+      ? [
+          //로그인 상태인 관리자일 때
+          { href: "/mypage", label: "마이페이지" },
+          { href: "/mypage/inquiry", label: "1:1문의" },
+          { href: "/delivery", label: "배송관리" },
+        ]
+      : [
+          // 로그인 상태인 일반 회원일 때
+          { href: "/mypage", label: "마이페이지" },
+          { href: "/inquiry", label: "1:1문의" },
+        ]
     : [
         // 로그아웃 상태일 때
         { href: "/login", label: "로그인" },

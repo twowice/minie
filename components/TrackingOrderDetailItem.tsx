@@ -55,8 +55,8 @@ export default function TrackingOrderDetailItem({
         {numberFormatter.format(order.price * order.productNum)}원
       </Box>
       <Stack flex="1" justifyContent={"center"} alignItems={"center"}>
-        <Box>{status === "주문완료" ? (localHasReview ? "리뷰완료" : "배송완료") : status}</Box>
-        {status === "주문완료" && !localHasReview && (
+        <Box>{localHasReview ? "리뷰완료" : status}</Box>
+        {status === "배송완료" && !localHasReview && (
           /* Add by CKH */
           <ReviewAddDialog
             id={order.id}

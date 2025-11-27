@@ -35,4 +35,13 @@ export type PaginatedOrderDetailsResponse = {
     totalCount: number
     currentPage: number
     totalPages: number
-};
+}
+
+export type OrderForManage = {
+    id: string;
+    user: string;
+    date: string;
+    orderName: string;
+    totalPrice: number;
+    status: "주문완료" | "배송중" | "배송완료" | "주문취소" | "결제 전";
+}
