@@ -24,7 +24,7 @@ export default function Page() {
     cartItems.length > 0 && cartItems.every((item) => item.checked);
 
   // 구매하기 핸들러
-  const handleBuyClick = (e) => {
+  const handleBuyClick = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
 
