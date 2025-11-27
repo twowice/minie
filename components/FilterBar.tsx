@@ -309,14 +309,14 @@ export default function FilterBar({ onDataFiltered, category, list = [] }: Filte
             </Box>
             <Box display={'flex'} gap={'16px'} fontSize={'12px'} alignItems={'center'} color={'rgba(0,0,0,0.4)'}>
                <Text>총 {categoryItems.length}개</Text>
-               <NativeSelect.Root
-                  size={'xs'}
-                  w={'90px'}
-                  variant={'plain'}
-                  value={sortOrder}
-                  onChange={e => setSortOrder(e.target.value)}
-               >
-                  <NativeSelect.Field padding={'2px 4px'} h={'24px'} color={'rgba(0,0,0,0.4)'}>
+               <NativeSelect.Root size={'xs'} w={'90px'} variant={'plain'}>
+                  <NativeSelect.Field
+                     padding={'2px 4px'}
+                     h={'24px'}
+                     color={'rgba(0,0,0,0.4)'}
+                     value={sortOrder}
+                     onChange={e => setSortOrder(e.target.value)}
+                  >
                      <option value="낮은 가격 순">낮은 가격 순</option>
                      <option value="높은 가격 순">높은 가격 순</option>
                   </NativeSelect.Field>
@@ -324,7 +324,7 @@ export default function FilterBar({ onDataFiltered, category, list = [] }: Filte
                </NativeSelect.Root>
             </Box>
          </Box>
-         <Dialog.Root placement={'center'} open={open} onClose={onClose}>
+         <Dialog.Root placement={'center'} open={open} onOpenChange={isOpen => !isOpen && onClose()}>
             <Dialog.Backdrop />
             <Dialog.Positioner>
                <Dialog.Content bg="white" color="black">

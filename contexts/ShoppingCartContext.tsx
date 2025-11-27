@@ -44,8 +44,8 @@ interface CartContextDataType {
   isItemCart: (itemId: number) => boolean;
 
   // 장바구니 액션
-  addToCart: (item: CartItem) => Promise<void>;
-  buyNow: (item: CartItem) => void;
+  addToCart: (item: any) => Promise<void>;
+  buyNow: (item: any) => void;
   removeItem: (itemId: number) => void;
   clear: (type: string) => void;
   updateQuantity: (itemId: number, type: "plus" | "minus") => void;
@@ -54,7 +54,7 @@ interface CartContextDataType {
   resetDirectOrder: () => void;
 
   // '좋아요' 액션
-  toggleLike: (item: CartItem) => void;
+  toggleLike: (item: any) => void;
 
   // 체크박스 액션
   toggleChecked: (id: number, type: "cart" | "like") => void;
@@ -157,7 +157,7 @@ export function CartProvider({ children }: CartProviderProps) {
 
     const norm = {
       id: Number(item.id),
-      title: item.name || "",
+      title: item.title || "",
       brand: item.brand || "",
       image:
         item.image ||
