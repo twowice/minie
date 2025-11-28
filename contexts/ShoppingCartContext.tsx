@@ -157,7 +157,7 @@ export function CartProvider({ children }: CartProviderProps) {
 
     const norm = {
       id: Number(item.id),
-      title: item.title || "",
+      title: item.name || "",
       brand: item.brand || "",
       image:
         item.image ||

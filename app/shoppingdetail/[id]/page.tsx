@@ -108,7 +108,7 @@ export default function ShoppingDetail() {
 
     return {
       id: product.id,
-      title: product.name,
+      name: product.name,
       brand: product.brand,
       image: product.image,
 
