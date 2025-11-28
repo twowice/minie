@@ -35,7 +35,7 @@ export default function Page() {
       resetFilters();
       setLoading(true);
       try {
-         const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice?is_admin=${isAdmin}`);
+         const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/inquiry/notice?is_admin=${isAdmin}`);
          const result = await res.json();
 
          if (res.ok && result.data) {
@@ -55,7 +55,7 @@ export default function Page() {
       setLoading(true);
       try {
          const res = await fetchWithAuth(
-            `http://localhost:3000/api/inquiry/notice?months=${months}&is_admin=${isAdmin}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/inquiry/notice?months=${months}&is_admin=${isAdmin}`,
          );
          const result = await res.json();
 
@@ -91,7 +91,7 @@ export default function Page() {
 
       try {
          const res = await fetchWithAuth(
-            `http://localhost:3000/api/inquiry/notice?start=${startISO}&end=${endISO}&is_admin=${isAdmin}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/inquiry/notice?start=${startISO}&end=${endISO}&is_admin=${isAdmin}`,
          );
          const result = await res.json();
 

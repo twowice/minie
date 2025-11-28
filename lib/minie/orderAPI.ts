@@ -11,7 +11,7 @@ export async function addNewOrder(
     checkedCartItems: CartItem[],
 ): Promise<boolean> {
     try {
-        const response = await fetchWithAuth("http://localhost:3000/api/order", {
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/order`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -41,7 +41,7 @@ export async function addNewOrder(
 export async function updateOrderStatusAndPaymentType(orderId: string, paymentType: string, status: string): Promise<boolean> {
     try {
         console.log(`[client] orderid: ${orderId}\tpaymentType: ${paymentType}]\tstatus: ${status}`)
-        const response = await fetchWithAuth("http://localhost:3000/api/order", {
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/order`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ order_id: orderId, payment_type: paymentType, order_status: status })
@@ -64,7 +64,7 @@ export async function updateOrderStatusAndPaymentType(orderId: string, paymentTy
 
 export async function deleteOrder(orderId: string): Promise<boolean> {
     try {
-        const response = await fetchWithAuth("http://localhost:3000/api/order", {
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/order`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ order_id: orderId })
@@ -85,7 +85,7 @@ export async function deleteOrder(orderId: string): Promise<boolean> {
 
 export async function getOrderExcludeOrderDetail(orderId: string): Promise<Order | null> {
     try {
-        const response = await fetchWithAuth(`http://localhost:3000/api/order?order-id=${orderId}`, {
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/order?order-id=${orderId}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         })
@@ -174,7 +174,7 @@ export async function getOrderDetailsCount(orderId: string, limit: number = 5): 
 
 export async function getOrdersForTracking() {
     try {
-        const response = await fetchWithAuth('http://localhost:3000/api/order/tracking', {
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/order/tracking`, {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         })

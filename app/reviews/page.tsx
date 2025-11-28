@@ -49,7 +49,7 @@ export default function Page() {
       setLoading(true);
       try {
          const res = await fetch(
-            `http://localhost:3000/api/reviews?page=${page}&pageSize=${pageSize}&sort=${sortType}&photo=${photoFilter}&normal=${normalFilter}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/reviews?page=${page}&pageSize=${pageSize}&sort=${sortType}&photo=${photoFilter}&normal=${normalFilter}`,
          );
          const result = await res.json();
 

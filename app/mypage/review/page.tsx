@@ -26,7 +26,7 @@ export default function Page() {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/reviews?user_id=${user?.id}&page=${page}&pageSize=${pageSize}&sort=${sortType}&photo=${photoFilter}&normal=${normalFilter}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reviews?user_id=${user?.id}&page=${page}&pageSize=${pageSize}&sort=${sortType}&photo=${photoFilter}&normal=${normalFilter}`);
       console.log("res:",res)
       const result = await res.json();
 
