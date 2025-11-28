@@ -94,10 +94,10 @@ export default function Page() {
   return (
     <Box>
       {/* 헤더 */}
-      <Text fontSize="14px" mb={1} color="black">
+      <Text fontWeight="bold" fontSize="28px" pb="15px" mb={1} color="#000000">
         상품 리뷰
       </Text>
-      <Text fontSize="16px" color="black" pb="20px" borderBottom="1px solid #D8D8D8">
+      <Text fontSize="16px" color="black" pb="5px" borderBottom="1px solid #D8D8D8">
         <Text as="span" fontSize="32px" fontWeight="bold" color="black">
           {reviewTotalData.totalCount.toLocaleString()}
         </Text>
