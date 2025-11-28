@@ -30,6 +30,7 @@ export default function Page() {
   const [activeMonths, setActiveMonths] = useState<number | null>(null);
   const router = useRouter();
   const { user, isAdmin } = useUser(); //관리자 여부
+
   useEffect(() => { if (!user) router.push("/login"); })
   useEffect(() => { fetchInquiry(); }, []);
   useEffect(() => { if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); } }, [startDate, endDate])
@@ -39,7 +40,7 @@ export default function Page() {
     resetFilters();
     setLoading(true);
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice?is_admin=${isAdmin}`);
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/inquiry/notice?is_admin=${isAdmin}`);
       const result = await res.json();
 
       if (res.ok && result.data) { console.log("응답:", result.data); setInquiry(result.data); }
@@ -53,7 +54,7 @@ export default function Page() {
     setActiveMonths(months);
     setLoading(true);
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice?months=${months}&is_admin=${isAdmin}`);
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/inquiry/notice?months=${months}&is_admin=${isAdmin}`);
       const result = await res.json();
 
       if (res.ok && result.data) { console.log("응답:", result.data); setInquiry(result.data); }
@@ -79,7 +80,7 @@ export default function Page() {
     const endISO = end.toISOString();
 
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/inquiry/notice?start=${startISO}&end=${endISO}&is_admin=${isAdmin}`);
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/inquiry/notice?start=${startISO}&end=${endISO}&is_admin=${isAdmin}`);
       const result = await res.json();
 
       if (res.ok && result.data) {

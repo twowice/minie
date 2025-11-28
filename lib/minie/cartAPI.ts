@@ -5,7 +5,7 @@ import { fetchWithAuth } from "./authAPI";
 
 export async function getCartItems(): Promise<CartItem[]> {
   try {
-    const response = await fetchWithAuth("http://localhost:3000/api/cart", {
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/cart`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
@@ -24,7 +24,7 @@ export async function getCartItems(): Promise<CartItem[]> {
 
 export async function deleteCartItem(id: number): Promise<boolean> {
   try {
-    const response = await fetchWithAuth("http://localhost:3000/api/cart", {
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/cart`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ product_id: id })
@@ -54,7 +54,7 @@ export async function addCartItems(newItems: CartItemPayload[]): Promise<boolean
   }
 
   try {
-    const response = await fetchWithAuth("http://localhost:3000/api/cart", {
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/cart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newItems)
@@ -76,7 +76,7 @@ export async function addCartItems(newItems: CartItemPayload[]): Promise<boolean
 
 export async function deleteAllCartItems(): Promise<boolean> {
   try {
-    const response = await fetchWithAuth("http://localhost:3000/api/cart/delete_all", {
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/delete_all`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     })
@@ -98,7 +98,7 @@ export async function updateCartItems(updatedItems: CartItem[]): Promise<CartIte
   try {
     const updatePromises = updatedItems.map(async (item) => {
       try {
-        const response = await fetchWithAuth("http://localhost:3000/api/cart", {
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/cart`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ product_id: item.id, product_num: item.num }),
