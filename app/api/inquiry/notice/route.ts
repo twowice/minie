@@ -150,10 +150,25 @@ export async function DELETE(req: Request) {
 
     if (oldError) return Response.json({ message: "문의 조회 실패", error: oldError.message }, { status: 500 });
 
+    /* 로컬 이미지 삭제 부분 */
+    // if (oldReview?.image_url) {
+    //   const oldImagePath = path.join(process.cwd(), "public", oldReview.image_url);
+    //   try { await unlink(oldImagePath); }
+    //   catch (e) { console.warn("기존 이미지 삭제 실패:", e); }
+    // }
+
+    /* Supabase 이미지 삭제 부분 */
     if (oldReview?.image_url) {
-      const oldImagePath = path.join(process.cwd(), "public", oldReview.image_url);
-      try { await unlink(oldImagePath); }
-      catch (e) { console.warn("기존 이미지 삭제 실패:", e); }
+      const filePath = oldReview.image_url.split("/inquiry/")[1]; // 경로 추출
+      if (filePath) {
+        const { error: storageError } = await supabase.storage
+          .from("inquiry")
+          .remove([filePath]);
+
+        if (storageError) {
+          console.warn("Supabase 이미지 삭제 실패:", storageError.message);
+        }
+      }
     }
 
     const { error: delError } = await supabase

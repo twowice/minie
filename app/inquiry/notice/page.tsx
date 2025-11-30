@@ -31,7 +31,7 @@ export default function Page() {
   const router = useRouter();
   const { user, isAdmin } = useUser(); //관리자 여부
 
-  useEffect(() => { if (!user) router.push("/login"); })
+  useEffect(() => { if (!user) router.push("/login"); }) // 수정 사항.
   useEffect(() => { fetchInquiry(); }, []);
   useEffect(() => { if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); } }, [startDate, endDate])
 

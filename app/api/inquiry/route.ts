@@ -4,6 +4,7 @@ import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
 import { NextRequest } from "next/server";
 import { sendMail } from "@/lib/mail";
+import { uploadInquiryImage } from "@/lib/uploadToSupabase";
 
 export async function POST(req: NextRequest) {
     try {
@@ -25,20 +26,44 @@ export async function POST(req: NextRequest) {
         console.log("파일:", file);
 
         let image_url = null;
+
+        /* 로컬 이미지 저장 부분 */
+        // if (file && typeof file === "object" && "arrayBuffer" in file) {
+        //     const bytes = await file.arrayBuffer();
+        //     const buffer = Buffer.from(bytes);
+
+        //     const uploadDir = path.join(process.cwd(), "public/images/inquiry");
+        //     await mkdir(uploadDir, { recursive: true });
+
+        //     // 중복 방지
+        //     const fileName = `${Date.now()}_${file.name}`;
+        //     const filePath = path.join(uploadDir, fileName);
+
+        //     await writeFile(filePath, buffer);
+        //     image_url = `/images/inquiry/${fileName}`;
+        // }
+
+        /* Supabase 이미지 저장 부분 */
         if (file && typeof file === "object" && "arrayBuffer" in file) {
-            const bytes = await file.arrayBuffer();
-            const buffer = Buffer.from(bytes);
 
-            const uploadDir = path.join(process.cwd(), "public/images/inquiry");
-            await mkdir(uploadDir, { recursive: true });
+            // 이미지 안전 저장 (공백,콜론,한글/특수문자,연속된_)
+            function sanitizedFileName(filename: string) {
+                return filename
+                .normalize("NFC")
+                .replace(/\s+/g, "_")
+                .replace(/[:]/g, "-")
+                .replace(/[^\w.-]+/g, "")
+                .replace(/_+/g, "_");   
+            }
+            const sanitized = sanitizedFileName((file as File).name);
+            const safeFile = new File([await file.arrayBuffer()], sanitized, {
+                type: (file as File).type,
+            });
 
-            // 중복 방지
-            const fileName = `${Date.now()}_${file.name}`;
-            const filePath = path.join(uploadDir, fileName);
-
-            await writeFile(filePath, buffer);
-            image_url = `/images/inquiry/${fileName}`;
+            image_url = await uploadInquiryImage(safeFile);
         }
+
+
         /* 이메일 전송 */
         let attachments: any[] = [];
         if (file && typeof (file as File).arrayBuffer === "function") {

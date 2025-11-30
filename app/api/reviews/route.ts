@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
 import { NextRequest } from "next/server";
+import { uploadReviewImage } from "@/lib/uploadToSupabase";
 
 /* 조회 */
 export async function GET(req: Request) {
@@ -110,19 +111,41 @@ export async function POST(req: NextRequest) {
     }
 
     let image_url = null;
-    if (image) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
 
-      const uploadDir = path.join(process.cwd(), "public/images/review");
-      await mkdir(uploadDir, { recursive: true });
+    /* 로컬 이미지 저장 부분 */
+    // if (image) {
+    //   const bytes = await image.arrayBuffer();
+    //   const buffer = Buffer.from(bytes);
 
-      // 중복 방지
-      const fileName = `${Date.now()}_${image.name}`;
-      const filePath = path.join(uploadDir, fileName);
+    //   const uploadDir = path.join(process.cwd(), "public/images/review");
+    //   await mkdir(uploadDir, { recursive: true });
 
-      await writeFile(filePath, buffer);
-      image_url = `/images/review/${fileName}`;
+    //   // 중복 방지
+    //   const fileName = `${Date.now()}_${image.name}`;
+    //   const filePath = path.join(uploadDir, fileName);
+
+    //   await writeFile(filePath, buffer);
+    //   image_url = `/images/review/${fileName}`;
+    // }
+
+    /* Supabase 이미지 저장 부분 */
+    if (image && typeof image === "object" && "arrayBuffer" in image) {
+
+      // 이미지 안전 저장 (공백,콜론,한글/특수문자,연속된_)
+      function sanitizedFileName(filename: string) {
+        return filename
+          .normalize("NFC")
+          .replace(/\s+/g, "_")
+          .replace(/[:]/g, "-")
+          .replace(/[^\w.-]+/g, "")
+          .replace(/_+/g, "_");
+      }
+      const sanitized = sanitizedFileName((image as File).name);
+      const safeFile = new File([await image.arrayBuffer()], sanitized, {
+        type: (image as File).type,
+      });
+
+      image_url = await uploadReviewImage(safeFile);
     }
 
     /* 수정 | 추가 판단 */
@@ -148,10 +171,25 @@ export async function POST(req: NextRequest) {
       let finalImageURL = oldReview?.image_url || null;
       if (image || imageUrl == "") {
         if (oldReview?.image_url) {
-          const oldImagePath = path.join(process.cwd(), "public", oldReview.image_url);
+          /* 로컬 이미지 삭제 부분 */
+          // const oldImagePath = path.join(process.cwd(), "public", oldReview.image_url);
 
-          try { await unlink(oldImagePath); }
-          catch (e) { console.warn("기존 이미지 삭제 실패:", e); }
+          // try { await unlink(oldImagePath); }
+          // catch (e) { console.warn("기존 이미지 삭제 실패:", e); }
+
+          /* Supabase 이미지 삭제 부분 */
+          if (oldReview?.image_url) {
+            const filePath = oldReview.image_url.split("/reviews/")[1]; // 경로 추출
+            if (filePath) {
+              const { error: storageError } = await supabase.storage
+                .from("reviews")
+                .remove([filePath]);
+
+              if (storageError) {
+                console.warn("Supabase 이미지 삭제 실패:", storageError.message);
+              }
+            }
+          }
         }
         finalImageURL = image_url;
       }
@@ -226,10 +264,25 @@ export async function DELETE(req: Request) {
 
     if (oldError) return Response.json({ message: "리뷰 조회 실패", error: oldError.message }, { status: 500 });
 
+    /* 로컬 이미지 삭제 부분 */
+    // if (oldReview?.image_url) {
+    //   const oldImagePath = path.join(process.cwd(), "public", oldReview.image_url);
+    //   try { await unlink(oldImagePath); }
+    //   catch (e) { console.warn("기존 이미지 삭제 실패:", e); }
+    // }
+
+    /* Supabase 이미지 삭제 부분 */
     if (oldReview?.image_url) {
-      const oldImagePath = path.join(process.cwd(), "public", oldReview.image_url);
-      try { await unlink(oldImagePath); }
-      catch (e) { console.warn("기존 이미지 삭제 실패:", e); }
+      const filePath = oldReview.image_url.split("/reviews/")[1]; // 경로 추출
+      if (filePath) {
+        const { error: storageError } = await supabase.storage
+          .from("reviews")
+          .remove([filePath]);
+
+        if (storageError) {
+          console.warn("Supabase 이미지 삭제 실패:", storageError.message);
+        }
+      }
     }
 
     const { error: delError } = await supabase
