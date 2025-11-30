@@ -5,54 +5,53 @@ import { useRouter } from 'next/navigation';
 import PhotoUploader from '../../components/PhotoUploader';
 import { fetchWithAuth } from '@/lib/minie/authAPI';
 import {
-  Container,
-  Text,
-  HStack,
-  VStack,
-  Textarea,
-  Button,
-  Input,
-  NativeSelect,
-  NativeSelectIndicator,
-  Flex,
-  Box,
-  Spinner
+   Container,
+   Text,
+   HStack,
+   VStack,
+   Textarea,
+   Button,
+   Input,
+   NativeSelect,
+   NativeSelectIndicator,
+   Flex,
+   Box,
+   Spinner
 } from "@chakra-ui/react";
 import { useUser } from "@/context/UserContext";
 
 export default function Page() {
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoURL, setPhotoURL] = useState<string | null>(null);
-  const [category, setCategory] = useState("");
-  const [content, setContent] = useState("");
-  const [email, setEmail] = useState("");
-  const [domain, setDomain] = useState("");
-  const [categoryError, setCategoryError] = useState(false);
-  const [contentError, setContentError] = useState(false);
-  const [emailError, setEmailError] = useState(false);
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+   const [photo, setPhoto] = useState<File | null>(null);
+   const [photoURL, setPhotoURL] = useState<string | null>(null);
+   const [category, setCategory] = useState("");
+   const [content, setContent] = useState("");
+   const [email, setEmail] = useState("");
+   const [domain, setDomain] = useState("");
+   const [categoryError, setCategoryError] = useState(false);
+   const [contentError, setContentError] = useState(false);
+   const [emailError, setEmailError] = useState(false);
+   const router = useRouter();
+   const [loading, setLoading] = useState(true);
 
-  /* 관리자 여부 */
-  const { user, isAdmin } = useUser();
-  useEffect(() => {
-    if (user === undefined) return;
-    if (user === null) {
-      setLoading(true);
-      const timer = setTimeout(() => { router.push("/login") }, 1000)
-      return () => clearTimeout(timer);
-    }
-    setLoading(false);
-  }, [user, isAdmin && true]);
+   const { user, isAdmin } = useUser();
+   useEffect(() => {
+      if (user === undefined) return;
+      if (user === null) {
+         setLoading(true);
+         const timer = setTimeout(() => { router.push("/login") }, 1000)
+         return () => clearTimeout(timer);
+      }
+      setLoading(false);
+   }, [user, isAdmin && true]);
 
-  if (loading) {
-    return (
-      <VStack colorPalette="pink">
-        <Spinner color="colorPalette.600" />
-        <Text color="colorPalette.600">Loading...</Text>
-      </VStack>
-    );
-  }
+   if (loading) {
+      return (
+         <VStack colorPalette="pink">
+            <Spinner color="colorPalette.600" />
+            <Text color="colorPalette.600">Loading...</Text>
+         </VStack>
+      );
+   }
 
    /* REQUEST */
    const handleSend = async () => {
