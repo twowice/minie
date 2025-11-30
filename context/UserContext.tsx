@@ -1,0 +1,107 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from "react";
+import { auth } from "@/firebase/firebaseConfig";
+import { getUserByFirebaseUid } from "@/lib/minie/authAPI";
+import { isEqual } from "lodash";
+
+// 사용자 타입 정의
+interface User {
+  id: number; //supabase db에서 사용되는 user_id 자동화 되어 헤더에서 조회 가능
+  firebase_uid: string;
+  email: string;
+  name: string;
+  phone: string | null;
+  birth_date: 
+      | string                               // "1995-03-15" 형식 (DB 저장 형식)
+      | { year: string; month: string; day: string }  // 프론트에서 쓰는 형식
+      | null;
+  profile_image: string | null;
+  is_admin: boolean; // 관리자 여부 추가 2025-11-21 "박영준"
+}
+
+// Context 타입 정의
+interface UserContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
+  loading: boolean;
+  logout: () => Promise<void>;
+  isAdmin: boolean; // 관리자 여부 추가 2025-11-21 "박영준"
+}
+
+// Context 생성
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+// Provider 컴포넌트
+export function UserProvider({ children }: { children: ReactNode }) {
+  const [user, setUserState] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // 관리자 여부 계산 - user가 있고 is_admin이 true일 때만 2025-11-21 "박영준"
+  const isAdmin = user?.is_admin ?? false;
+
+  const setUser = useCallback(
+    (newUser: User | null) => {
+      // 기존 user와 새 user가 내용상 같다면 상태 업데이트 안 함
+      if (!isEqual(user, newUser)) {
+        setUserState(newUser);
+      }
+    },
+    [user]
+  );
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        const { data: userData } = await getUserByFirebaseUid(firebaseUser.uid);
+        if (userData) {
+          if (!isEqual(user, userData)) {
+            setUser(userData);
+          }
+        } else {
+          // Firebase 로그인 했으나 Supabase에 없는 경우
+          if (user !== null) {
+            setUser(null);
+          }
+        }
+      } else {
+        // 로그아웃된 경우
+        if (user !== null) {
+          setUser(null);
+        }
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  // 로그아웃 함수
+  const logout = async () => {
+    await auth.signOut();
+    setUser(null);
+    localStorage.removeItem("user");
+  };
+
+  return (
+    <UserContext.Provider value={{ user, setUser, loading, logout, isAdmin }}>
+      {children}
+    </UserContext.Provider>
+  );
+}
+
+// Custom Hook
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
+  return context;
+};

@@ -1,48 +1,22 @@
 import { supabase } from "@/lib/supabase";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
+import { NextRequest } from "next/server";
+import { uploadReviewImage } from "@/lib/uploadToSupabase";
 
+/* 조회 */
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const page = parseInt(url.searchParams.get("page") || "1");
   const pageSize = parseInt(url.searchParams.get("pageSize") || "5");
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
+  const sortType = url.searchParams.get("sort") || "latest";
+  const photo = url.searchParams.get("photo") === "true";
+  const normal = url.searchParams.get("normal") === "true";
+  const productId = url.searchParams.get("product_id");
+  const userId = url.searchParams.get("user_id");
 
-  // 전체 리뷰 통계 가져오기
-  const { data: allReviews, error: allError } = await supabase
-    .from("reviews")
-    .select("rating", { count: "exact" });
-
-  if (allError) {
-    return Response.json({ message: "전체 리뷰 조회 실패", error: allError.message }, { status: 500 });
-  }
-
-  const totalCount = allReviews.length || 0;
-  const totalRating = allReviews.reduce((acc, review) => acc + review.rating, 0);
-  const rating = +(totalRating / totalCount).toFixed(1);
-
-  const distribution: Record<number, number> = {
-    5: 0,
-    4: 0,
-    3: 0,
-    2: 0,
-    1: 0,
-  };
-
-  allReviews.forEach((review) => {
-    const r = Math.round(review.rating);
-    if (r >= 1 && r <= 5) {
-      distribution[r] += 1;
-    }
-  });
-
-  Object.keys(distribution).forEach((key) => {
-    distribution[+key] = Math.round((distribution[+key] / totalCount) * 100);
-  })
-
-  // 페이지네이션 리뷰(5개 씩) 가져오기
-  const { data, error } = await supabase
+  /* 전체 리뷰 가져오기 */
+  let query = supabase
     .from("reviews")
     .select(`
       id,
@@ -60,32 +34,49 @@ export async function GET(req: Request) {
         name,
         image
       )
-    `
-    )
-    .order("created_at", { ascending: false })
-    .range(from, to);
+    `);
+  if (userId) query = query.eq("user_id", userId)
+  if (productId) query = query.eq("product_id", productId);
+  const { data: allReviews, error: allError } = await query;
+  if (allError) return Response.json({ message: "전체 리뷰 조회 실패", error: allError.message }, { status: 500 });
 
-  if (error) {
-    return Response.json(
-      { message: "리뷰 조회 실패", error: error.message },
-      { status: 500 }
-    );
-  }
+  /* 필터 & 정렬*/
+  let filtered = [...allReviews];
+  if (photo && !normal) filtered = filtered.filter((r) => r.image_url);
+  if (!photo && normal) filtered = filtered.filter((r) => !r.image_url)
+  if (sortType === "latest") filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  else if (sortType === "rating") filtered.sort((a, b) => b.rating - a.rating);
 
-  if (!data) {
-    return Response.json({ message: "데이터가 없습니다." }, { status: 404 });
-  }
+  /* 페이지네이션 */
+  const totalCount = filtered.length;
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  const pageData = filtered.slice(start, end);
+
+  /* 평균 점수 및 그래프 */
+  const totalRating = allReviews.reduce((acc, r) => acc + r.rating, 0);
+  const rating = +(totalRating / allReviews.length).toFixed(1);
+  const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  allReviews.forEach(r => {
+    const score = Math.round(r.rating);
+    if (score >= 1 && score <= 5) distribution[score] += 1;
+  });
+  Object.keys(distribution).forEach(k => {
+    const key = Number(k);
+    distribution[key] = Math.round((distribution[key] / allReviews.length) * 100);
+  });
 
   return Response.json({
     message: "리뷰 조회 성공",
     totalCount,
     rating,
     distribution,
-    data: data || [],
+    data: pageData,
   });
 }
 
-export async function POST(req: Request) {
+/* 추가 & 수정 */
+export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const id = formData.get("id") as string;
@@ -94,6 +85,12 @@ export async function POST(req: Request) {
     const user_id = formData.get("user_id") as string;
     const product_id = formData.get("product_id") as string;
     const image = formData.get("image") as File | null;
+    const imageUrl = formData.get("imageUrl") as string;
+    const orderDetailId = formData.get("order_detail_id") as string;
+    const uid = req.headers.get('X-User-ID');
+    if (uid === null || uid === "") {
+      return Response.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
 
     console.log("=== POST 요청 데이터 ===");
     console.log("id:", id);
@@ -101,9 +98,12 @@ export async function POST(req: Request) {
     console.log("content:", content);
     console.log("user_id:", user_id);
     console.log("product_id:", product_id);
+    console.log("imageUrl:", imageUrl);
+    console.log("orderDetailId:", orderDetailId);
     console.log("image:", image ? { name: image.name, size: image.size } : null);
 
-    if (!rating || !content || !user_id || !product_id) {
+    /* 예외 처리 */
+    if (!rating || !content || !product_id) {
       return Response.json(
         { message: "필수 데이터 누락" },
         { status: 400 }
@@ -112,43 +112,110 @@ export async function POST(req: Request) {
 
     let image_url = null;
 
-    if (image) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+    /* 로컬 이미지 저장 부분 */
+    // if (image) {
+    //   const bytes = await image.arrayBuffer();
+    //   const buffer = Buffer.from(bytes);
 
-      const uploadDir = path.join(process.cwd(), "public/images/review");
-      await mkdir(uploadDir, { recursive: true });
+    //   const uploadDir = path.join(process.cwd(), "public/images/review");
+    //   await mkdir(uploadDir, { recursive: true });
 
-      const fileName = `${image.name}`;
-      const filePath = path.join(uploadDir, fileName);
+    //   // 중복 방지
+    //   const fileName = `${Date.now()}_${image.name}`;
+    //   const filePath = path.join(uploadDir, fileName);
 
-      await writeFile(filePath, buffer);
-      image_url = `/images/review/${fileName}`;
+    //   await writeFile(filePath, buffer);
+    //   image_url = `/images/review/${fileName}`;
+    // }
+
+    /* Supabase 이미지 저장 부분 */
+    if (image && typeof image === "object" && "arrayBuffer" in image) {
+
+      // 이미지 안전 저장 (공백,콜론,한글/특수문자,연속된_)
+      function sanitizedFileName(filename: string) {
+        return filename
+          .normalize("NFC")
+          .replace(/\s+/g, "_")
+          .replace(/[:]/g, "-")
+          .replace(/[^\w.-]+/g, "")
+          .replace(/_+/g, "_");
+      }
+      const sanitized = sanitizedFileName((image as File).name);
+      const safeFile = new File([await image.arrayBuffer()], sanitized, {
+        type: (image as File).type,
+      });
+
+      image_url = await uploadReviewImage(safeFile);
     }
 
+    /* 수정 | 추가 판단 */
     let result;
     let action: "update" | "insert";
-    
+
+    // 수정일 경우
     if (id) {
-      console.log("image_url:", image_url)
+      const { data: oldReview, error: oldError } = await supabase
+        .from("reviews")
+        .select("image_url")
+        .eq("id", id)
+        .single();
+
+      if (oldError) {
+        return Response.json(
+          { message: "기존 리뷰 조회 실패", error: oldError.message },
+          { status: 500 }
+        );
+      }
+
+      // 기존 이미지 삭제
+      let finalImageURL = oldReview?.image_url || null;
+      if (image || imageUrl == "") {
+        if (oldReview?.image_url) {
+          /* 로컬 이미지 삭제 부분 */
+          // const oldImagePath = path.join(process.cwd(), "public", oldReview.image_url);
+
+          // try { await unlink(oldImagePath); }
+          // catch (e) { console.warn("기존 이미지 삭제 실패:", e); }
+
+          /* Supabase 이미지 삭제 부분 */
+          if (oldReview?.image_url) {
+            const filePath = oldReview.image_url.split("/reviews/")[1]; // 경로 추출
+            if (filePath) {
+              const { error: storageError } = await supabase.storage
+                .from("reviews")
+                .remove([filePath]);
+
+              if (storageError) {
+                console.warn("Supabase 이미지 삭제 실패:", storageError.message);
+              }
+            }
+          }
+        }
+        finalImageURL = image_url;
+      }
+
+      // DB UPDATE
       const { data, error } = await supabase
         .from("reviews")
         .update({
           rating,
           content,
-          image_url: image_url || "",
+          image_url: finalImageURL,
           user_id: Number(user_id),
-          product_id: Number(product_id)
+          product_id: Number(product_id),
+          created_at: new Date()
         })
         .eq("id", id)
         .select();
-      if (error) {
-        return Response.json({ message: "리뷰 수정 실패", error: error.message }, { status: 500 });
-      }
+
+      if (error) return Response.json({ message: "리뷰 수정 실패", error: error.message }, { status: 500 });
 
       result = data;
       action = "update";
-    } else {
+    }
+    // 추가일 경우
+    else {
+      // DB INSERT
       const { data, error } = await supabase
         .from("reviews")
         .insert([
@@ -156,27 +223,78 @@ export async function POST(req: Request) {
             rating,
             content,
             image_url: image_url || "",
-            user_id: Number(user_id),
-            product_id: Number(product_id)
+            user_id: uid,
+            product_id: Number(product_id),
+            order_detail_id: Number(orderDetailId)
           }
         ])
         .select();
 
-      if (error) {
-        return Response.json(
-          { message: "리뷰 추가 실패", error: error.message },
-          { status: 500 }
-        );
-      }
+      if (error) return Response.json({ message: "리뷰 추가 실패", error: error.message }, { status: 500 });
+
       result = data;
       action = "insert";
     }
-
 
     return Response.json({
       message: `리뷰 ${action === "update" ? "수정" : "추가"} 성공`,
       result,
     });
+
+  } catch (err: any) {
+    return Response.json(
+      { message: "서버 에러", error: err.message },
+      { status: 500 }
+    );
+  }
+}
+
+/* 삭제 */
+export async function DELETE(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+    if (!id) return Response.json({ message: "삭제할 리뷰 ID가 필요합니다." }, { status: 400 });
+
+    const { data: oldReview, error: oldError } = await supabase
+      .from("reviews")
+      .select("image_url")
+      .eq("id", id)
+      .single();
+
+    if (oldError) return Response.json({ message: "리뷰 조회 실패", error: oldError.message }, { status: 500 });
+
+    /* 로컬 이미지 삭제 부분 */
+    // if (oldReview?.image_url) {
+    //   const oldImagePath = path.join(process.cwd(), "public", oldReview.image_url);
+    //   try { await unlink(oldImagePath); }
+    //   catch (e) { console.warn("기존 이미지 삭제 실패:", e); }
+    // }
+
+    /* Supabase 이미지 삭제 부분 */
+    if (oldReview?.image_url) {
+      const filePath = oldReview.image_url.split("/reviews/")[1]; // 경로 추출
+      if (filePath) {
+        const { error: storageError } = await supabase.storage
+          .from("reviews")
+          .remove([filePath]);
+
+        if (storageError) {
+          console.warn("Supabase 이미지 삭제 실패:", storageError.message);
+        }
+      }
+    }
+
+    const { error: delError } = await supabase
+      .from("reviews")
+      .delete()
+      .eq("id", id);
+
+    if (delError) {
+      return Response.json({ message: "리뷰 삭제 실패", error: delError.message }, { status: 500 });
+    }
+    return Response.json({ message: "리뷰 삭제 성공" });
+
   } catch (err: any) {
     return Response.json(
       { message: "서버 에러", error: err.message },

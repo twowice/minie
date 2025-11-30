@@ -15,54 +15,64 @@ import {
    Text,
    useDisclosure,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import { MdFilterListAlt } from 'react-icons/md';
+import { useEffect, useMemo, useState } from 'react';
+import { TiFilter } from 'react-icons/ti';
 import Segment from './ui/Segment';
-import items from '@/data/items.json';
+// import items from '@/data/items.json'; //더미데이터
 import { RiResetLeftFill } from 'react-icons/ri';
-import { FaS } from 'react-icons/fa6';
+import { FilterBarProps } from '@/app/api/products/product';
 
-export default function FilterBar({ onDataFiltered, category }) {
+const priceLabels: Record<number, string> = {
+   10000: '10,000원 이하',
+   15000: '15,000원 이하',
+   20000: '20,000원 이하',
+};
+export default function FilterBar({ onDataFiltered, category, list = [] }: FilterBarProps) {
    // --- 상단 버튼 필터 State ---
-   const [male, setMale] = useState(false);
-   const [female, setFemale] = useState(false);
-   const [myType, setMyType] = useState(false);
-   const [price, setPrice] = useState([]);
+   const [male, setMale] = useState<boolean>(false);
+   const [female, setFemale] = useState<boolean>(false);
+   // const [myType, setMyType] = useState(false);
+   const [price, setPrice] = useState<number[]>([]);
 
    // --- 다이얼로그 ---
    const { open, onOpen, onClose } = useDisclosure();
-   const [dialog, setDialog] = useState(false);
-   const [filterMale, setFilterMale] = useState(true);
-   const [filterFemale, setFilterFemale] = useState(true);
-   const [filterBoth, setFilterBoth] = useState(true);
-   const [filterPrice, setFilterPrice] = useState([]);
+   const [dialog, setDialog] = useState<boolean>(false);
+   const [filterMale, setFilterMale] = useState<boolean>(true);
+   const [filterFemale, setFilterFemale] = useState<boolean>(true);
+   const [filterBoth, setFilterBoth] = useState<boolean>(true);
+   const [filterPrice, setFilterPrice] = useState<number[]>([]);
 
    // ---상세옵션 ---
    //skincare
-   const [skincare, setSkincare] = useState([]);
+   const [skincare, setSkincare] = useState<string[]>([]);
    //use
-   const [use, setUse] = useState([]);
+   const [use, setUse] = useState<string[]>([]);
    //type
-   const [type, setType] = useState([]);
+   const [type, setType] = useState<string[]>([]);
    //style
-   const [style, setStyle] = useState([]);
+   const [style, setStyle] = useState<string[]>([]);
 
-   // 임시 상세옵션
-   const [filterSkincare, setFilterSkincare] = useState([]);
-   const [filterUse, setFilterUse] = useState([]);
-   const [filterType, setFilterType] = useState([]);
-   const [filterStyle, setFilterStyle] = useState([]);
+   // 필터 상세옵션
+   const [filterSkincare, setFilterSkincare] = useState<string[]>([]);
+   const [filterUse, setFilterUse] = useState<string[]>([]);
+   const [filterType, setFilterType] = useState<string[]>([]);
+   const [filterStyle, setFilterStyle] = useState<string[]>([]);
 
    // --- 최종 데이터 ---
-   const [data, setData] = useState(items);
-   const [sortOrder, setSortOrder] = useState('낮은 가격 순');
+   // const [data, setData] = useState(list);
+   const [sortOrder, setSortOrder] = useState<string>('낮은 가격 순');
+
+   const categoryItems = useMemo(() => {
+      if (!list) return [];
+      return list.filter(item => item.category === category);
+   }, [list, category]);
 
    //초기화
    useEffect(() => {
       //상단필터
       setMale(false);
       setFemale(false);
-      setMyType(false);
+      // setMyType(false);
       setPrice([]);
 
       //상세필터
@@ -86,44 +96,51 @@ export default function FilterBar({ onDataFiltered, category }) {
 
       //다이얼로그 닫기
       setDialog(false);
-      onClose();
-   }, [category, onClose]);
+      // onClose();
+   }, [category]);
 
    //동작
    useEffect(() => {
-      let selected = items.filter(item => item.category === category);
+      const items = list.filter(item => item.category === category);
+      let selected = [...items];
 
       selected = selected.filter(p => {
          if (female && !male && !p.gender.includes('여성')) return false;
          if (male && !female && !p.gender.includes('남성')) return false;
-         if (myType && p.mytype !== '마이타입') return false;
+         // if (myType && p.mytype !== '마이타입') return false;
          if (price.length > 0 && !price.some(priceCeiling => p.price <= priceCeiling)) return false;
-         if (skincare.length > 0 && !skincare.includes(p.skincare)) return false;
-         if (use.length > 0 && !use.includes(p.use)) return false;
-         if (type.length > 0 && !type.includes(p.type)) return false;
-         if (style.length > 0 && !style.includes(p.style)) return false;
+         if (skincare.length > 0 && p.skincare && !skincare.includes(p.skincare)) return false;
+         if (use.length > 0 && p.use && !use.includes(p.use)) return false;
+         if (type.length > 0 && p.type && !type.includes(p.type)) return false;
+         if (style.length > 0 && p.style && !style.includes(p.style)) return false;
          return true;
       });
 
-      if (sortOrder === '낮은 가격 순') {
-         selected.sort((a, b) => a.price - b.price);
-      } else if (sortOrder === '높은 가격 순') {
-         selected.sort((a, b) => b.price - a.price);
-      }
+      selected.sort((a, b) => {
+         const realPriceA = a.is_discounted ? a.price - a.discount_amount : a.price;
+         const realPriceB = b.is_discounted ? b.price - b.discount_amount : b.price;
 
-      setData(selected);
+         if (sortOrder === '낮은 가격 순') {
+            return realPriceA - realPriceB;
+         } else if (sortOrder === '높은 가격 순') {
+            return realPriceB - realPriceA;
+         }
+         return 0;
+      });
+
+      // setData(selected);
       onDataFiltered(selected);
-   }, [male, female, myType, price, sortOrder, skincare, use, type, style, onDataFiltered, category]);
+   }, [male, female, price, sortOrder, skincare, use, type, style, list, category]);
 
-   const filteredData = () => {
-      let checked = items.filter(item => item.category === category);
+   const filteredData = (): number => {
+      let checked = [...categoryItems];
 
-      if (myType) {
-         checked = checked.filter(p => p.mytype === '마이타입');
-      }
+      // if (myType) {
+      //    checked = checked.filter(p => p.mytype === '마이타입');
+      // }
 
-      const genderFilter = [];
-      if (filterBoth || (filterMale && filterFemale)) {
+      const genderFilter: string[] = [];
+      if (filterBoth || (filterMale && filterFemale) || (!filterMale && !filterFemale)) {
          genderFilter.push('남성', '여성');
       } else if (filterMale) {
          genderFilter.push('남성');
@@ -132,7 +149,7 @@ export default function FilterBar({ onDataFiltered, category }) {
       }
 
       if (genderFilter.length > 0) {
-         checked = checked.filter(item => item.gender.some(g => genderFilter.includes(g)));
+         checked = checked.filter(item => genderFilter.some(g => item.gender.includes(g)));
       }
 
       if (filterPrice.length > 0) {
@@ -186,30 +203,40 @@ export default function FilterBar({ onDataFiltered, category }) {
       setDialog(false);
    };
    const handleReset = () => {
-      setFilterBoth(true)
-      setFilterMale(false)
-      setFilterFemale(false)
-      setFilterPrice([])
-      setFilterSkincare([])
-      setFilterUse([])
-      setFilterType([])
-      setFilterStyle([])
+      setFilterBoth(true);
+      setFilterMale(false);
+      setFilterFemale(false);
+      setFilterPrice([]);
+      setFilterSkincare([]);
+      setFilterUse([]);
+      setFilterType([]);
+      setFilterStyle([]);
    };
 
-   const removeFilterTag = (type, value) => {
+   const removeFilterTag = (type: string, value: string | number) => {
       if (type === 'gender') {
-         if (value === 'both') setFilterBoth(false)
-         if (value === 'male') setFilterMale(false)
-         if (value === 'female') setFilterFemale(false)
+         if (value === 'both') setFilterBoth(false);
+         if (value === 'male') setFilterMale(false);
+         if (value === 'female') setFilterFemale(false);
       }
-   if (type === 'price') {setFilterPrice(prev => prev.filter(p => p !== value))}
-   if (type === 'skincare') {setFilterSkincare(prev => prev.filter(s => s !== value))}
-   if (type === 'use') {setFilterUse(prev => prev.filter(u=> u !== value))}
-   if (type === 'type') {setFilterType(prev => prev.filter(t => t !== value))}
-   if (type === 'style') {setFilterStyle(prev => prev.filter(st => st !== value))}
-   }
+      if (type === 'price') {
+         setFilterPrice(prev => prev.filter(p => p !== value));
+      }
+      if (type === 'skincare') {
+         setFilterSkincare(prev => prev.filter(s => s !== value));
+      }
+      if (type === 'use') {
+         setFilterUse(prev => prev.filter(u => u !== value));
+      }
+      if (type === 'type') {
+         setFilterType(prev => prev.filter(t => t !== value));
+      }
+      if (type === 'style') {
+         setFilterStyle(prev => prev.filter(st => st !== value));
+      }
+   };
 
-   const togglePrice = price => {
+   const togglePrice = (price: number) => {
       setFilterPrice(prev => (prev.includes(price) ? prev.filter(p => p !== price) : [...prev, price]));
    };
 
@@ -232,7 +259,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                      setDialog(prev => !prev);
                   }}
                >
-                  <MdFilterListAlt />
+                  <TiFilter />
                </Button>
                <Button
                   color={male ? 'white' : 'rgba(0,0,0,0.32)'}
@@ -264,7 +291,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                >
                   여
                </Button>
-               <Button
+               {/* <Button
                   color={myType ? 'white' : 'rgba(0,0,0,0.32)'}
                   bg={myType ? '#fa6d6d' : 'white'}
                   border={myType ? 'transparent' : '1px solid rgba(0,0,0,0.32)'}
@@ -278,18 +305,18 @@ export default function FilterBar({ onDataFiltered, category }) {
                   }}
                >
                   마이타입
-               </Button>
+               </Button> */}
             </Box>
             <Box display={'flex'} gap={'16px'} fontSize={'12px'} alignItems={'center'} color={'rgba(0,0,0,0.4)'}>
-               <Text>총 {data.length}개</Text>
-               <NativeSelect.Root
-                  size={'xs'}
-                  w={'90px'}
-                  variant={'plain'}
-                  value={sortOrder}
-                  onChange={e => setSortOrder(e.target.value)}
-               >
-                  <NativeSelect.Field padding={'2px 4px'} h={'24px'} color={'rgba(0,0,0,0.4)'}>
+               <Text>총 {categoryItems.length}개</Text>
+               <NativeSelect.Root size={'xs'} w={'90px'} variant={'plain'}>
+                  <NativeSelect.Field
+                     padding={'2px 4px'}
+                     h={'24px'}
+                     color={'rgba(0,0,0,0.4)'}
+                     value={sortOrder}
+                     onChange={e => setSortOrder(e.target.value)}
+                  >
                      <option value="낮은 가격 순">낮은 가격 순</option>
                      <option value="높은 가격 순">높은 가격 순</option>
                   </NativeSelect.Field>
@@ -297,7 +324,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                </NativeSelect.Root>
             </Box>
          </Box>
-         <Dialog.Root placement={'center'} open={open} onClose={onClose}>
+         <Dialog.Root placement={'center'} open={open} onOpenChange={isOpen => !isOpen && onClose()}>
             <Dialog.Backdrop />
             <Dialog.Positioner>
                <Dialog.Content bg="white" color="black">
@@ -310,27 +337,168 @@ export default function FilterBar({ onDataFiltered, category }) {
                         mb={'16px'}
                         justifyContent={'space-between'}
                         bgColor={'rgba(204,204,204,0.3)'}
-                        p={'4px'}
                         gap={4}
+                        p={1}
                         flex={1}
                      >
-                        <Tag.Root>
-                           <Tag.Label>남녀 무관</Tag.Label>
-                           <Tag.EndElement>
-                              <Tag.CloseTrigger
-                                 onClick={() => {
-                                    onClose();
-                                 }}
-                              />
-                           </Tag.EndElement>
-                        </Tag.Root>
+                        <Flex>
+                           {filterBoth && (
+                              <Tag.Root
+                                 size={'sm'}
+                                 variant={'solid'}
+                                 colorPalette={'red'}
+                                 justifyContent={'space-between'}
+                                 m={1}
+                              >
+                                 <Tag.Label>남녀 무관</Tag.Label>
+                                 <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                       onClick={() => {
+                                          removeFilterTag('gender', 'both');
+                                       }}
+                                    />
+                                 </Tag.EndElement>
+                              </Tag.Root>
+                           )}
+                           {filterMale && (
+                              <Tag.Root
+                                 size={'sm'}
+                                 variant={'solid'}
+                                 colorPalette={'red'}
+                                 justifyContent={'space-between'}
+                                 m={1}
+                              >
+                                 <Tag.Label>남성</Tag.Label>
+                                 <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                       onClick={() => {
+                                          removeFilterTag('gender', 'male');
+                                       }}
+                                    />
+                                 </Tag.EndElement>
+                              </Tag.Root>
+                           )}
+                           {filterFemale && (
+                              <Tag.Root
+                                 size={'sm'}
+                                 variant={'solid'}
+                                 colorPalette={'red'}
+                                 justifyContent={'space-between'}
+                                 m={1}
+                              >
+                                 <Tag.Label>여성</Tag.Label>
+                                 <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                       onClick={() => {
+                                          removeFilterTag('gender', 'female');
+                                       }}
+                                    />
+                                 </Tag.EndElement>
+                              </Tag.Root>
+                           )}
+                           {filterPrice.map(price => (
+                              <Tag.Root
+                                 key={`price-${price}`}
+                                 size={'sm'}
+                                 variant={'solid'}
+                                 colorPalette={'red'}
+                                 justifyContent={'space-between'}
+                                 m={1}
+                              >
+                                 <Tag.Label>{priceLabels[price]}</Tag.Label>
+                                 <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                       onClick={() => {
+                                          removeFilterTag('price', price);
+                                       }}
+                                    />
+                                 </Tag.EndElement>
+                              </Tag.Root>
+                           ))}
+                           {filterSkincare.map(item => (
+                              <Tag.Root
+                                 key={`skincare-${item}`}
+                                 size={'sm'}
+                                 variant={'solid'}
+                                 colorPalette={'red'}
+                                 justifyContent={'space-between'}
+                                 m={1}
+                              >
+                                 <Tag.Label>{item}</Tag.Label>
+                                 <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                       onClick={() => {
+                                          removeFilterTag('skincare', item);
+                                       }}
+                                    />
+                                 </Tag.EndElement>
+                              </Tag.Root>
+                           ))}
+                           {filterUse.map(item => (
+                              <Tag.Root
+                                 key={`use-${item}`}
+                                 size={'sm'}
+                                 variant={'solid'}
+                                 colorPalette={'red'}
+                                 justifyContent={'space-between'}
+                                 m={1}
+                              >
+                                 <Tag.Label>{item}</Tag.Label>
+                                 <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                       onClick={() => {
+                                          removeFilterTag('use', item);
+                                       }}
+                                    />
+                                 </Tag.EndElement>
+                              </Tag.Root>
+                           ))}
+                           {filterType.map(item => (
+                              <Tag.Root
+                                 key={`type-${item}`}
+                                 size={'sm'}
+                                 variant={'solid'}
+                                 colorPalette={'red'}
+                                 justifyContent={'space-between'}
+                                 m={1}
+                              >
+                                 <Tag.Label>{item}</Tag.Label>
+                                 <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                       onClick={() => {
+                                          removeFilterTag('type', item);
+                                       }}
+                                    />
+                                 </Tag.EndElement>
+                              </Tag.Root>
+                           ))}
+                           {filterStyle.map(item => (
+                              <Tag.Root
+                                 key={`style-${item}`}
+                                 size={'sm'}
+                                 variant={'solid'}
+                                 colorPalette={'red'}
+                                 justifyContent={'space-between'}
+                                 m={1}
+                              >
+                                 <Tag.Label>{item}</Tag.Label>
+                                 <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                       onClick={() => {
+                                          removeFilterTag('style', item);
+                                       }}
+                                    />
+                                 </Tag.EndElement>
+                              </Tag.Root>
+                           ))}
+                        </Flex>
                         <IconButton
-                           size={'sm'}
+                           size={'xs'}
                            variant={'ghost'}
                            onClick={handleReset}
                            color={'black'}
                            _hover={{ color: 'white' }}
-                           aria-label='필터 초기화'
+                           aria-label="필터 초기화"
                         >
                            <RiResetLeftFill />
                         </IconButton>
@@ -347,7 +515,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                                  w={'full'}
                                  checked={filterBoth}
                                  onCheckedChange={e => {
-                                    setFilterBoth(e.checked);
+                                    setFilterBoth(!!e.checked);
                                     if (e.checked) {
                                        setFilterMale(false);
                                        setFilterFemale(false);
@@ -364,7 +532,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                                  colorPalette={'red'}
                                  checked={filterMale}
                                  onCheckedChange={e => {
-                                    setFilterMale(e.checked);
+                                    setFilterMale(!!e.checked);
                                     if (e.checked) {
                                        setFilterBoth(false);
                                     }
@@ -380,7 +548,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                                  w={'full'}
                                  checked={filterFemale}
                                  onCheckedChange={e => {
-                                    setFilterFemale(e.checked);
+                                    setFilterFemale(!!e.checked);
                                     if (e.checked) {
                                        setFilterBoth(false);
                                     }
@@ -414,7 +582,7 @@ export default function FilterBar({ onDataFiltered, category }) {
                                  colorPalette={'red'}
                                  checked={filterPrice.includes(15000)}
                                  onCheckedChange={() => togglePrice(15000)}
-                                 >
+                              >
                                  <Checkbox.HiddenInput />
                                  <Checkbox.Control />
                                  <Checkbox.Label>15,000원 이하</Checkbox.Label>

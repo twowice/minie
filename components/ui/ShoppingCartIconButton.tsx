@@ -35,7 +35,18 @@ export default function ShoppingCartIconButton({
 
         {cartItemsLength !== 0 && (
           <Float placement={"top-end"} offset={[0, 0.5]}>
-            <Circle size="3" bg="red" color="white" fontSize="11px">
+            <Circle
+              size="3"
+              bg="red"
+              color="white"
+              fontSize={
+                cartItemsLength > 9
+                  ? "8px"
+                  : cartItemsLength > 2
+                  ? "10px"
+                  : "11px"
+              }
+            >
               {cartItemsLength}
             </Circle>
           </Float>

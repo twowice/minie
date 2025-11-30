@@ -1,17 +1,20 @@
-import { supabase } from "@/lib/supabase";
-import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function DELETE() {
-     const tempUid = 1
-    /* TODO: getServerSession(authOption)와 같이 로그인 로직 완성시 얻는 uid 불러오기 로직 */
+export async function DELETE(request: NextRequest) {
+     const uid = request.headers.get('X-User-ID');
+
+    if(uid === null || uid === ""){
+        return NextResponse.json({ error: "Unauthorized: No user info" }, { status: 401 })
+    }
 
     const {error} = await supabase
     .from('carts')
     .delete()
-    .eq('user_id', tempUid)
+    .eq('user_id', Number(uid))
     
     if(error){
-        return NextResponse.json({ error: 'Failed to deleting cart item: ' + error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to delete all cart item: ' + error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
