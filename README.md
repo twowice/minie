@@ -1,11 +1,9 @@
 # Minié 사용자 맞춤형 화장품 미니 사이즈 플랫폼
-화장품 유목민들을 위한 미니 사이즈 화장품 판매 플랫폼을 목표로 
-
----
+화장품 유목민들을 위한 미니 사이즈 화장품 판매 플랫폼을 목표로 제작한 기본 프로젝트입니다.
 
 ## 🖥️ 데모 링크
-🔗 배포 사이트:  
-https://minie-eta.vercel.app/
+🔗 배포 사이트: https://minie-eta.vercel.app/
+[<img src="https://private-user-images.githubusercontent.com/114320282/520552519-b8ce12bf-b711-4a9b-a779-9af3d0996b64.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjQ1NTIzNjUsIm5iZiI6MTc2NDU1MjA2NSwicGF0aCI6Ii8xMTQzMjAyODIvNTIwNTUyNTE5LWI4Y2UxMmJmLWI3MTEtNGE5Yi1hNzc5LTlhZjNkMDk5NmI2NC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMjAxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTIwMVQwMTIxMDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1lYTM5ZDVjYzg0ZmQ2MTAwMDgxOTQ3NGFmOTEyM2M1YThmYWEzMjk3MjNlM2RiZWEzNWM4NDYyODY4NGFhZWIzJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.eKqCCY6cxvKMcZs-_csVtSJed8UsZeuXVo9hsKZz9Js">](https://minie-eta.vercel.app/)
 
 ---
 ## ⏱️ 제작 기간
