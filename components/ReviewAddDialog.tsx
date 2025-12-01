@@ -39,6 +39,7 @@ export default function reviewDialogDialog({
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /* 별점 동작 */
   const handleStarClick = (
@@ -69,6 +70,9 @@ export default function reviewDialogDialog({
       else console.log(`${key}: ${value}`);
     }
 
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     /* REQUEST */
     try {
       const res = await fetchWithAuth("/api/reviews", {
@@ -92,10 +96,8 @@ export default function reviewDialogDialog({
 
         onSuccess?.();
       }
-    } catch (e) {
-      console.error("에러:", e);
-      onFail?.();
-    }
+    } catch (e) { console.error("에러:", e); onFail?.(); }
+    finally { setIsSubmitting(false) };
   };
 
   return (
@@ -364,8 +366,9 @@ export default function reviewDialogDialog({
                   color="#FFFFFF"
                   _hover={{ bg: "#ff8e8eff" }}
                   onClick={handleSave}
+                  disabled={isSubmitting}
                 >
-                  등록
+                  {isSubmitting ? "등록 중..." : "등록"}
                 </Button>
               </Flex>
             </Dialog.Footer>

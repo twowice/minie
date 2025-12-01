@@ -28,6 +28,8 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
     const [photo, setPhoto] = useState<File | null>(null);
     const [photoURL, setPhotoURL] = useState<string | null>(null);
     const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDelSubmitting, setIsDelSubmitting] = useState(false);
 
     /* 별점 동작 */
     const handleStarClick = (
@@ -62,6 +64,9 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
             else console.log(`${key}: ${value}`);
         }
 
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+
         /* REQUEST */
         try {
             const res = await fetchWithAuth("/api/reviews", {
@@ -78,10 +83,13 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
                 onUpdate?.();
             }
         } catch (e) { console.error("에러:", e); onFail?.(); }
+        finally { setIsSubmitting(false) };
     }
 
     /* 삭제 */
     const handleDel = async () => {
+        if (isDelSubmitting) return;
+        setIsDelSubmitting(true);
         try {
             const res = await fetchWithAuth(`/api/reviews?id=${id}`, {
                 method: "DELETE",
@@ -96,6 +104,7 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
                 onUpdate?.();
             }
         } catch (e) { console.error("에러:", e); onDelFail?.(); }
+        finally { setIsDelSubmitting(false) };
     }
 
     return (
@@ -323,6 +332,7 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
                                         borderRadius="3px"
                                         fontSize="16px"
                                         color="#B5B5B5"
+                                        bg="white"
                                         _hover={{ bg: "#f1f1f1" }}
                                         onClick={() => document.getElementById('photo-upload')?.click()}
                                     >
@@ -338,8 +348,8 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
                         {/* 푸터 */}
                         <Dialog.Footer p="0" paddingTop="10px">
                             <Flex w="100%" gap="8px">
-                                <Button flex="1" bg="#FFFFFF" border="1px solid #cececeff" borderRadius="4px" fontSize="16px" color="#000000" _hover={{ bg: "#f5f5f5", borderColor: "#bfbfbf" }} onClick={handleDel}>삭제</Button>
-                                <Button flex="1" bg="#FA6D6D" borderRadius="4px" fontSize="16px" color="#FFFFFF" _hover={{ bg: "#ff8e8eff" }} onClick={handleSave} >저장</Button>
+                                <Button flex="1" bg="#FFFFFF" border="1px solid #cececeff" borderRadius="4px" fontSize="16px" color="#000000" _hover={{ bg: "#f5f5f5", borderColor: "#bfbfbf" }} onClick={handleDel} disabled={isDelSubmitting}>{isDelSubmitting ? "삭제 중..." : "삭제"}</Button>
+                                <Button flex="1" bg="#FA6D6D" borderRadius="4px" fontSize="16px" color="#FFFFFF" _hover={{ bg: "#ff8e8eff" }} onClick={handleSave} disabled={isSubmitting}>{isSubmitting ? "저장 중..." : "저장"}</Button>
                             </Flex>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
