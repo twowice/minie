@@ -32,6 +32,7 @@ export default function Page() {
    const [emailError, setEmailError] = useState(false);
    const router = useRouter();
    const [loading, setLoading] = useState(true);
+   const [isSubmitting, setIsSubmitting] = useState(false);
 
    const { user, isAdmin } = useUser();
    useEffect(() => {
@@ -88,6 +89,9 @@ export default function Page() {
       }
       if (hasError) return;
 
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+
       try {
          const res = await fetchWithAuth('/api/inquiry', {
             method: 'POST',
@@ -110,6 +114,8 @@ export default function Page() {
             type: 'error',
             title: '문의 전송 실패!',
          });
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -315,8 +321,9 @@ export default function Page() {
                   color="#FFFFFF"
                   _hover={{ bg: '#ff8e8eff' }}
                   onClick={handleSend}
+                  disabled={isSubmitting}
                >
-                  등록
+                  {isSubmitting ? "등록 중..." : "등록"}
                </Button>
             </Flex>
          </VStack>
