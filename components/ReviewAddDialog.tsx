@@ -332,6 +332,7 @@ export default function reviewDialogDialog({
                   </Box>
                 ) : (
                   <Button
+                    bg={"white"}
                     w="80px"
                     h="80px"
                     border="1px solid #B5B5B5"
