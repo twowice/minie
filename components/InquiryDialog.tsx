@@ -21,17 +21,22 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
 
     const closeBtnRef = useRef<HTMLButtonElement | null>(null);
     const [contentContent, setcontentContent] = useState(answer ?? "");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDelSubmitting, setIsDelSubmitting] = useState(false);
 
     /* 저장 */
     const handleSave = async () => {
         const formData = new FormData();
         formData.append("id", id);
         formData.append("content", contentContent);
- 
+
         console.log("=== FormData 내용 ===");
         for (const [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
+
+        if (isSubmitting) return;
+        setIsSubmitting(true);
 
         /* REQUEST */
         try {
@@ -49,10 +54,13 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
                 onUpdate?.();
             }
         } catch (e) { console.error("에러:", e); onFail?.(); }
+        finally { setIsSubmitting(false) };
     }
 
     /* 삭제 */
     const handleDel = async () => {
+        if (isDelSubmitting) return;
+        setIsDelSubmitting(true);
         try {
             const res = await fetchWithAuth(`/api/inquiry/notice?id=${id}`, {
                 method: "DELETE",
@@ -67,6 +75,7 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
                 onUpdate?.();
             }
         } catch (e) { console.error("에러:", e); onDelFail?.(); }
+        finally { setIsDelSubmitting(false) };
     }
 
     return (
@@ -78,7 +87,16 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
             }}>
 
             <Dialog.Trigger asChild>
-                <Button bg="#fc6a6aff" marginLeft="10px" fontSize="13px" color="white" h="27px" px="10px">답변하기</Button>
+                <Button
+                    bg="#fc6a6aff"
+                    marginLeft="10px"
+                    fontSize="13px"
+                    color="white"
+                    h="27px"
+                    px="10px"
+                >
+                    답변하기
+                </Button>
             </Dialog.Trigger>
 
             <Portal>
@@ -121,7 +139,7 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
                         >
 
                             <Span
-                                mt="8px" 
+                                mt="8px"
                                 display="block"
                                 color="#000000ff"
                                 flex="1"
@@ -137,15 +155,15 @@ export default function inquiryDialog({ id, content, type, imageUrl, answer, onU
                                 )}
                                 <Text color="#3f3f3f">{content}</Text>
                             </Box>
-                            <Textarea autoresize color="#1d1d1dff" h="200px" minH="200px" value={contentContent} onChange={(e) => setcontentContent(e.target.value)}/>
-                            
+                            <Textarea autoresize color="#1d1d1dff" h="200px" minH="200px" value={contentContent} onChange={(e) => setcontentContent(e.target.value)} />
+
                         </Dialog.Body>
 
                         {/* 푸터 */}
                         <Dialog.Footer p="0" paddingTop="10px">
                             <Flex w="100%" gap="8px">
-                                <Button flex="1" bg="#FFFFFF" border="1px solid #cececeff" borderRadius="4px" fontSize="16px" color="#000000" _hover={{ bg: "#f5f5f5", borderColor: "#bfbfbf" }} onClick={handleDel}>삭제</Button>
-                                <Button flex="1" bg="#FA6D6D" borderRadius="4px" fontSize="16px" color="#FFFFFF" _hover={{ bg: "#ff8e8eff" }} onClick={handleSave} >저장</Button>
+                                <Button flex="1" bg="#FFFFFF" border="1px solid #cececeff" borderRadius="4px" fontSize="16px" color="#000000" _hover={{ bg: "#f5f5f5", borderColor: "#bfbfbf" }} onClick={handleDel} disabled={isDelSubmitting}>{isDelSubmitting ? "삭제 중..." : "삭제"}</Button>
+                                <Button flex="1" bg="#FA6D6D" borderRadius="4px" fontSize="16px" color="#FFFFFF" _hover={{ bg: "#ff8e8eff" }} onClick={handleSave} disabled={isSubmitting}>{isSubmitting ? "저장 중..." : "저장"}</Button>
                             </Flex>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>

@@ -114,9 +114,8 @@ export default function Page() {
             type: 'error',
             title: '문의 전송 실패!',
          });
-      } finally {
-         setIsSubmitting(false);
       }
+      finally { setIsSubmitting(false); }
    };
 
    const handleCancel = () => {
