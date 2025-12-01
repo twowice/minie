@@ -29,9 +29,19 @@ export default function Page() {
   const [inquiry, setInquiry] = useState<any[]>([]);
   const [activeMonths, setActiveMonths] = useState<number | null>(null);
   const router = useRouter();
-  const { user, isAdmin } = useUser(); //관리자 여부
 
-  useEffect(() => { if (!user) router.push("/login"); }) // 수정 사항.
+  const { user, isAdmin } = useUser();
+  useEffect(() => {
+    console.log("user:", user);
+    if (user === undefined) return;
+    if (user === null) {
+      setLoading(true);
+      const timer = setTimeout(() => { router.push("/login") }, 1000)
+      return () => clearTimeout(timer);
+    }
+    setLoading(false);
+  }, [user, isAdmin && true]);
+
   useEffect(() => { fetchInquiry(); }, []);
   useEffect(() => { if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); } }, [startDate, endDate])
 
@@ -97,15 +107,12 @@ export default function Page() {
     setEndDate(null);
   }
 
-  /* 로딩 */
   if (loading) {
     return (
-      <>
-        <VStack colorPalette="pink">
-          <Spinner color="colorPalette.600" />
-          <Text color="colorPalette.600">불러오는 중...</Text>
-        </VStack>
-      </>
+      <VStack colorPalette="pink">
+        <Spinner color="colorPalette.600" />
+        <Text color="colorPalette.600">Loading...</Text>
+      </VStack>
     );
   }
 
