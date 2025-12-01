@@ -73,7 +73,7 @@ export default function ShoppingCartItem({
             gap={"4px"}
           >
             <IconButton
-              color={item.num === 1 ? "#CCCCCC" : ""}
+              color={item.num === 1 ? "#CCCCCC" : "#000000"}
               onClick={() => handleNumChanged("minus")}
               disabled={item.num === 1}
               bg={"white"}

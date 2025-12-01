@@ -241,7 +241,7 @@ export function CartProvider({ children }: CartProviderProps) {
       const exists = cartItems.find((i) => i.id === targetId);
 
       if (exists) {
-        const newQty = exists.num + addQty;
+        const newQty = addQty;
 
         updateCartItems([normItem]).catch((err) =>
           console.error("Update failed:", err)
