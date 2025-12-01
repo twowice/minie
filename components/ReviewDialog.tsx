@@ -332,6 +332,7 @@ export default function reviewDialogDialog({ id, content, reviewImage, productNa
                                         borderRadius="3px"
                                         fontSize="16px"
                                         color="#B5B5B5"
+                                        bg="white"
                                         _hover={{ bg: "#f1f1f1" }}
                                         onClick={() => document.getElementById('photo-upload')?.click()}
                                     >
