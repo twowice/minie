@@ -31,21 +31,19 @@ export default function Page() {
    const [contentError, setContentError] = useState(false);
    const [emailError, setEmailError] = useState(false);
    const router = useRouter();
-   const [loading, setLoading] = useState(true);
    const [isSubmitting, setIsSubmitting] = useState(false);
 
-   const { user, isAdmin } = useUser();
+   const { user, isAdmin, loading: userLoding } = useUser();
    useEffect(() => {
       if (user === undefined) return;
-      if (user === null) {
-         setLoading(true);
-         const timer = setTimeout(() => { router.push("/login") }, 1000)
-         return () => clearTimeout(timer);
+      if (user === null && !userLoding) {
+         // const timer = setTimeout(() => { router.push("/login") }, 1000)
+         // return () => clearTimeout(timer);
+         router.push("/login");
       }
-      setLoading(false);
-   }, [user, isAdmin && true]);
+   }, [user, userLoding]);
 
-   if (loading) {
+   if (userLoding) {
       return (
          <VStack colorPalette="pink">
             <Spinner color="colorPalette.600" />

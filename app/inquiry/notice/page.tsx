@@ -30,17 +30,15 @@ export default function Page() {
   const [activeMonths, setActiveMonths] = useState<number | null>(null);
   const router = useRouter();
 
-  const { user, isAdmin } = useUser();
+  const { user, isAdmin, loading: userLoding } = useUser();
   useEffect(() => {
-    console.log("user:", user);
     if (user === undefined) return;
-    if (user === null) {
-      setLoading(true);
-      const timer = setTimeout(() => { router.push("/login") }, 1000)
-      return () => clearTimeout(timer);
+    if (user === null && !userLoding) {
+      // const timer = setTimeout(() => { router.push("/login") }, 1000)
+      // return () => clearTimeout(timer);
+      router.push("/login");
     }
-    setLoading(false);
-  }, [user, isAdmin && true]);
+  }, [user, userLoding]);
 
   useEffect(() => { fetchInquiry(); }, []);
   useEffect(() => { if (startDate && endDate) { fetchInquiryDateCal(); setActiveMonths(null); } }, [startDate, endDate])
