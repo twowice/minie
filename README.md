@@ -1,3 +1,58 @@
+# Minié 사용자 맞춤형 화장품 미니 사이즈 플랫폼
+화장품 유목민들을 위한 미니 사이즈 화장품 판매 플랫폼을 목표로 
+
+---
+
+## 🖥️ 데모 링크
+🔗 배포 사이트:  
+https://minie-eta.vercel.app/
+
+---
+## ⏱️ 제작 기간
+2025.11.03 ~ 2025.12.01
+
+## 🚀 기술 스택
+### Languages
+<img src="https://img.shields.io/badge/Typescript-3178C6?style=flat-square&logo=Typescript&logoColor=white"/> <img src="https://img.shields.io/badge/Javascript-F7DF1E?style=flat-square&logo=Javascript&logoColor=black"/>
+
+### Frontend
+<img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=React&logoColor=black"/>  <img src="https://img.shields.io/badge/Chakra UI-1BB2A9?style=flat-square&logo=chakraui&logoColor=white"/>  <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white"/>  <img src="https://img.shields.io/badge/Firebase SDK-DD2C00?style=flat-square&logo=firebase&logoColor=white"/>  <img src="https://img.shields.io/badge/Tosspay API-0005CC?style=flat-square&logoColor=white"/> <img src="https://img.shields.io/badge/Google reCAPTCHA-4285F4?style=flat-square&logo=google&logoColor=white"/>
+
+### Backend
+<img src="[https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white](https://img.shields.io/badge/Visual Studio Code-007ACC?style=flat-square&logo=Visual Studio Code&logoColor=white)"/> <img src="https://img.shields.io/badge/Firebase Auth SDK-DD2C00?style=flat-square&logo=firebase&logoColor=white"/>
+### Tool & Setting
+<img src="https://img.shields.io/badge/Visual Studio Code-007ACC?style=flat-square&logoColor=white"/> <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=Git&logoColor=white"/> <img src="https://img.shields.io/badge/Figma-F24E1E?style=flat-square&logo=Figma&logoColor=white"/> <img src="https://img.shields.io/badge/Postman-white?style=flat-square&logo=Postman&logoColor=FF6C37"/> <img src="https://img.shields.io/badge/GitHub-black?style=flat-square&logo=Github&logoColor=white"/> <img src="https://img.shields.io/badge/Notion-white?style=flat-square&logo=Notion&logoColor=black"/>
+
+### Database
+<img src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white"/> <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white"/>
+
+### Deploy
+<img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white"/>
+
+---
+
+## 📌 주요 기능
+
+- 로그인 / 회원가입
+- 상품 목록 및 상세 보기
+- 장바구니
+- 결제 기능
+- 마이페이지
+- 리뷰 / 1:1 문의
+
+---
+
+## 📂 폴더 구조
+
+```bash
+ ├─ app/
+ ├─ components/
+ ├─ lib/
+ ├─ context/
+ ├─ config/
+ ├─ firebase/
+ └─ utils/
+
 ## 📋 Issue 관리
 
 ### 작업 전
@@ -133,11 +188,3 @@ git push origin feature/login-page
 3. **커밋 전 코드 리뷰**: 가능하면 동료에게 코드 확인 요청
 4. **명확한 커밋 메시지 작성**: 변경 내용을 구체적으로 기술
 5. **정기적인 동기화**: 작업 중 주기적으로 main 브랜치와 동기화
-
-```
-
-```
-
-```
-
-```
