@@ -41,6 +41,8 @@ export default function SignupPage() {
 
   const [profileImage, setProfileImage] = useState<File | null>(null);  // 프로필 이미지
   const [previewUrl, setPreviewUrl] = useState<string>("");  // 프로필 이미지
+
+   const [isLoading, setIsLoading] = useState(false); // 버튼 광클 방지
 // =====================================================================================================================================================================================
 
 
@@ -58,6 +60,9 @@ export default function SignupPage() {
       setIsEmailChecked(false);
       return;
     }
+
+    // 중복 확인 중 로딩 추가
+    setIsLoading(true);
 
     try {
       // 2. 임시 비밀번호로 계정 생성 시도
@@ -80,6 +85,9 @@ export default function SignupPage() {
         setError((prev) => ({ ...prev, email: "중복 확인 중 오류가 발생했습니다." }));
         setIsEmailChecked(false);
       }
+    } finally {
+      // 중복 확인 완료 후 로딩 해제
+      setIsLoading(false);
     }
   };
 
@@ -161,6 +169,7 @@ const handleSignUP = async () => {
     setError( (prev) => ({...prev, phone: "전화번호는 '-'을 제외한 11자리의 숫자를 입력해주세요."}));
     return;
   }
+  setIsLoading(true);
 
   try{
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -200,6 +209,8 @@ const handleSignUP = async () => {
   } catch(err: any) {
     console.error("회원가입 오류:", err);
     alert("회원가입 중 오류가 발생했습니다.");
+  } finally {
+    setIsLoading(false);
   }
 };
 
@@ -344,6 +355,7 @@ const handleSignUP = async () => {
                   borderColor: "#FA6D6D",
                   borderWidth: "2px"
                 }}
+                disabled={isLoading}
               />
               <Button
                 position="absolute"
@@ -358,6 +370,8 @@ const handleSignUP = async () => {
                 px="12px"
                 whiteSpace="nowrap"
                 onClick={checkEmailDuplicate}
+                disabled={isLoading}
+                opacity={isLoading ? 0.6 : 1}
               >
                 중복확인
               </Button>
@@ -570,6 +584,7 @@ const handleSignUP = async () => {
                 height="48px"
                 onClick={() => router.push("/login")} // 취소 클릭 시 로그인 화면으로 이동
                 color="#000000"
+                disabled={isLoading}
               >
                 취소
               </Button>
@@ -581,8 +596,10 @@ const handleSignUP = async () => {
                 color="#ffffff"
                 height="48px"
                 onClick={handleSignUP}
+                disabled={isLoading}
+                opacity={isLoading ? 0.7 : 1}
               >
-                가입하기
+                 {isLoading ? "가입 중..." : "가입하기"}
               </Button>
             </Flex>
           </Box>
