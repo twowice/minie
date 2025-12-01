@@ -30,6 +30,7 @@ export default function LoginPage() {
   const [error, setError] = useState(""); // 에러 메세지 출력을 위한 상태
   const router = useRouter(); // 라우터 변수
   const { setUser } = useUser(); // 2025-11-19
+  const [isLoading, setIsLoading] = useState(false);
 
   // reCAPTCHA 관련 상태 및 ref 추가
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -87,6 +88,8 @@ export default function LoginPage() {
       setError("로봇이 아님을 인증해주세요.");
       return;
     }
+
+    setIsLoading(true);
     
     try {
       // 1. Firebase 로그인
@@ -110,9 +113,11 @@ export default function LoginPage() {
       // 5. 홈으로 이동
       router.push("/");
     } catch (err: any) {
-       setError(getErrorMessage(err.code));
+    setError(getErrorMessage(err.code));
+    } finally {
+      setIsLoading(false);
     }
-  };
+};
 
   /* 기존 Google login 비동기 함수
   const handleGoogleLogin = async () => {
@@ -129,6 +134,7 @@ export default function LoginPage() {
   // 2025-11-19 Google login 비동기 함수
   const handleGoogleLogin = async () => {
     setError("");
+    setIsLoading(true);
     try {
       const firebaseUser = await signInWithGoogle(); // 수정
 
@@ -144,13 +150,14 @@ export default function LoginPage() {
       router.push("/");
     } catch (err: any) {
       if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
-      return; // 여기서 팝업 닫은 오류 무시
-    }
+        return;
+      }
       console.error("Google 로그인 오류", err);
       setError(getErrorMessage(err.code));
+    } finally {
+      setIsLoading(false);
     }
   };
-
   // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   return (
     // body 전체 영역
@@ -197,6 +204,7 @@ export default function LoginPage() {
                   fontSize="16px"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                   _focus={{
                     // 차크라 ui의 클릭시 스타일 변경 문법 _focus={{, , ,}}
                     borderColor: "#FA6D6D", // 클릭시 외곽 색상 변경
@@ -216,6 +224,7 @@ export default function LoginPage() {
                   fontSize="16px"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading} 
                   _focus={{
                     borderColor: "#FA6D6D",
                     outline: "none",
@@ -276,8 +285,10 @@ export default function LoginPage() {
               fontSize="16px"
               fontWeight="medium"
               onClick={handleEmailLogin}
+              disabled={isLoading}
+              opacity={isLoading ? 0.7 : 1} 
             >
-              로그인
+              {isLoading ? "로그인 중..." : "로그인"}
             </Button>
           </Box>
 
@@ -308,13 +319,15 @@ export default function LoginPage() {
               height="48px"
               fontWeight="bold"
               onClick={handleGoogleLogin}
+              disabled={isLoading} 
+              opacity={isLoading ? 0.7 : 1} 
             >
               <Box position="absolute" left="16px">
                 {" "}
                 {/* 아이콘 왼쪽 고정 */}
                 <FcGoogle style={{ width: "24px", height: "24px" }} />
               </Box>
-              Google 로그인
+              {isLoading ? "로그인 중..." : "Google 로그인"}
             </Button>
           </Box>
         </VStack>
